@@ -30,25 +30,53 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
     <!-- Latest compiled and minified MQTT Paho JavaScript -->
-    <!--script
-      src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"
-      type="text/javascript"></script-->
-    <!--script
-      src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js"
-      type="text/javascript"></script-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
+    <!-- MQTT code using Paho -->
+    <script>
+      // UI const variables
+      var redFlagsText = "Red has caputured: ";
+      var yellowFlagsText = "Yellow has captured: ";
 
-    <!--script>
-      hostname = "ws://nwf1.xen.prgmr.com:1883/mqtt";
+      // UI state variables
+      //   Config
+      var gameValid = false; // whether the most recent config msg was "none"
+      var gameStarttime = 0;
+      var setupDuration = 0;
+      var numRounds = 0;
+      var roundDuration = 0;
+      var flagsPerTeam = 0;
+      //   Flags
+      var showFlags = true;
+      var numRedFlags = 0;
+      var numYellowFlags = 0;
+      //   Endtime
+      var gameEndtime = 0;
+      //   Messages
+
+      // Function which updates the page based on the above variables
+      function updateUI() {
+        // Flags
+        $("#redFlagsHeader").text(redFlagsText + numRedFlags);
+        $("#yellowFlagsHeader").text(yellowFlagsText + numYellowFlags);
+        if (showFlags) {
+          $("#flagsRow").removeClass("hidden");
+        } else {
+          $("#flagsRow").addClass("hidden");
+        }
+      }
+
+      var hostname = "ws://nwf1.xen.prgmr.com:1884/mqtt";
+      var clientId = "cmukgb_webapp_" + Math.random().toString(16).substr(2, 8);
 
       // Create a client instance
-      client = new Paho.MQTT.Client(hostname, "cmukgb-org-webapp");
+      var client = new Paho.MQTT.Client(hostname, clientId);
 
       // set callback handlers
       client.onConnectionLost = onConnectionLost;
       client.onMessageArrived = onMessageArrived;
 
       // connect the client
-      client.connect({onSuccess:onConnect,onFailure:onConnectFail,userName:"ctfwsmaster",password:"buymoretangerines",hosts:["nwf1.xen.prgmr.com"],ports:[1883]});
+      client.connect({onSuccess:onConnect,onFailure:onConnectFail});
 
       function onConnectFail() {
         console.log("onConnectFail");
@@ -56,11 +84,9 @@
 
       // called when the client connects
       function onConnect() {
-        // Once a connection has been made, make a subscription and send a message.
+        // Once a connection has been made, subscribe to all topics.
         console.log("onConnect");
-        client.subscribe("ctfws/game/config");
-        client.subscribe("ctfws/game/flags");
-        client.subscribe("ctfws/game/message");
+        client.subscribe("ctfws/game/#");
       }
 
       // called when the client loses its connection
@@ -70,21 +96,88 @@
         }
       }
 
-      // called when a message arrives
-      function onMessageArrived(message) {
-        console.log("onMessageArrived:"+message.payloadString);
+      // splitRd string on first whitespace, if it exists
+      // return array of two strings
+      // if there is no whitespace, second element will be the empty string
+      function splitOnWhitespace(str) {
+        var newStr = str.replace(/\s+/, " ");
+        var splitIndex = newStr.indexOf(" ");
+        if (splitIndex == -1) {
+          return [newStr, ""]
+        } else {
+          return [newStr.substring(0, splitIndex),
+            newStr.substring(splitIndex + 1)];
+        }
       }
 
-      $(window).unload(function(){
+      // called when a message arrives
+      function onMessageArrived(message) {
+        console.log("onMessageArrived: " + message.destinationName + ": " +
+            message.payloadString);
+
+        var msg = message.payloadString;
+        var topic = message.destinationName.substring(11);
+        switch (topic) {
+          case 'config':
+            if (msg == "none") {
+              gameValid = false;
+            } else {
+              var split = splitOnWhitespace(msg);
+
+            }
+            break;
+          case 'flags':
+            if (msg == "?") {
+              showFlags = false;
+            } else {
+              var split = splitOnWhitespace(msg);
+
+              var r = parseInt(split[0]);
+              var y = parseInt(split[1]);
+              if (!isNaN(r) && !isNaN(y)) {
+                numRedFlags = r;
+                numYellowFlags = y;
+                showFlags = true;
+              } else {
+                console.log("Unknown flag message: " + msg);
+              }
+            }
+            break;
+          case 'endtime':
+            var secs = parseInt(msg);
+            if (!isNaN(secs)) {
+              gameEndtime = secs;
+            } else {
+              colsole.log("Unknown endtime message: " + msg);
+            }
+            break;
+          case 'message':
+          case 'message/player':
+            break;
+          case 'message/jail':
+            console.log("Ignoring jail message: " + msg);
+            break;
+          default:
+            console.log("Unknown topic: " + message.destinationName);
+        }
+
+        updateUI();
+      }
+
+      $(window).unload(function() {
+        console.log("disconnecting on window close")
         client.disconnect();
       });
 
-      console.log("Hello wolrd");
-    </script-->
+      updateUI();
+
+      console.log("Finished script");
+    </script>
 
     <!-- Latest compiled and minified MQTT.js -->
-    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js" type="text/javascript"></script>
-    <script>
+    <!--script src="https://unpkg.com/mqtt/dist/mqtt.min.js" type="text/javascript"></script-->
+    <!-- MQTT code using MQTT.js -->
+    <!--script>
       var client = mqtt.connect('mqtt://nwf1.xen.prgmr.com:1883', {username:"ctfwsmaster", password:"buymoretangerines"})
 
       client.on('connect', function () {
@@ -120,7 +213,7 @@
       //})
 
       console.log("Finished script")
-    </script>
+    </script-->
   </head>
 
   <body>
@@ -142,13 +235,13 @@
 
         <div class="col-sm-6 col-xs-6">
           <div class="progress">
-            <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 80%">
+            <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 80%">
             </div>
           </div>
         </div>
 
         <div class="col-sm-2 col-xs-3">
-          <p class="lead text-center">8:00</p>
+          <p class="lead text-center">00:00</p>
         </div>
 
       </div>
@@ -160,13 +253,13 @@
 
         <div class="col-sm-6 col-xs-6">
           <div class="progress">
-            <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 80%">
+            <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 80%">
             </div>
           </div>
         </div>
 
         <div class="col-sm-2 col-xs-3">
-          <p class="lead text-center">1:20:00</p>
+          <p class="lead text-center">00:00</p>
         </div>
 
       </div>
@@ -174,19 +267,23 @@
 
         <div class="col-sm-offset-1 col-sm-10 col-xs-12">
           <div class="page-header">
-            <h1 class="text-center">Flags per side: 8</h1>
+            <h1 class="text-center">Flags per side: 0</h1>
           </div>
         </div>
 
       </div>
-      <div class="row vertical-center">
+      <div id="flagsRow" class="row vertical-center">
 
         <div class="col-sm-offset-1 col-sm-5 col-xs-6">
-          <h2 class="text-center text-danger">Red has caputured: 3</h2>
+          <h2 id="redFlagsHeader" class="text-center text-danger">
+            Red has caputured: 0
+          </h2>
         </div>
 
         <div class="col-sm-5 col-xs-6">
-          <h2 class="text-center text-warning">Yellow has caputured: 5</h2>
+          <h2 id="yellowFlagsHeader" class="text-center text-warning">
+            Yellow has caputured: 0
+          </h2>
         </div>
 
       </div>
@@ -204,8 +301,6 @@
         <div class="col-sm-offset-1 col-sm-10 col-xs-12">
           <table class="table table-striped">
             <tr><th>Time</th><th>Message</th></tr>
-            <tr><td>00:11</td><td>Red team is defending DH this game</td></tr>
-            <tr><td>00:24</td><td>Flag scores will be public</td></tr>
           </table>
         </div>
 
