@@ -81,6 +81,7 @@
       //   Endtime
       var gameEndtime = 0;
       //   Messages
+      var gameMessages = [];
 
       // Function which updates the page based on the above variables
       function updateUI() {
@@ -92,7 +93,7 @@
           var setupEnd = gameStarttime + setupDuration;
           var gameEnd = setupEnd + (numRounds * roundDuration); // scheduled end
           var gameDuration = gameEnd - setupEnd;
-          var startDate = new Date(gameStarttime);
+          var startDate = new Date(gameStarttime * 1000);
           var gameStartText = startDate.toLocaleTimeString();
           var numText = gameNumber == 0 ? "State" : gameNumber;
 
@@ -175,6 +176,24 @@
         } */
 
         // Messages
+        $("#messageTable").html('<tr><th class="col-sm-2 col-xs-2">Time<\/th><th>Message<\/th><\/tr>');
+        for (i = gameMessages.length - 1; i >= 0; i--) {
+          var secs = gameMessages[i][0];
+          var time = (new Date(secs * 1000)).toLocaleTimeString();
+          var color = "";
+          if (gameValid) {
+            if (secs < gameStarttime) {
+              color = "active";
+            } else if (secs < gameStarttime + setupDuration) {
+              color = "info";
+            } else {
+              color = "success";
+            }
+          }
+          var newRow = '<tr class="' + color + '"><td>' + time + '<\/td><td>' +
+            gameMessages[i][1] + '<\/td><\/tr>';
+          $("#messageTable").append(newRow);
+        }
       }
 
       var hostname = "ws://nwf1.xen.prgmr.com:1884/mqtt";
@@ -214,10 +233,24 @@
         var a = str.split(/\s+/);
         if (a.length != expectedLen) {
           console.log("Message does not have the expected number of fields (" +
-              expectedLen + "): " + msg);
+              expectedLen + "): " + str);
           throw "wrong number of fields";
         }
         return a;
+      }
+
+      function splitOnFirstWhitespace(str) {
+        var newStr = str.replace(/\s+/, ' ');
+        var index = newStr.indexOf(' ');
+        if (index == -1) {
+          console.log("Message cannot be split on whitespace: " + str);
+          throw "cannot split message";
+        }
+        return [newStr.substring(0, index), newStr.substring(index + 1)];
+      }
+
+      function compare_messages(a, b) {
+        return a[0] - b[0];
       }
 
       // called when a message arrives
@@ -280,6 +313,15 @@
             break;
           case 'message':
           case 'message/player':
+            var split = splitOnFirstWhitespace(msg);
+            var secs = parseInt(split[0]);
+            var body = split[1];
+            if (!isNaN(secs)) {
+              gameMessages.push([secs, body]);
+              gameMessages = gameMessages.sort(compare_messages);
+            } else {
+              console.log("Unknown message message: " + msg);
+            }
             break;
           case 'message/jail':
             console.log("Ignoring jail message: " + msg);
@@ -435,7 +477,7 @@
       <div class="row vertical-center">
 
         <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-          <table class="table table-striped">
+          <table id="messageTable" class="table">
             <tr><th>Time</th><th>Message</th></tr>
           </table>
         </div>
