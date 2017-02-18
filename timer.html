@@ -92,16 +92,38 @@
           var setupEnd = gameStarttime + setupDuration;
           var gameEnd = setupEnd + (numRounds * roundDuration); // scheduled end
           var gameDuration = gameEnd - setupEnd;
+          var startDate = new Date(gameStarttime);
+          var gameStartText = startDate.toLocaleTimeString();
           var numText = gameNumber == 0 ? "State" : gameNumber;
 
           if ((gameEndtime >= gameStarttime && gameEndtime <= now) ||
               gameEnd <= now) {
             // Over
+            $("#gameHeader").text("Game " + numText + ": Over");
+            $("#startTimeLabel").text("Game started at " + gameStartText);
+            var secs = 0;
+            if (gameEndtime >= gameStarttime && gameEndtime <= now) {
+              secs = Math.max(Math.min(gameEndtime, gameEnd) - setupEnd, 0);
+            } else {
+              secs = gameEnd - setupEnd;
+            }
+            var roundNum = Math.floor((secs - 1) / roundDuration); // 0-indexed
+            var roundSecs = secs - roundNum * roundDuration;
+            $("#setupJailbreakLabel").text("Jailbreak " + (roundNum + 1));
+            var percent1 = Math.round((100 * roundSecs) / roundDuration);
+            $("#firstBar").width(percent1 + "%");
+            $("#firstBarLabel").text(toHMS(roundSecs) + " / " +
+                toHMS(roundDuration));
+            var percent2 = Math.round((100 * secs) / gameDuration);
+            $("#secondBar").width(percent2 + "%");
+            $("#secondBarLabel").text(toHMS(secs) + " / " +
+                toHMS(gameDuration));
           } else if (setupEnd <= now) {
             // Playing
             $("#gameHeader").text("Game " + numText + ": In Progress");
+            $("#startTimeLabel").text("Game started at " + gameStartText);
             var secs = now - setupEnd;
-            var roundNum = Math.floor(secs / roundDuration); // 0-indexed
+            var roundNum = Math.floor((secs - 1) / roundDuration); // 0-indexed
             var roundSecs = secs - roundNum * roundDuration;
             $("#setupJailbreakLabel").text("Jailbreak " + (roundNum + 1));
             var percent1 = Math.round((100 * roundSecs) / roundDuration);
@@ -115,6 +137,7 @@
           } else {
             // Setup
             $("#gameHeader").text("Game " + numText + ": Setup");
+            $("#startTimeLabel").text("Game starts at " + gameStartText);
             $("#setupJailbreakLabel").text("Setup");
             var secs = now - gameStarttime;
             var percent = Math.round((100 * secs) / setupDuration);
@@ -122,17 +145,18 @@
             $("#firstBarLabel").text(toHMS(secs) + " / " +
                 toHMS(setupDuration));
             $("#secondBar").width("0%");
-            $("#secondBarLabel").text("0:00:00 / 0:00:00");
+            $("#secondBarLabel").text(toHMS(0) + " / " + toHMS(gameDuration));
           }
 
         } else {
           // None
           $("#gameHeader").text("No Current Game");
+          $("#startTimeLabel").text("");
           $("#setupJailbreakLabel").text("Setup");
           $("#firstBar").width("0%");
-          $("#firstBarLabel").text("0:00 / 0:00");
+          $("#firstBarLabel").text("0:00 / 15:00");
           $("#secondBar").width("0%");
-          $("#secondBarLabel").text("0:00:00 / 0:00:00");
+          $("#secondBarLabel").text("0:00 / 1:00:00");
           $("#flagsHeader").text(flagsText + "0");
         }
 
@@ -332,6 +356,13 @@
       </div>
       <div class="row vertical-center">
 
+        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+          <p id="startTimeLabel" class="lead text-center"></p>
+        </div>
+
+      </div>
+      <div class="row vertical-center">
+
         <div class="col-sm-offset-1 col-sm-2 col-xs-3">
           <p id="setupJailbreakLabel" class="lead text-center">Setup</p>
         </div>
@@ -345,7 +376,7 @@
         </div>
 
         <div class="col-sm-2 col-xs-3">
-          <p id="firstBarLabel" class="lead text-center">0:00 / 0:00</p>
+          <p id="firstBarLabel" class="lead text-center">0:00 / 15:00</p>
         </div>
 
       </div>
@@ -364,7 +395,7 @@
         </div>
 
         <div class="col-sm-2 col-xs-3">
-          <p id="secondBarLabel" class="lead text-center">0:00:00 / 0:00:00</p>
+          <p id="secondBarLabel" class="lead text-center">0:00 / 1:00:00</p>
         </div>
 
       </div>
