@@ -1,6 +1,9 @@
 # ctfws-timer-page
 A webpage to display info from the CtFwS timer and game status server
 
+A more detailed description of the project can be found at
+https://github.com/AcmeTensorToys/esp-lua/tree/master/examples/ctfws
+
 The page `timer.html` is entirely self contained. To deploy, just ssh to the
 website server, navigate to `/home/www/activities/ctfws_timer`, and git pull.
 
