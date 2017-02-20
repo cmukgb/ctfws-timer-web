@@ -195,11 +195,6 @@
           $("#redFlagsHeader").text(redFlagsText + "?");
           $("#yellowFlagsHeader").text(yellowFlagsText + "?");
         }
-        /* if (showFlags) {
-          $("#flagsRow").removeClass("hidden");
-        } else {
-          $("#flagsRow").addClass("hidden");
-        } */
 
         // Messages
         var firstRow = '<tr><th class="col-sm-2 col-xs-2">Time<\/th>' +
@@ -380,47 +375,6 @@
 
       console.log("Finished setup");
     </script>
-
-    <!-- Latest compiled and minified MQTT.js -->
-    <!--script src="https://unpkg.com/mqtt/dist/mqtt.min.js" type="text/javascript"></script-->
-    <!-- MQTT code using MQTT.js -->
-    <!--script>
-      var client = mqtt.connect('mqtt://nwf1.xen.prgmr.com:1883')
-
-      client.on('connect', function () {
-        console.log("Connected")
-        client.subscribe('ctfws/#')
-      })
-
-      client.on('error', function (error) {
-        console.log("Error")
-      })
-
-      client.on('close', function () {
-        console.log("Close")
-      })
-
-      client.on('offline', function () {
-        console.log("Offline")
-      })
-
-      client.on('reconnect', function () {
-        console.log("Reconnect")
-      })
-
-      client.on('message', function (topic, message) {
-        console.log("Message")
-        // message is Buffer
-        console.log(message.toString())
-        // client.end()
-      })
-
-      //$(window).unload(function () {
-      //  client.end()
-      //})
-
-      console.log("Finished script")
-    </script-->
   </head>
 
   <body>
