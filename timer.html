@@ -60,6 +60,23 @@
         return (negative ? "-" : "") + result;
       }
 
+      // Sets the two spans which form the game header text field
+      function setGameHeader(firstText, secondText, secondClass) {
+        $("#gameHeader1").text(firstText);
+        $("#gameHeader2").text(secondText);
+        $("#gameHeader2").removeClass();
+        $("#gameHeader2").addClass(secondClass);
+      }
+
+      // Sets the color of a progress bar
+      function setBarColor(barName, color) {
+        $(barName).removeClass("progress-bar-success");
+        $(barName).removeClass("progress-bar-info");
+        $(barName).removeClass("progress-bar-warning");
+        $(barName).removeClass("progress-bar-danger");
+        $(barName).addClass(color);
+      }
+
       // UI const variables
       var redFlagsText = "Red has caputured: ";
       var yellowFlagsText = "Yellow has captured: ";
@@ -100,7 +117,7 @@
           if ((gameEndtime >= gameStarttime && gameEndtime <= now) ||
               gameEnd <= now) {
             // Over
-            $("#gameHeader").text("Game " + numText + ": Over");
+            setGameHeader("Game " + numText + ": ", "Over", "text-danger");
             $("#startTimeLabel").text("Game started at " + gameStartText);
             var secs = 0;
             if (gameEndtime >= gameStarttime && gameEndtime <= now) {
@@ -113,15 +130,18 @@
             $("#setupJailbreakLabel").text("Jailbreak " + (roundNum + 1));
             var percent1 = Math.round((100 * roundSecs) / roundDuration);
             $("#firstBar").width(percent1 + "%");
+            setBarColor("#firstBar", "progress-bar-danger");
             $("#firstBarLabel").text(toHMS(roundSecs) + " / " +
                 toHMS(roundDuration));
             var percent2 = Math.round((100 * secs) / gameDuration);
             $("#secondBar").width(percent2 + "%");
+            setBarColor("#secondBar", "progress-bar-danger");
             $("#secondBarLabel").text(toHMS(secs) + " / " +
                 toHMS(gameDuration));
           } else if (setupEnd <= now) {
             // Playing
-            $("#gameHeader").text("Game " + numText + ": In Progress");
+            setGameHeader("Game " + numText + ": ", "In Progress",
+                "text-success");
             $("#startTimeLabel").text("Game started at " + gameStartText);
             var secs = now - setupEnd;
             var roundNum = Math.floor((secs - 1) / roundDuration); // 0-indexed
@@ -129,34 +149,40 @@
             $("#setupJailbreakLabel").text("Jailbreak " + (roundNum + 1));
             var percent1 = Math.round((100 * roundSecs) / roundDuration);
             $("#firstBar").width(percent1 + "%");
+            setBarColor("#firstBar", "progress-bar-warning");
             $("#firstBarLabel").text(toHMS(roundSecs) + " / " +
                 toHMS(roundDuration));
             var percent2 = Math.round((100 * secs) / gameDuration);
             $("#secondBar").width(percent2 + "%");
+            setBarColor("#secondBar", "progress-bar-success");
             $("#secondBarLabel").text(toHMS(secs) + " / " +
                 toHMS(gameDuration));
           } else {
             // Setup
-            $("#gameHeader").text("Game " + numText + ": Setup");
+            setGameHeader("Game " + numText + ": ", "Setup", "text-info");
             $("#startTimeLabel").text("Game starts at " + gameStartText);
             $("#setupJailbreakLabel").text("Setup");
             var secs = now - gameStarttime;
             var percent = Math.round((100 * secs) / setupDuration);
             $("#firstBar").width(percent + "%");
+            setBarColor("#firstBar", "progress-bar-info");
             $("#firstBarLabel").text(toHMS(secs) + " / " +
                 toHMS(setupDuration));
             $("#secondBar").width("0%");
+            setBarColor("#secondBar", "progress-bar-success");
             $("#secondBarLabel").text(toHMS(0) + " / " + toHMS(gameDuration));
           }
 
         } else {
           // None
-          $("#gameHeader").text("No Current Game");
+          setGameHeader("No Current Game", "", "");
           $("#startTimeLabel").text("");
           $("#setupJailbreakLabel").text("Setup");
           $("#firstBar").width("0%");
+          setBarColor("#firstBar", "progress-bar-danger");
           $("#firstBarLabel").text("0:00 / 15:00");
           $("#secondBar").width("0%");
+          setBarColor("#secondBar", "progress-bar-danger");
           $("#secondBarLabel").text("0:00 / 1:00:00");
           $("#flagsHeader").text(flagsText + "0");
         }
@@ -176,7 +202,9 @@
         } */
 
         // Messages
-        $("#messageTable").html('<tr><th class="col-sm-2 col-xs-2">Time<\/th><th>Message<\/th><\/tr>');
+        var firstRow = '<tr><th class="col-sm-2 col-xs-2">Time<\/th>' +
+          '<th>Message<\/th><\/tr>';
+        $("#messageTable").html(firstRow);
         for (i = gameMessages.length - 1; i >= 0; i--) {
           var secs = gameMessages[i][0];
           var time = (new Date(secs * 1000)).toLocaleTimeString();
@@ -218,6 +246,7 @@
         // Once a connection has been made, subscribe to all topics.
         console.log("onConnect");
         client.subscribe("ctfws/game/#");
+        setInterval(updateUI, 500);
       }
 
       // called when the client loses its connection
@@ -338,8 +367,6 @@
         client.disconnect();
       });
 
-      setInterval(updateUI, 500);
-
       console.log("Finished setup");
     </script>
 
@@ -347,7 +374,7 @@
     <!--script src="https://unpkg.com/mqtt/dist/mqtt.min.js" type="text/javascript"></script-->
     <!-- MQTT code using MQTT.js -->
     <!--script>
-      var client = mqtt.connect('mqtt://nwf1.xen.prgmr.com:1883', {username:"ctfwsmaster", password:"buymoretangerines"})
+      var client = mqtt.connect('mqtt://nwf1.xen.prgmr.com:1883')
 
       client.on('connect', function () {
         console.log("Connected")
@@ -391,7 +418,10 @@
 
         <div class="col-sm-offset-1 col-sm-10 col-xs-12">
           <div class="page-header">
-            <h1 id="gameHeader" class="text-center">Game State</h1>
+            <h1 class="text-center">
+              <span id="gameHeader1">Game State</span>
+              <span id="gameHeader2"></span>
+            </h1>
           </div>
         </div>
 
@@ -411,7 +441,7 @@
 
         <div class="col-sm-6 col-xs-6">
           <div class="progress">
-            <div id="firstBar" class="progress-bar progress-bar-danger" role="progressbar"
+            <div id="firstBar" class="progress-bar" role="progressbar"
               style="width: 0%">
             </div>
           </div>
@@ -430,7 +460,7 @@
 
         <div class="col-sm-6 col-xs-6">
           <div class="progress">
-            <div id="secondBar" class="progress-bar progress-bar-danger" role="progressbar"
+            <div id="secondBar" class="progress-bar" role="progressbar"
               style="width: 0%">
             </div>
           </div>
