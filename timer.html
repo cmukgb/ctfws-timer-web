@@ -210,12 +210,23 @@
           var time = (new Date(secs * 1000)).toLocaleTimeString();
           var color = "";
           if (gameValid) {
+            var now = getNow();
+            var setupEnd = gameStarttime + setupDuration;
+            var gameEnd = setupEnd + (numRounds * roundDuration); // scheduled end
+            var cutoff = 0;
+            if (gameEndtime >= gameStarttime && gameEndtime <= now) {
+              cutoff = Math.min(gameEndtime, gameEnd);
+            } else {
+              cutoff = gameEnd;
+            }
             if (secs < gameStarttime) {
               color = "active";
-            } else if (secs < gameStarttime + setupDuration) {
+            } else if (secs < setupEnd) {
               color = "info";
-            } else {
+            } else if (secs < cutoff) {
               color = "success";
+            } else {
+              color = "danger";
             }
           }
           var newRow = '<tr class="' + color + '"><td>' + time + '<\/td><td>' +
