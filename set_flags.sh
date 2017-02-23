@@ -14,6 +14,6 @@ then
   echo 'e.g. "?" or "1 1"'
   exit 1
 else
-  mosquitto_pub -h nwf1.xen.prgmr.com -u ctfwsmaster -P $(cat password.txt) -q 1 -r -t ctfws/game/flags -m "$1"
+  mosquitto_pub -h kgb.club.cc.cmu.edu -u ctfwsmaster -P $(cat password.txt) -q 1 -r -t ctfws/game/flags -m "$1"
 fi
 
