@@ -4,9 +4,11 @@ A webpage to display info from the CtFwS timer and game status server
 A more detailed description of the project can be found at
 https://github.com/AcmeTensorToys/esp-lua/tree/master/examples/ctfws
 
+## The Page
 The page `timer.html` is entirely self contained. To deploy, just ssh to the
 website server, navigate to `/home/www/activities/ctfws_timer`, and git pull.
 
+## The Scripts
 This repo also contains convenience scripts to send commands to the server.
 They should be self-explanatory and will report usage if used with the wrong
 number of arguments. To make things simpler, the startgame, endgame, and
@@ -29,4 +31,9 @@ The commands are:
 * `./send_message.sh`
 * `./send_player_message.sh`
 * `./send_jail_message.sh`
+
+## The Broker
+The MQTT broker is run from the kgb.club.cc.cmu.edu server. It should start
+itself properly when the server boots up. The config is in `/etc/mosquitto/`.
+To start, stop, or reload the broker, use `/etc/init.d/mosquitto`.
 
