@@ -36,11 +36,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
     <!-- MQTT code using Paho -->
     <script>
+      // Get the current Unix time in seconds
       function getNow() {
         var now = new Date();
         return Math.round(now.getTime() / 1000);
       }
 
+      // Convert to [hours:]minutes:seconds
       function toHMS(time) {
         var negative = false;
         if (time < 0) {
@@ -94,6 +96,8 @@
       var roundDuration = 0;
       var flagsPerTeam = 0;
       var gameNumber = 0;
+      //   Stun Timer
+      var stunStart = 0;
       //   Flags
       var showFlags = true;
       var numRedFlags = 0;
@@ -105,11 +109,12 @@
 
       // Function which updates the page based on the above variables
       function updateUI() {
+        var now = getNow();
+
         // Config and Endtime
         if (gameValid) {
           $("#flagsHeader").text(flagsText + flagsPerTeam);
 
-          var now = getNow();
           var setupEnd = gameStarttime + setupDuration;
           var gameEnd = setupEnd + (numRounds * roundDuration); // scheduled end
           var gameDuration = gameEnd - setupEnd;
@@ -190,6 +195,24 @@
           $("#flagsHeader").text(flagsText + "0");
         }
 
+        // Stun Timer
+        if (stunStart > 0) {
+          // Stun active or over
+          $("#stunRow").removeClass("hidden");
+          $("#cancelButtonRow").removeClass("hidden");
+          $("#stunButtonRow").addClass("hidden");
+          var stunLength = 60
+          var secs = Math.min(now - stunStart, stunLength);
+          var percent = Math.round((100 * secs) / stunLength);
+          $("#stunBar").width(percent + "%");
+          $("#stunBarLabel").text(toHMS(secs) + " / " + toHMS(stunLength));
+        } else {
+          // No stun
+          $("#stunRow").addClass("hidden");
+          $("#cancelButtonRow").addClass("hidden");
+          $("#stunButtonRow").removeClass("hidden");
+        }
+
         // Flags
         if (showFlags) {
           $("#redFlagsHeader").text(redFlagsText + numRedFlags);
@@ -208,7 +231,6 @@
           var time = (new Date(secs * 1000)).toLocaleTimeString();
           var color = "";
           if (gameValid) {
-            var now = getNow();
             var setupEnd = gameStarttime + setupDuration;
             var gameEnd = setupEnd + (numRounds * roundDuration); // scheduled end
             var cutoff = 0;
@@ -233,6 +255,18 @@
         }
       }
 
+      // Button functions
+      $("#stunButton").on("click", function() {
+        console.log("onStunButtonClick");
+        stunStart = getNow();
+      });
+
+      $("#cancelButton").on("click", function() {
+        console.log("onCancelButtonClick");
+        stunStart = 0;
+      });
+
+      // MQTT config
       var hostname = "ws://kgb.club.cc.cmu.edu:1884/mqtt";
       var clientId = "cmukgb_webapp_" + Math.random().toString(16).substr(2, 8);
 
@@ -255,7 +289,6 @@
         // Once a connection has been made, subscribe to all topics.
         console.log("onConnect");
         client.subscribe("ctfws/game/#");
-        setInterval(updateUI, 500);
       }
 
       // called when the client loses its connection
@@ -376,6 +409,8 @@
         client.disconnect();
       });
 
+      setInterval(updateUI, 500);
+
       console.log("Finished setup");
     </script>
   </head>
@@ -476,6 +511,43 @@
 
         <div class="col-sm-2 col-xs-3">
           <p id="secondBarLabel" class="lead text-center">0:00 / 1:00:00</p>
+        </div>
+
+      </div>
+      <div id="stunRow" class="hidden row vertical-center">
+
+        <div class="col-sm-offset-1 col-sm-2 col-xs-3">
+          <p class="lead text-center">Stun Timer</p>
+        </div>
+
+        <div class="col-sm-6 col-xs-6">
+          <div class="progress">
+            <div id="stunBar" class="progress-bar" role="progressbar"
+              style="width: 0%">
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-2 col-xs-3">
+          <p id="stunBarLabel" class="lead text-center">0:00 / 1:00</p>
+        </div>
+
+      </div>
+      <div id="cancelButtonRow" class="hidden row vertical-center">
+
+        <div class="col-sm-offset-1 col-sm-10 col-xs-12 text-center">
+          <button id="cancelButton" class="btn btn-info btn-lg" type="button">
+            Cancel
+          </button>
+        </div>
+
+      </div>
+      <div id="stunButtonRow" class="row vertical-center">
+
+        <div class="col-sm-offset-1 col-sm-10 col-xs-12 text-center">
+          <button id="stunButton" class="btn btn-info btn-lg" type="button">
+            Stun Timer
+          </button>
         </div>
 
       </div>
