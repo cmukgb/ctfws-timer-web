@@ -8,7 +8,7 @@ then
 else
   if [ -h "$0" ] # Test for symlink
   then
-    password_dir=$(dirname $(readlink "$0"))
+    password_dir=$(dirname $(readlink -f "$0"))
     password_file="$password_dir"/password.txt
   fi
 fi
