@@ -246,8 +246,8 @@
       // connect the client
       client.connect({onSuccess:onConnect,onFailure:onConnectFail});
 
-      function onConnectFail() {
-        console.log("onConnectFail");
+      function onConnectFail(failureObject) {
+        console.log("onConnectFail: " + failureObject);
       }
 
       // called when the client connects
@@ -261,7 +261,7 @@
       // called when the client loses its connection
       function onConnectionLost(responseObject) {
         if (responseObject.errorCode !== 0) {
-          console.log("onConnectionLost:"+responseObject.errorMessage);
+          console.log("onConnectionLost: " + responseObject.errorMessage);
         }
       }
 
