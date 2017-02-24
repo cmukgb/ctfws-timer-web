@@ -1,6 +1,9 @@
 #!/bin/bash
 
-if [ ! -f "password.txt" ]
+password_dir=$(dirname $(readlink -f $0))
+password_file=$password_dir/password.txt
+
+if [ ! -f $password_file ]
 then
   echo "File password.txt must exist to run this command"
   exit 1
@@ -12,6 +15,6 @@ then
   exit 1
 else
   m="`date +%s` ""$1"
-  mosquitto_pub -h kgb.club.cc.cmu.edu -u ctfwsmaster -P $(cat password.txt) -q 1 -r -t ctfws/game/message -m "$m"
+  mosquitto_pub -h kgb.club.cc.cmu.edu -u ctfwsmaster -P $(cat $password_file) -q 1 -r -t ctfws/game/message -m "$m"
 fi
 
