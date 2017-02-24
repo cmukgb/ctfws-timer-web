@@ -256,15 +256,15 @@
       }
 
       // Button functions
-      $("#stunButton").on("click", function() {
+      function clickStun() {
         console.log("onStunButtonClick");
         stunStart = getNow();
-      });
+      }
 
-      $("#cancelButton").on("click", function() {
+      function clickCancel() {
         console.log("onCancelButtonClick");
         stunStart = 0;
-      });
+      }
 
       // MQTT config
       var hostname = "ws://kgb.club.cc.cmu.edu:1884/mqtt";
@@ -522,8 +522,8 @@
 
         <div class="col-sm-6 col-xs-6">
           <div class="progress">
-            <div id="stunBar" class="progress-bar" role="progressbar"
-              style="width: 0%">
+            <div id="stunBar" class="progress-bar progress-bar-info"
+              role="progressbar" style="width: 0%">
             </div>
           </div>
         </div>
@@ -536,7 +536,8 @@
       <div id="cancelButtonRow" class="hidden row vertical-center">
 
         <div class="col-sm-offset-1 col-sm-10 col-xs-12 text-center">
-          <button id="cancelButton" class="btn btn-info btn-lg" type="button">
+          <button id="cancelButton" class="btn btn-info btn-lg" type="button"
+            onclick="clickCancel()">
             Cancel
           </button>
         </div>
@@ -545,7 +546,8 @@
       <div id="stunButtonRow" class="row vertical-center">
 
         <div class="col-sm-offset-1 col-sm-10 col-xs-12 text-center">
-          <button id="stunButton" class="btn btn-info btn-lg" type="button">
+          <button id="stunButton" class="btn btn-info btn-lg" type="button"
+            onclick="clickStun()">
             Stun Timer
           </button>
         </div>
