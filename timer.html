@@ -118,8 +118,8 @@
           var setupEnd = gameStarttime + setupDuration;
           var gameEnd = setupEnd + (numRounds * roundDuration); // scheduled end
           var gameDuration = gameEnd - setupEnd;
-          var startDate = new Date(gameStarttime * 1000);
-          var gameStartText = setupEnd.toLocaleTimeString();
+          var setupEndDate = new Date(setupEnd * 1000);
+          var gameStartText = setupEndDate.toLocaleTimeString();
           var numText = gameNumber == 0 ? "State" : gameNumber;
 
           if ((gameEndtime >= gameStarttime && gameEndtime <= now) ||
