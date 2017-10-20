@@ -199,13 +199,18 @@
         if (stunStart > 0) {
           // Stun active or over
           $("#stunRow").removeClass("hidden");
-          $("#cancelButtonRow").removeClass("hidden");
-          $("#stunButtonRow").addClass("hidden");
           var stunLength = 60
           var secs = Math.min(now - stunStart, stunLength);
           var percent = Math.round((100 * secs) / stunLength);
           $("#stunBar").width(percent + "%");
           $("#stunBarLabel").text(toHMS(secs) + " / " + toHMS(stunLength));
+          if (percent < 100) {
+            $("#cancelButton").text("Cancel");
+          } else {
+            $("#cancelButton").text("Done");
+          }
+          $("#stunButtonRow").addClass("hidden");
+          $("#cancelButtonRow").removeClass("hidden");
         } else {
           // No stun
           $("#stunRow").addClass("hidden");
