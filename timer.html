@@ -39,22 +39,7 @@
     <script src="ServerDate.js"></script>
 
     <script>
-      // Log the ServerDate precision and delta every minute
-      function logServerDate() {
-        console.log("ServerDate precision: +/-" + ServerDate.getPrecision() +
-          " ms");
-        console.log("ServerDate delta: " + (ServerDate - new Date()) +
-          " seconds");
-      }
-      setInterval(logServerDate, 1000 * 60);
-
-      // Get the server's current Unix time in seconds
-      function getNow() {
-        var now = new Date();
-        return Math.round(ServerDate.now() / 1000);
-      }
-
-      // Convert to [hours:]minutes:seconds
+      // Convert seconds to [hours:]minutes:seconds
       function toHMS(time) {
         var negative = false;
         if (time < 0) {
@@ -75,6 +60,25 @@
             ":" + (seconds < 10 ? "0" + seconds : seconds);
         }
         return (negative ? "-" : "") + result;
+      }
+
+      // Log the ServerDate precision and delta every minute
+      function logServerDate() {
+        var delta = ServerDate - new Date();
+        var secs = delta / 1000;
+        var ms = delta - (secs * 1000);
+        console.log("ServerDate delta: " + delta + " ms = " + toHMS(secs) +
+          "." + ms);
+        console.log("ServerDate precision: +/-" + ServerDate.getPrecision() +
+          " ms");
+      }
+      logServerDate();
+      setInterval(logServerDate, 1000 * 60);
+
+      // Get the server's current Unix time in seconds
+      function getNow() {
+        var now = new Date();
+        return Math.round(ServerDate.now() / 1000);
       }
 
       // Sets the two spans which form the game header text field
