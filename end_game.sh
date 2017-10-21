@@ -23,7 +23,7 @@ then
   echo Usage: "$0"
   exit 1
 else
-	m="`date +%s`"
+  m="$(date +%s)"
   mosquitto_pub -h kgb.club.cc.cmu.edu -u ctfwsmaster -P $(cat $password_file) -q 1 -r -t ctfws/game/endtime -m "$m"
 fi
 
