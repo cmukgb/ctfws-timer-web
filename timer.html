@@ -65,10 +65,8 @@
       // Log the ServerDate precision and delta every minute
       function logServerDate() {
         var delta = ServerDate - new Date();
-        var secs = delta / 1000;
-        var ms = delta - (secs * 1000);
-        console.log("ServerDate delta: " + delta + " ms = " + toHMS(secs) +
-          "." + ms);
+        console.log("ServerDate delta: " + delta + " ms = " +
+          toHMS(delta / 1000));
         console.log("ServerDate precision: +/-" + ServerDate.getPrecision() +
           " ms");
       }
