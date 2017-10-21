@@ -34,12 +34,24 @@
 
     <!-- Latest compiled and minified MQTT Paho JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
-    <!-- MQTT code using Paho -->
+
+    <!-- ServerDate JavaScript served from the same place as this file -->
+    <script src="ServerDate.js"></script>
+
     <script>
-      // Get the current Unix time in seconds
+      // Log the ServerDate precision and delta every minute
+      function logServerDate() {
+        console.log("ServerDate precision: +/-" + ServerDate.getPrecision() +
+          " ms");
+        console.log("ServerDate delta: " + (ServerDate - new Date()) +
+          " seconds");
+      }
+      setInterval(logServerDate, 1000 * 60);
+
+      // Get the server's current Unix time in seconds
       function getNow() {
         var now = new Date();
-        return Math.round(now.getTime() / 1000);
+        return Math.round(ServerDate.now() / 1000);
       }
 
       // Convert to [hours:]minutes:seconds
@@ -367,7 +379,6 @@
               showFlags = false;
             } else {
               var split = splitOnWhitespace(msg, 2);
-
               var r = parseInt(split[0]);
               var y = parseInt(split[1]);
               if (!isNaN(r) && !isNaN(y)) {
@@ -410,7 +421,7 @@
       }
 
       $(window).unload(function() {
-        console.log("disconnecting on window close")
+        console.log("Disconnecting on window close");
         client.disconnect();
       });
 
