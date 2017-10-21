@@ -74,9 +74,13 @@
       setInterval(logServerDate, 1000 * 60);
 
       // Get the server's current Unix time in seconds
-      function getNow() {
-        var now = new Date();
+      function getServerNow() {
         return Math.round(ServerDate.now() / 1000);
+      }
+
+      // Get the client's current Unix time in seconds
+      function getClientNow() {
+        return Math.round(Date.now() / 1000);
       }
 
       // Sets the two spans which form the game header text field
@@ -123,7 +127,20 @@
 
       // Function which updates the page based on the above variables
       function updateUI() {
-        var now = getNow();
+        // If the server time is different from the client time by more than
+        // 30 seconds, warn the user.
+        if (Math.abs(ServerDate - new Date()) > 30 * 1000) { // 30 seconds
+          var delta = getServerNow() - getClientNow(); // seconds
+          var deltaStr = Math.abs(delta) >= 60 ? toHMS(delta) : delta + "s";
+          $("#offsetLabel").text("Note: Your clock differs from ours by " +
+            deltaStr);
+          $("#offsetRow").removeClass("hidden");
+        } else {
+          $("#offsetRow").addClass("hidden");
+          $("#offsetLabel").text("");
+        }
+
+        var now = getServerNow();
 
         // Config and Endtime
         if (gameValid) {
@@ -277,7 +294,7 @@
       // Button functions
       function clickStun() {
         console.log("onStunButtonClick");
-        stunStart = getNow();
+        stunStart = getServerNow();
       }
 
       function clickCancel() {
@@ -484,6 +501,13 @@
               <span id="gameHeader2"></span>
             </h2>
           </div>
+        </div>
+
+      </div>
+      <div id="offsetRow" class="hidden row vertical-center">
+
+        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+          <p id="offsetLabel" class="lead text-center"></p>
         </div>
 
       </div>
