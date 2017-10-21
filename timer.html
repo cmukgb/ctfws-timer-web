@@ -62,17 +62,6 @@
         return (negative ? "-" : "") + result;
       }
 
-      // Log the ServerDate precision and delta every minute
-      function logServerDate() {
-        var delta = ServerDate - new Date();
-        console.log("ServerDate delta: " + delta + " ms = " +
-          toHMS(delta / 1000));
-        console.log("ServerDate precision: +/-" + ServerDate.getPrecision() +
-          " ms");
-      }
-      logServerDate();
-      setInterval(logServerDate, 1000 * 60);
-
       // Get the server's current Unix time in seconds
       function getServerNow() {
         return Math.round(ServerDate.now() / 1000);
@@ -82,6 +71,39 @@
       function getClientNow() {
         return Math.round(Date.now() / 1000);
       }
+
+      // Log the ServerDate precision and delta every minute
+      function logServerDate() {
+        var delta = ServerDate - new Date();
+        console.log("ServerDate delta: " + delta + " ms = " +
+          toHMS(delta / 1000));
+        console.log("ServerDate precision: +/-" + ServerDate.getPrecision() +
+          " ms");
+      }
+      logServerDate();
+      setInterval(logServerDate, 60 * 1000);
+
+      // Every 10 seconds, check if the server time is different from the
+      // client time by more than 15 seconds. If so, warn the user.
+      function checkServerDateOffset() {
+        var delta = getServerNow() - getClientNow(); // seconds
+        if (Math.abs(delta) > 15) {
+          var serverAhead = delta > 0;
+          delta = Math.abs(delta);
+          var deltaStr = delta >= 60 ? toHMS(delta) : delta + "s";
+          if (serverAhead) {
+            $("#offsetLabel").text("Note: Your clock is behind ours by " +
+              deltaStr);
+          } else {
+            $("#offsetLabel").text("Note: Your clock is ahead of ours by " +
+              deltaStr);
+          }
+        } else {
+          $("#offsetLabel").text("");
+        }
+      }
+      checkServerDateOffset();
+      setInterval(checkServerDateOffset, 10 * 1000);
 
       // Sets the two spans which form the game header text field
       function setGameHeader(firstText, secondText, secondClass) {
@@ -127,19 +149,6 @@
 
       // Function which updates the page based on the above variables
       function updateUI() {
-        // If the server time is different from the client time by more than
-        // 30 seconds, warn the user.
-        if (Math.abs(ServerDate - new Date()) > 30 * 1000) { // 30 seconds
-          var delta = getServerNow() - getClientNow(); // seconds
-          var deltaStr = Math.abs(delta) >= 60 ? toHMS(delta) : delta + "s";
-          $("#offsetLabel").text("Note: Your clock differs from ours by " +
-            deltaStr);
-          $("#offsetRow").removeClass("hidden");
-        } else {
-          $("#offsetRow").addClass("hidden");
-          $("#offsetLabel").text("");
-        }
-
         var now = getServerNow();
 
         // Config and Endtime
@@ -213,7 +222,7 @@
           }
 
         } else {
-          // None
+          // No Game
           setGameHeader("No Current Game", "", "");
           $("#startTimeLabel").text("");
           $("#setupJailbreakLabel").text("Setup");
@@ -504,7 +513,7 @@
         </div>
 
       </div>
-      <div id="offsetRow" class="hidden row vertical-center">
+      <div class="row vertical-center">
 
         <div class="col-sm-offset-1 col-sm-10 col-xs-12">
           <p id="offsetLabel" class="lead text-center"></p>
