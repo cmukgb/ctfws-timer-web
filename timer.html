@@ -354,33 +354,33 @@
       // Create a client instance
       var client = new Paho.MQTT.Client(hostname, clientId);
 
-      // set callback handlers
+      // Set callback handlers
       client.onConnectionLost = onConnectionLost;
       client.onMessageArrived = onMessageArrived;
 
-      // connect the client
+      // Connect the client
       client.connect({onSuccess:onConnect,onFailure:onConnectFail});
 
       function onConnectFail(failureObject) {
         console.log("onConnectFail: " + failureObject);
       }
 
-      // called when the client connects
+      // Called when the client connects
       function onConnect() {
         // Once a connection has been made, subscribe to all topics.
         console.log("onConnect");
         client.subscribe("ctfws/game/#");
       }
 
-      // called when the client loses its connection
+      // Called when the client loses its connection
       function onConnectionLost(responseObject) {
         if (responseObject.errorCode !== 0) {
           console.log("onConnectionLost: " + responseObject.errorMessage);
         }
       }
 
-      // split a string into an array, splitting on whitespace
-      // also checks that the resulting array has the expected length
+      // Split a string into an array, splitting on whitespace
+      // Also check that the resulting array has the expected length
       function splitOnWhitespace(str, expectedLen) {
         var a = str.split(/\s+/);
         if (a.length != expectedLen) {
@@ -405,7 +405,7 @@
         return a[0] - b[0];
       }
 
-      // called when a message arrives
+      // Called when a message arrives
       function onMessageArrived(message) {
         console.log("onMessageArrived: " + message.destinationName + ": " +
             message.payloadString);
