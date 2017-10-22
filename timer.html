@@ -39,8 +39,16 @@
     <script src="ServerDate.js"></script>
 
     <script>
-      // Convert seconds to [hours:]minutes:seconds
-      function toHMS(time) {
+      // Constants
+      var serverDateLogInterval = 60 * 1000; // seconds
+      var clockOffsetInterval = 10 * 1000; // seconds
+      var clockOffsetThreshold = 10 * 1000; // seconds
+
+      // If useWords, then convert seconds to
+      // "[minus ][H hr[s]][M min[s]]S sec[s]"
+      // Otherwise, convert seconds to
+      // "[-][H:]M:S"
+      function toHMSHelper(time, useWords) {
         var negative = false;
         if (time < 0) {
           negative = true;
@@ -52,14 +60,42 @@
         var minutes = Math.floor(time / 60);
         var seconds = time - minutes * 60;
 
-        var result = "";
-        if (hours == 0) {
-          result = minutes + ":" + (seconds < 10 ? "0" + seconds : seconds);
+        if (useWords) {
+          var result = "";
+          if (hours > 0) {
+            result += hours + " hr" + (hours == 1 ? "" : "s") + " ";
+          }
+          if (minutes > 0) {
+            result += minutes + " min" + (minutes == 1 ? "" : "s") + " ";
+          }
+          // Add seconds if there are any or add "0 secs" if there are no
+          // hours and no minutes
+          if (seconds > 0 || (minutes <= 0 && hours <= 0)) {
+            result += seconds + " sec" + (seconds == 1 ? "" : "s");
+          }
+          return (negative ? "minus " : "") + result;
+
         } else {
-          result =  hours + ":" + (minutes < 10 ? "0" + minutes : minutes) +
-            ":" + (seconds < 10 ? "0" + seconds : seconds);
+          var result = "";
+          if (hours == 0) {
+            result = minutes + ":" + (seconds < 10 ? "0" + seconds : seconds);
+          } else {
+            result =  hours + ":" + (minutes < 10 ? "0" + minutes : minutes) +
+              ":" + (seconds < 10 ? "0" + seconds : seconds);
+          }
+          return (negative ? "-" : "") + result;
+
         }
-        return (negative ? "-" : "") + result;
+      }
+
+      // Convert seconds to "[-][H:]M:S"
+      function toHMS(time) {
+        return toHMSHelper(time, false);
+      }
+
+      // Convert seconds to "[minus ][H hr[s]][M min[s]]S sec[s]"
+      function toHMSWords(time) {
+        return toHMSHelper(time, true);
       }
 
       // Get the server's current Unix time in seconds
@@ -72,7 +108,7 @@
         return Math.round(Date.now() / 1000);
       }
 
-      // Log the ServerDate precision and delta every minute
+      // Log the ServerDate precision and delta every serverDateLogInterval
       function logServerDate() {
         var delta = ServerDate - new Date();
         console.log("ServerDate delta: " + delta + " ms = " +
@@ -81,13 +117,13 @@
           " ms");
       }
       logServerDate();
-      setInterval(logServerDate, 60 * 1000);
+      setInterval(logServerDate, serverDateLogInterval);
 
-      // Every 10 seconds, check if the server time is different from the
-      // client time by more than 15 seconds. If so, warn the user.
+      // Every clockOffsetInterval seconds, check if the server time is different from the
+      // client time by more than clockOffsetThreshhold seconds. If so, warn the user.
       function checkServerDateOffset() {
         var delta = getServerNow() - getClientNow(); // seconds
-        if (Math.abs(delta) > 15) {
+        if (Math.abs(delta) > clockOffsetThreshold) {
           var serverAhead = delta > 0;
           delta = Math.abs(delta);
           var deltaStr = delta >= 60 ? toHMS(delta) : delta + "s";
@@ -103,7 +139,7 @@
         }
       }
       checkServerDateOffset();
-      setInterval(checkServerDateOffset, 10 * 1000);
+      setInterval(checkServerDateOffset, clockOffsetInterval);
 
       // Sets the two spans which form the game header text field
       function setGameHeader(firstText, secondText, secondClass) {
