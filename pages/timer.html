@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+
+{% load static %}
+
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -36,7 +39,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
 
     <!-- ServerDate JavaScript served from the same place as this file -->
-    <script src="ServerDate.js"></script>
+    <script src="{% static 'ServerDate.js' %}"></script>
 
     <script>
       // Timing constants
