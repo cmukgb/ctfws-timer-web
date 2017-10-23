@@ -39,10 +39,15 @@
     <script src="ServerDate.js"></script>
 
     <script>
-      // Constants
-      var serverDateLogInterval = 60 * 1000; // seconds
-      var clockOffsetInterval = 10 * 1000; // seconds
-      var clockOffsetThreshold = 10 * 1000; // seconds
+      // Timing constants - all in milliseconds
+      var serverDateLogInterval = 60 * 1000;
+      var clockOffsetInterval = 10 * 1000;
+      var clockOffsetThreshold = 10 * 1000;
+      var updateUIIntervalTime = 500;
+
+      // MQTT config
+      var hostname = "ws://kgb.club.cc.cmu.edu:1884/mqtt";
+      var clientId = "cmukgb_webapp_" + Math.random().toString(16).substr(2, 8);
 
       // If useWords, then convert seconds to
       // "[minus ][H hr[s]][M min[s]]S sec[s]"
@@ -116,8 +121,6 @@
         console.log("ServerDate precision: +/-" + ServerDate.getPrecision() +
           " ms");
       }
-      logServerDate();
-      setInterval(logServerDate, serverDateLogInterval);
 
       // Every clockOffsetInterval seconds, check if the server time is different from the
       // client time by more than clockOffsetThreshhold seconds. If so, warn the user.
@@ -138,8 +141,6 @@
           $("#offsetLabel").text("");
         }
       }
-      checkServerDateOffset();
-      setInterval(checkServerDateOffset, clockOffsetInterval);
 
       // Sets the two spans which form the game header text field
       function setGameHeader(firstText, secondText, secondClass) {
@@ -347,29 +348,16 @@
         stunStart = 0;
       }
 
-      // MQTT config
-      var hostname = "ws://kgb.club.cc.cmu.edu:1884/mqtt";
-      var clientId = "cmukgb_webapp_" + Math.random().toString(16).substr(2, 8);
-
-      // Create a client instance
-      var client = new Paho.MQTT.Client(hostname, clientId);
-
-      // Set callback handlers
-      client.onConnectionLost = onConnectionLost;
-      client.onMessageArrived = onMessageArrived;
-
-      // Connect the client
-      client.connect({onSuccess:onConnect,onFailure:onConnectFail});
-
-      function onConnectFail(failureObject) {
-        console.log("onConnectFail: " + failureObject);
-      }
-
       // Called when the client connects
       function onConnect() {
         // Once a connection has been made, subscribe to all topics.
         console.log("onConnect");
         client.subscribe("ctfws/game/#");
+      }
+
+      // Called if the client can't connect
+      function onConnectFail(failureObject) {
+        console.log("onConnectFail: " + failureObject);
       }
 
       // Called when the client loses its connection
@@ -482,6 +470,11 @@
         }
 
         updateUI();
+        // If it took more than 3 seconds to get here this interval will
+        // already be set up. Otherwise, start it now.
+        if (updateUIIntervalObject == false) {
+          updateUIIntervalObject = setInterval(updateUI, updateUIIntervalTime);
+        }
       }
 
       $(window).unload(function() {
@@ -489,9 +482,40 @@
         client.disconnect();
       });
 
-      setInterval(updateUI, 500);
+      $(document).ready(function() {
+        // Log the ServerDate precision and delta
+        logServerDate();
+        setInterval(logServerDate, serverDateLogInterval);
 
-      console.log("Finished setup");
+        // Check the clock offset and display if needed
+        checkServerDateOffset();
+        setInterval(checkServerDateOffset, clockOffsetInterval);
+
+        // The UI looks cleanest if we don't update it until the MQTT client
+        // has connected. So we give it 3 seconds connect before we set up the
+        // UI interval. If it connects first, the below variable will still be
+        // false and it will set up the interval. If not, we start the interval
+        // and if it still connects after 3 seconds, it will not touch the
+        // interval.
+        updateUIIntervalObject = false; // Intentionally global
+        setTimeout(function () {
+          if (updateUIIntervalObject == false) {
+            updateUI();
+            updateUIIntervalObject = setInterval(updateUI, updateUIIntervalTime);
+          }
+        }, 3 * 1000); // 3 seconds
+
+        // MQTT
+        //   Create a client instance - this variable is intentionally global
+        client = new Paho.MQTT.Client(hostname, clientId);
+        //   Set callback handlers
+        client.onConnectionLost = onConnectionLost;
+        client.onMessageArrived = onMessageArrived;
+        //   Connect the client
+        client.connect({onSuccess:onConnect,onFailure:onConnectFail});
+
+        console.log("Finished setup");
+      });
     </script>
   </head>
 
@@ -542,7 +566,7 @@
         <div class="col-sm-offset-1 col-sm-10 col-xs-12">
           <div class="page-header">
             <h2 class="text-center">
-              <span id="gameHeader1">Game State</span>
+              <span id="gameHeader1">Connecting...</span>
               <span id="gameHeader2"></span>
             </h2>
           </div>
