@@ -18,6 +18,10 @@
     <![endif]-->
 
     <style>
+      /* This allows mobile device users to tap anywhere to dismiss popovers */
+      body {
+        cursor: pointer;
+      }
       .vertical-center {
         display: flex;
         align-items: center;
@@ -39,11 +43,12 @@
     <script src="ServerDate.js"></script>
 
     <script>
-      // Timing constants - all in milliseconds
-      var serverDateLogInterval = 60 * 1000;
-      var clockOffsetInterval = 10 * 1000;
-      var clockOffsetThreshold = 10 * 1000;
-      var updateUIIntervalTime = 500;
+      // Timing constants
+      var updateUIIntervalTime = 500; // ms
+      var serverDateLogInterval = 60 * 1000; // ms
+      var clockOffsetInitialChecks = [1, 2, 3, 5, 10, 15, 30]; // seconds
+      var clockOffsetInterval = 60 * 1000; // ms
+      var clockOffsetThreshold = 15; // seconds
 
       // MQTT config
       var hostname = "ws://kgb.club.cc.cmu.edu:1884/mqtt";
@@ -129,16 +134,11 @@
         if (Math.abs(delta) > clockOffsetThreshold) {
           var serverAhead = delta > 0;
           delta = Math.abs(delta);
-          var deltaStr = delta >= 60 ? toHMS(delta) : delta + "s";
-          if (serverAhead) {
-            $("#offsetLabel").text("Note: Your clock is behind ours by " +
-              deltaStr);
-          } else {
-            $("#offsetLabel").text("Note: Your clock is ahead of ours by " +
-              deltaStr);
-          }
+          $("#offsetAmount").text(toHMSWords(delta));
+          $("#offsetAheadBehind").text(serverAhead ? "behind" : "ahead of");
+          $("#offsetLabel").removeClass("hidden");
         } else {
-          $("#offsetLabel").text("");
+          $("#offsetLabel").addClass("hidden");
         }
       }
 
@@ -483,6 +483,10 @@
       });
 
       $(document).ready(function() {
+        // Enable the popover on the "What's this?" shown when there is a
+        // clock offset.
+        $("#offsetPopover").popover();
+
         // Log the ServerDate precision and delta
         logServerDate();
         setInterval(logServerDate, serverDateLogInterval);
@@ -490,6 +494,11 @@
         // Check the clock offset and display if needed
         checkServerDateOffset();
         setInterval(checkServerDateOffset, clockOffsetInterval);
+        // Because it might take a few seconds to get the initial value, check
+        // frequently (e.g. 1,2,3,5,10,15,30) secs initially.
+        clockOffsetInitialChecks.forEach(function (secs) {
+          setTimeout(checkServerDateOffset, secs * 1000);
+        });
 
         // The UI looks cleanest if we don't update it until the MQTT client
         // has connected. So we give it 3 seconds connect before we set up the
@@ -576,14 +585,32 @@
       <div class="row vertical-center">
 
         <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-          <p id="offsetLabel" class="lead text-center"></p>
+          <p id="startTimeLabel" class="lead text-center"></p>
+          <p id="offsetLabel" class="hidden text-muted text-center">
+            <strong>Note:</strong> Your clock is
+            <span id="offsetAheadBehind"><!-- ahead of / behind--></span>
+            the game's by <span id="offsetAmount"></span>.
+            <a id="offsetPopover" tabindex="0" role="button"
+              data-toggle="popover" data-trigger="focus" data-placement="auto"
+              data-html=true data-content=
+              "We correct for any difference between your clock
+              and the game clock, so you don’t have to do anything for the app
+              to work.
+              <br>
+              However, we still display the game start time and any messages
+              using the game clock. Because your clock is off by more than a
+              few seconds, this means the times shown may not agree with the
+              clock shown on your device."
+              >
+              What's&nbsp;this?
+            </a>
+          </p>
         </div>
 
       </div>
       <div class="row vertical-center">
 
         <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-          <p id="startTimeLabel" class="lead text-center"></p>
         </div>
 
       </div>
