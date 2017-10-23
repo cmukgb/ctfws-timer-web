@@ -18,10 +18,6 @@
     <![endif]-->
 
     <style>
-      /* This allows mobile device users to tap anywhere to dismiss popovers */
-      body {
-        cursor: pointer;
-      }
       .vertical-center {
         display: flex;
         align-items: center;
@@ -485,6 +481,14 @@
       });
 
       $(document).ready(function() {
+        // Mobile Safari has a bug that prevents popovers from closing when the
+        // user taps away from them. This can be fixed with the below CSS, but
+        // we only want to do this when needed because if the device does have
+        // a mouse, it makes the mouse always the "clickable" style pointer.
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
+          $("body").css("cursor", "pointer");
+        }
+
         // Enable the popover on the "What's this?" shown when there is a
         // clock offset.
         $("#offsetPopover").popover();
