@@ -23,7 +23,9 @@ then
   echo Usage: "$0" message
   exit 1
 else
-  m="$(date +%s) ""$1"
+  d=$(date +%s)
+  m="$d $1"
   mosquitto_pub -h kgb.club.cc.cmu.edu -u ctfwsmaster -P $(cat $password_file) -q 1 -r -t ctfws/game/message -m "$m"
+  echo "Sent message at $d"
 fi
 
