@@ -341,11 +341,13 @@
       function clickStun() {
         console.log("onStunButtonClick");
         stunStart = getServerNow();
+        updateUI();
       }
 
       function clickCancel() {
         console.log("onCancelButtonClick");
         stunStart = 0;
+        updateUI();
       }
 
       // Called when the client connects
