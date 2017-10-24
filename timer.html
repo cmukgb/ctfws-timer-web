@@ -22,8 +22,18 @@
         display: flex;
         align-items: center;
       }
-      .grey-background {
+      .inline-block {
+        display: inline-block;
+      }
+      .side-margins {
+        margin-left: 5pt;
+        margin-right: 5pt;
+      }
+      .bg-grey {
         background-color: #f5f5f5;
+      }
+      .bg-dark-grey {
+        background-color: #d5d5d5;
       }
     </style>
 
@@ -536,20 +546,27 @@
   </head>
 
   <body>
-    <header class="grey-background">
+    <header class="bg-grey">
       <div class="container-fluid">
         <div class="row vertical-center">
           <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-            <h5>
+            <h5 class="inline-block">
               Check out the
+              <a href="https://www.dropbox.com/s/2qjcuh5eocol0xh/CtFwS%20Cheatsheet.pdf?raw=1">
+                <span class="hidden-xs">CtFwS</span> cheatsheet
+              </a>
+              and
               <a href="https://play.google.com/store/apps/details?id=com.acmetensortoys.ctfwstimer">
                 Android app
               </a>
-              and
-              <a href="https://www.dropbox.com/s/2qjcuh5eocol0xh/CtFwS%20Cheatsheet.pdf?dl=1">
-                CtFwS Cheatsheet
-              </a>
             </h5>
+            <div class="hidden inline-block pull-right bg-dark-grey">
+              <h5 class="side-margins">
+                <small>
+                  <a href="">Judges</a>
+                </small>
+              </h5>
+            </div>
           </div>
         </div>
       </div>
@@ -765,7 +782,7 @@
       </div>
     </div>
 
-    <footer class="grey-background">
+    <footer class="bg-grey">
       <div class="container-fluid">
         <div class="row vertical-center">
           <div class="col-sm-offset-1 col-sm-10 col-xs-12">
