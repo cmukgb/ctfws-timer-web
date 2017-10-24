@@ -1,43 +1,8 @@
-<!DOCTYPE html>
+{% extends "base.html" %}
 
 {% load static %}
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>CtFwS Timer</title>
-
-    <!-- Latest compiled and minified Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
-    <style>
-      .vertical-center {
-        display: flex;
-        align-items: center;
-      }
-      .grey-background {
-        background-color: #f5f5f5;
-      }
-    </style>
-
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <!-- Latest compiled and minified Bootstrap JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-
-    <!-- Latest compiled and minified MQTT Paho JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
-
+{% block scripts %}
     <!-- ServerDate JavaScript served from the same place as this file -->
     <script src="{% static 'ServerDate.js' %}"></script>
 
@@ -536,260 +501,194 @@
         console.log("Finished setup");
       });
     </script>
-  </head>
+{% endblock %}
 
-  <body>
-    <header class="grey-background">
-      <div class="container-fluid">
-        <div class="row vertical-center">
-          <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-            <h5>
-              Check out the
-              <a href="https://play.google.com/store/apps/details?id=com.acmetensortoys.ctfwstimer">
-                Android app
-              </a>
-              and
-              <a href="https://www.dropbox.com/s/2qjcuh5eocol0xh/CtFwS%20Cheatsheet.pdf?dl=1">
-                CtFwS Cheatsheet
-              </a>
-            </h5>
-          </div>
+{% block container %}
+    <div class="row vertical-center">
+
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+        <div class="page-header">
+          <h2 class="text-center">
+            <span id="gameHeader1">Connecting...</span>
+            <span id="gameHeader2"></span>
+          </h2>
         </div>
       </div>
-    </header>
 
-    <div class="container-fluid">
-      <div class="row vertical-center">
-
-        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-          <div class="page-header">
-            <div class="row vertical-center">
-
-              <div class="col-md-1 col-sm-2 col-xs-3">
-                <a href="http://www.cmukgb.org">
-                  <img src="http://www.cmukgb.org/2013/wp-content/uploads/2013/08/shield-1.png"
-                    class="img-responsive" alt="KGB Logo">
-                </a>
-              </div>
-              <div class="col-md-11 col-sm-10 col-xs-9">
-                <h1>CMU KGB's CtFwS Timer</h1>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
-      </div>
-      <div class="row vertical-center">
-
-        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-          <div class="page-header">
-            <h2 class="text-center">
-              <span id="gameHeader1">Connecting...</span>
-              <span id="gameHeader2"></span>
-            </h2>
-          </div>
-        </div>
-
-      </div>
-      <div class="row vertical-center">
-
-        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-          <p id="startTimeLabel" class="lead text-center"></p>
-          <p id="offsetLabel" class="hidden text-muted text-center">
-            <strong>Note:</strong> Your clock is
-            <span id="offsetAheadBehind"><!-- ahead of / behind--></span>
-            the game's by <span id="offsetAmount"></span>.
-            <a id="offsetPopover" tabindex="0" role="button"
-              data-toggle="popover" data-trigger="focus" data-placement="auto"
-              data-html=true data-content=
-              "We correct for any difference between your clock
-              and the game clock, so you don’t have to do anything for the app
-              to work.
-              <br>
-              However, we still display the game start time and any messages
-              using the game clock. Because your clock is off by more than a
-              few seconds, this means the times shown may not agree with the
-              clock shown on your device."
-              >
-              What's&nbsp;this?
-            </a>
-          </p>
-        </div>
-
-      </div>
-      <div class="row vertical-center">
-
-        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-        </div>
-
-      </div>
-      <div class="row vertical-center">
-
-        <div class="col-sm-offset-1 col-sm-2 col-xs-3">
-          <p id="setupJailbreakLabel" class="lead text-center">Setup</p>
-        </div>
-
-        <div class="col-sm-6 col-xs-6">
-          <div class="progress">
-            <div id="firstBar" class="progress-bar" role="progressbar"
-              style="width: 0%">
-            </div>
-          </div>
-        </div>
-
-        <div class="col-sm-2 col-xs-3">
-          <p id="firstBarLabel" class="lead text-center">0:00 / 15:00</p>
-        </div>
-
-      </div>
-      <div class="row vertical-center">
-
-        <div class="col-sm-offset-1 col-sm-2 col-xs-3">
-          <p class="lead text-center">Game Time Elapsed</p>
-        </div>
-
-        <div class="col-sm-6 col-xs-6">
-          <div class="progress">
-            <div id="secondBar" class="progress-bar" role="progressbar"
-              style="width: 0%">
-            </div>
-          </div>
-        </div>
-
-        <div class="col-sm-2 col-xs-3">
-          <p id="secondBarLabel" class="lead text-center">0:00 / 1:00:00</p>
-        </div>
-
-      </div>
-      <div id="stunRow" class="hidden row vertical-center">
-
-        <div class="col-sm-offset-1 col-sm-2 col-xs-3">
-          <p class="lead text-center">Stun Timer</p>
-        </div>
-
-        <div class="col-sm-6 col-xs-6">
-          <div class="progress">
-            <div id="stunBar" class="progress-bar progress-bar-info"
-              role="progressbar" style="width: 0%">
-            </div>
-          </div>
-        </div>
-
-        <div class="col-sm-2 col-xs-3">
-          <p id="stunBarLabel" class="lead text-center">0:00 / 1:00</p>
-        </div>
-
-      </div>
-      <div id="cancelButtonRow" class="hidden row vertical-center">
-
-        <div class="col-sm-offset-1 col-sm-10 col-xs-12 text-center">
-          <button id="cancelButton" class="btn btn-info btn-lg" type="button"
-            onclick="clickCancel()">
-            Cancel
-          </button>
-        </div>
-
-      </div>
-      <div id="stunButtonRow" class="row vertical-center">
-
-        <div class="col-sm-offset-1 col-sm-10 col-xs-12 text-center">
-          <button id="stunButton" class="btn btn-info btn-lg" type="button"
-            onclick="clickStun()">
-            Stun Timer
-          </button>
-        </div>
-
-      </div>
-      <div class="row vertical-center">
-
-        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-          <div class="page-header">
-            <h2 class="text-center">Flags</h2>
-          </div>
-        </div>
-
-      </div>
-      <div class="row vertical-center">
-
-        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-          <h3 id="flagsHeader" class="text-center">Total per side: 0</h3>
-        </div>
-
-      </div>
-      <div id="flagsRow" class="row vertical-center">
-
-        <div class="col-sm-offset-1 col-sm-5 col-xs-6">
-          <h3 id="redFlagsHeader" class="text-center text-danger">
-            Red has captured: 0
-          </h3>
-        </div>
-
-        <div class="col-sm-5 col-xs-6">
-          <h3 id="yellowFlagsHeader" class="text-center text-warning">
-            Yellow has captured: 0
-          </h3>
-        </div>
-
-      </div>
-      <div class="row vertical-center">
-
-        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-          <div class="page-header">
-            <h2 class="text-center">Messages</h2>
-          </div>
-        </div>
-
-      </div>
-      <div class="row vertical-center">
-
-        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-          <p>
-          Note: Messages sent before the last time the page was loaded may not
-          appear.
-          <br>
-          Messages sent before game start are
-          <span class="text-muted">grey</span>, during setup are
-          <span class="text-info">blue</span>, during game play are
-          <span class="text-success">green</span>, and after game end are
-          <span class="text-danger">red</span>.
-          </p>
-        </div>
-
-      </div>
-      <div class="row vertical-center">
-
-        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-          <table id="messageTable" class="table">
-            <tr><th>Time</th><th>Message</th></tr>
-          </table>
-        </div>
-
-      </div>
     </div>
+    <div class="row vertical-center">
 
-    <footer class="grey-background">
-      <div class="container-fluid">
-        <div class="row vertical-center">
-          <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-            <h6 class="text-muted">
-              Conceived of and created by
-                <a href="http://www.ietfng.org/nwf/">nwf</a>.
-              Wrangled into a web "app" by
-                <a href="https://github.com/michaelfelixmurphy">Murphy</a>.
-              CtFwS created and run by the
-                <a href="http://www.cmukgb.org">CMU KGB</a>.
-              Full rules and history
-                <a href="http://www.cmukgb.org/activities/ctfws.php">here</a>.
-              This page is maintained on
-                <a href="https://github.com/cmukgb/ctfws-timer-page">GitHub</a>.
-              Questions or concerns contact
-                <a href="mailto:exec@cmukgb.org">exec@cmukgb.org</a>.
-            </h6>
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+        <p id="startTimeLabel" class="lead text-center"></p>
+        <p id="offsetLabel" class="hidden text-muted text-center">
+          <strong>Note:</strong> Your clock is
+          <span id="offsetAheadBehind"><!-- ahead of / behind--></span>
+          the game's by <span id="offsetAmount"></span>.
+          <a id="offsetPopover" tabindex="0" role="button"
+            data-toggle="popover" data-trigger="focus" data-placement="auto"
+            data-html=true data-content=
+            "We correct for any difference between your clock
+            and the game clock, so you don’t have to do anything for the app
+            to work.
+            <br>
+            However, we still display the game start time and any messages
+            using the game clock. Because your clock is off by more than a
+            few seconds, this means the times shown may not agree with the
+            clock shown on your device."
+            >
+            What's&nbsp;this?
+          </a>
+        </p>
+      </div>
+
+    </div>
+    <div class="row vertical-center">
+
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+      </div>
+
+    </div>
+    <div class="row vertical-center">
+
+      <div class="col-sm-offset-1 col-sm-2 col-xs-3">
+        <p id="setupJailbreakLabel" class="lead text-center">Setup</p>
+      </div>
+
+      <div class="col-sm-6 col-xs-6">
+        <div class="progress">
+          <div id="firstBar" class="progress-bar" role="progressbar"
+            style="width: 0%">
           </div>
         </div>
       </div>
-    </footer>
-  </body>
-</html>
+
+      <div class="col-sm-2 col-xs-3">
+        <p id="firstBarLabel" class="lead text-center">0:00 / 15:00</p>
+      </div>
+
+    </div>
+    <div class="row vertical-center">
+
+      <div class="col-sm-offset-1 col-sm-2 col-xs-3">
+        <p class="lead text-center">Game Time Elapsed</p>
+      </div>
+
+      <div class="col-sm-6 col-xs-6">
+        <div class="progress">
+          <div id="secondBar" class="progress-bar" role="progressbar"
+            style="width: 0%">
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-2 col-xs-3">
+        <p id="secondBarLabel" class="lead text-center">0:00 / 1:00:00</p>
+      </div>
+
+    </div>
+    <div id="stunRow" class="hidden row vertical-center">
+
+      <div class="col-sm-offset-1 col-sm-2 col-xs-3">
+        <p class="lead text-center">Stun Timer</p>
+      </div>
+
+      <div class="col-sm-6 col-xs-6">
+        <div class="progress">
+          <div id="stunBar" class="progress-bar progress-bar-info"
+            role="progressbar" style="width: 0%">
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-2 col-xs-3">
+        <p id="stunBarLabel" class="lead text-center">0:00 / 1:00</p>
+      </div>
+
+    </div>
+    <div id="cancelButtonRow" class="hidden row vertical-center">
+
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12 text-center">
+        <button id="cancelButton" class="btn btn-info btn-lg" type="button"
+          onclick="clickCancel()">
+          Cancel
+        </button>
+      </div>
+
+    </div>
+    <div id="stunButtonRow" class="row vertical-center">
+
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12 text-center">
+        <button id="stunButton" class="btn btn-info btn-lg" type="button"
+          onclick="clickStun()">
+          Stun Timer
+        </button>
+      </div>
+
+    </div>
+    <div class="row vertical-center">
+
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+        <div class="page-header">
+          <h2 class="text-center">Flags</h2>
+        </div>
+      </div>
+
+    </div>
+    <div class="row vertical-center">
+
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+        <h3 id="flagsHeader" class="text-center">Total per side: 0</h3>
+      </div>
+
+    </div>
+    <div id="flagsRow" class="row vertical-center">
+
+      <div class="col-sm-offset-1 col-sm-5 col-xs-6">
+        <h3 id="redFlagsHeader" class="text-center text-danger">
+          Red has captured: 0
+        </h3>
+      </div>
+
+      <div class="col-sm-5 col-xs-6">
+        <h3 id="yellowFlagsHeader" class="text-center text-warning">
+          Yellow has captured: 0
+        </h3>
+      </div>
+
+    </div>
+    <div class="row vertical-center">
+
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+        <div class="page-header">
+          <h2 class="text-center">Messages</h2>
+        </div>
+      </div>
+
+    </div>
+    <div class="row vertical-center">
+
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+        <p>
+        Note: Messages sent before the last time the page was loaded may not
+        appear.
+        <br>
+        Messages sent before game start are
+        <span class="text-muted">grey</span>, during setup are
+        <span class="text-info">blue</span>, during game play are
+        <span class="text-success">green</span>, and after game end are
+        <span class="text-danger">red</span>.
+        </p>
+      </div>
+
+    </div>
+    <div class="row vertical-center">
+
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+        <table id="messageTable" class="table">
+          <tr><th>Time</th><th>Message</th></tr>
+        </table>
+      </div>
+
+    </div>
+{% endblock %}
 
