@@ -1,2 +1,3 @@
 *.swp
 password.txt
+__pycache__

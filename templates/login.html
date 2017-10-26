@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block container %}
+    <div class="row vertical-center">
+			<div class="col-sm-offset-1 col-sm-10 col-xs-12">
+				<div class="page-header">
+					<h2 class="text-center">
+						Login
+					</h2>
+				</div>
+			</div>
+		</div>
+
+    {% if form.errors %}
+      <div class="row vertical-center">
+        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+					<p class="text-center">
+            Your username and password didn't match. Please try again.
+          </p>
+        </div>
+      </div>
+    {% endif %}
+
+		{% if next %}
+      <div class="row vertical-center">
+        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+          {% if user.is_authenticated %}
+            <p class="text-center">
+              Your account doesn't have access to this page. To proceed,
+              please login with an account that has access.
+            </p>
+          {% else %}
+            <p class="text-center">
+              Please login to see this page.
+            </p>
+          {% endif %}
+        </div>
+      </div>
+		{% endif %}
+
+    <form class="form-horizontal" method="post" action="{% url 'login' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <div class="col-sm-offset-1 col-sm-5 col-xs-6">
+          <div class="pull-right">
+            {{ form.username.label_tag }}
+          </div>
+        </div>
+        <div class="col-sm-5 col-xs-6">
+          <div class="pull-left">
+            {{ form.username }}
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-offset-1 col-sm-5 col-xs-6">
+          <div class="pull-right">
+            {{ form.password.label_tag }}
+          </div>
+        </div>
+        <div class="col-sm-5 col-xs-6">
+          <div class="pull-left">
+            {{ form.password }}
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+          <button type="submit" class="center-block btn btn-default">
+            Log in
+          </button>
+        </div>
+      </div>
+      <input type="hidden" name="next" value="{{ next }}" />
+    </form>
+{% endblock %}
+
