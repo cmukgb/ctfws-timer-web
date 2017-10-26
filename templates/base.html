@@ -36,6 +36,9 @@
       .bg-dark-grey {
         background-color: #d5d5d5;
       }
+      a.no-color {
+        color: inherit;
+      }
     </style>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
@@ -81,21 +84,21 @@
       <div class="row vertical-center">
 
         <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-          <div class="page-header">
-            <div class="row vertical-center">
+          <a href="{% url 'index' %}" class="no-color">
+            <div class="page-header">
+              <div class="row vertical-center">
 
-              <div class="col-md-1 col-sm-2 col-xs-3">
-                <a href="http://www.cmukgb.org">
+                <div class="col-md-1 col-sm-2 col-xs-3">
                   <img src="http://www.cmukgb.org/2013/wp-content/uploads/2013/08/shield-1.png"
                     class="img-responsive" alt="KGB Logo">
-                </a>
-              </div>
-              <div class="col-md-11 col-sm-10 col-xs-9">
-                <h1>CMU KGB's CtFwS Timer</h1>
-              </div>
+                </div>
+                <div class="col-md-11 col-sm-10 col-xs-9">
+                  <h1>CMU KGB's CtFwS Timer</h1>
+                </div>
 
+              </div>
             </div>
-          </div>
+          </a>
         </div>
 
       </div>
