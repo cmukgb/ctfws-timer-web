@@ -1,3 +1,4 @@
+{# This comment helps vim figure out this is a Django HTML file type #}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -19,10 +20,6 @@
     <![endif]-->
 
     <style>
-      .vertical-center {
-        display: flex;
-        align-items: center;
-      }
       .inline-block {
         display: inline-block;
       }
@@ -38,6 +35,16 @@
       }
       a.no-color {
         color: inherit;
+      }
+      @media (min-width: 768px) {
+        .vertical-center {
+          display: flex;
+          align-items: center;
+        }
+        .form-inline {
+          display: inline-block;
+          margin-bottom: 15px;
+        }
       }
     </style>
 
@@ -102,8 +109,22 @@
         </div>
 
       </div>
+      <div class="row vertical-center">
+
+        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+          <div class="page-header">
+            <h2 class="text-center">
+              {% block page_title %}
+              {% endblock %}
+            </h2>
+          </div>
+        </div>
+
+      </div>
+
       {% block container %}
       {% endblock %}
+
     </div>
 
     <footer class="bg-grey">
