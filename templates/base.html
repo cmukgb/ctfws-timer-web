@@ -46,6 +46,38 @@
           margin-bottom: 15px;
         }
       }
+      .nav-justified {
+        margin-bottom: 15px;
+      }
+      /* Tab modifications: The below is in Bootstrap, but limited to
+         min-width: 768px. Let's just apply it to all sizes. */
+      .nav-justified > li {
+        display: table-cell;
+        width: 1%;
+      }
+      .nav-justified > li > a {
+        margin-bottom: 0;
+      }
+      .nav-tabs.nav-justified > li {
+        display: table-cell;
+        width: 1%;
+      }
+      .nav-tabs.nav-justified > li > a {
+        margin-bottom: 0;
+      }
+      .nav-tabs.nav-justified > li > a {
+        border-bottom: 1px solid #ddd;
+        border-radius: 4px 4px 0 0;
+      }
+      .nav-tabs.nav-justified > .active > a,
+      .nav-tabs.nav-justified > .active > a:hover,
+      .nav-tabs.nav-justified > .active > a:focus {
+        border-bottom-color: #fff;
+      }
+      td > hr {
+        margin-top: 10px;
+        margin-bottom: 10px;
+      }
     </style>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->

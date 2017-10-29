@@ -2,14 +2,27 @@
 
 {% block scripts %}
     <script>
-      function post_form(e) {
+      function postForm(e) {
         e.preventDefault(); // Prevent normal form submission
         $.post($(this).attr("action"), $(this).serialize());
         $(this)[0].reset(); // Use [0] to get the underlying DOM object
       }
 
+      function updateInputColor() {
+        cell = $(this).parent()
+        inputs = cell.children("input");
+        topStr = $.trim(inputs[0].value);
+        bottomStr = $.trim(inputs[1].value);
+        if (topStr === bottomStr && topStr !== "") {
+          cell.addClass("success");
+        } else {
+          cell.removeClass("success");
+        }
+      }
+
       $(document).ready(function () {
-        $(".form-ajax-submit").submit(post_form);
+        $(".form-ajax-submit").submit(postForm);
+        $("#stuffTables input").on("input", updateInputColor)
       });
     </script>
 {% endblock %}
@@ -19,6 +32,28 @@
 {% endblock %}
 
 {% block container %}
+<div class="row">
+  <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+    <ul class="nav nav-tabs nav-justified" role="tablist">
+      <li role="presentation" class="active">
+        <a href="#gameTabPane" aria-controls="gameTabPane" role="tab"
+            data-toggle="tab">
+          Game
+        </a>
+      </li>
+      <li role="presentation">
+        <a href="#stuffTabPane" aria-controls="stuffTabPane" role="tab"
+            data-toggle="tab">
+          Stuff
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="tab-content">
+  <div role="tabpanel" class="tab-pane active" id="gameTabPane">
+
     <div class="row vertical-center">
       <div class="col-sm-offset-1 col-sm-10 col-xs-12">
         <p class="text-center help-block">
@@ -61,50 +96,6 @@
           </div>
 
           <input type="hidden" name="command" value="start_game">
-        </form>
-
-      </div>
-    </div>
-
-    <hr class="visible-xs">
-
-    <div class="row vertical-center">
-      <div class="col-sm-offset-1 col-sm-10 col-xs-12 text-center">
-
-        <form class="form-inline form-ajax-submit" method="post"
-            action="{% url 'judge' %}">
-          {% csrf_token %}
-
-          <div class="form-group">
-            <label class="sr-only" for="redFlagsInput">Red score</label>
-            <input type="text" class="form-control" id="redFlagsInput"
-                name="red_flags" placeholder="Red score">
-          </div>
-
-          <div class="form-group">
-            <label class="sr-only" for="yellowFlagsInput">Yellow score</label>
-            <input type="text" class="form-control" id="yellowFlagsInput"
-                name="yellow_flags" placeholder="Yellow score">
-          </div>
-
-          <div class="form-group">
-            <button type="submit" class="btn btn-primary">
-              Set Flags
-            </button>
-          </div>
-
-          <input type="hidden" name="command" value="set_flags_number">
-        </form>
-
-        <form class="form-inline form-ajax-submit" method="post"
-            action="{% url 'judge' %}">
-          {% csrf_token %}
-          <div class="form-group">
-            <button type="submit" class="btn btn-success">
-              Set Flags to ?
-            </button>
-          </div>
-          <input type="hidden" name="command" value="set_flags_hidden">
         </form>
 
       </div>
@@ -163,6 +154,50 @@
     <hr class="visible-xs">
 
     <div class="row vertical-center">
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12 text-center">
+
+        <form class="form-inline form-ajax-submit" method="post"
+            action="{% url 'judge' %}">
+          {% csrf_token %}
+
+          <div class="form-group">
+            <label class="sr-only" for="redFlagsInput">Red score</label>
+            <input type="text" class="form-control" id="redFlagsInput"
+                name="red_flags" placeholder="Red score">
+          </div>
+
+          <div class="form-group">
+            <label class="sr-only" for="yellowFlagsInput">Yellow score</label>
+            <input type="text" class="form-control" id="yellowFlagsInput"
+                name="yellow_flags" placeholder="Yellow score">
+          </div>
+
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary">
+              Set Flags
+            </button>
+          </div>
+
+          <input type="hidden" name="command" value="set_flags_number">
+        </form>
+
+        <form class="form-inline form-ajax-submit" method="post"
+            action="{% url 'judge' %}">
+          {% csrf_token %}
+          <div class="form-group">
+            <button type="submit" class="btn btn-success">
+              Set Flags to ?
+            </button>
+          </div>
+          <input type="hidden" name="command" value="set_flags_hidden">
+        </form>
+
+      </div>
+    </div>
+
+    <hr class="visible-xs">
+
+    <div class="row vertical-center">
       <div class="col-lg-offset-4 col-sm-offset-3 col-lg-2 col-sm-3 col-xs-6">
         <form class="form-ajax-submit" method="post" action="{% url 'judge' %}">
           {% csrf_token %}
@@ -187,5 +222,208 @@
         </form>
       </div>
     </div>
+  </div>
+
+  <div role="tabpanel" class="tab-pane" id="stuffTabPane">
+    <div class="row">
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+        <div class="row" id="stuffTables">
+          <div class="col-md-8 col-xs-12">
+            <div class="panel panel-primary">
+              <div class="panel-heading">
+                <h1 class="panel-title">Stuff</h1>
+              </div>
+              <table class="table table-bordered">
+                <tr>
+                  <th class="bg-grey"></th>
+                  <th class="danger">Red</th>
+                  <th class="success">Green</th>
+                  <th class="info">Blue</th>
+                  <th>White</th>
+                </tr>
+                <tr>
+                  <th>Wands</th>
+                  <td>
+                    <input type="number" class="form-control">
+                    <hr>
+                    <input type="number" class="form-control">
+                  </td>
+                  <td>
+                    <input type="number" class="form-control">
+                    <hr>
+                    <input type="number" class="form-control">
+                  </td>
+                  <td>
+                    <input type="number" class="form-control">
+                    <hr>
+                    <input type="number" class="form-control">
+                  </td>
+                  <td>
+                    <input type="number" class="form-control">
+                    <hr>
+                    <input type="number" class="form-control">
+                  </td>
+                </tr>
+                <tr>
+                  <th>Belts</th>
+                  <td>
+                    <input type="number" class="form-control">
+                    <hr>
+                    <input type="number" class="form-control">
+                  </td>
+                  <td>
+                    <input type="number" class="form-control">
+                    <hr>
+                    <input type="number" class="form-control">
+                  </td>
+                  <td>
+                    <input type="number" class="form-control">
+                    <hr>
+                    <input type="number" class="form-control">
+                  </td>
+                  <td>
+                    <input type="number" class="form-control">
+                    <hr>
+                    <input type="number" class="form-control">
+                  </td>
+                </tr>
+                <tr>
+                  <th>Potions</th>
+                  <td>
+                    <input type="number" class="form-control">
+                    <hr>
+                    <input type="number" class="form-control">
+                  </td>
+                  <td>
+                    <input type="number" class="form-control">
+                    <hr>
+                    <input type="number" class="form-control">
+                  </td>
+                  <td>
+                    <input type="number" class="form-control">
+                    <hr>
+                    <input type="number" class="form-control">
+                  </td>
+                  <td>
+                    <input type="number" class="form-control">
+                    <hr>
+                    <input type="number" class="form-control">
+                  </td>
+                </tr>
+              </table>
+            </div>
+
+            <div class="panel panel-primary">
+              <div class="panel-heading">
+                <h1 class="panel-title">Flags</h1>
+              </div>
+              <table class="table table-bordered">
+                <tr>
+                  <th class="bg-grey"></th>
+                  <th class="danger">Red</th>
+                  <th class="warning">Yellow</th>
+                </tr>
+                <tr>
+                  <th>Flags</th>
+                  <td>
+                    <input type="number" class="form-control">
+                    <hr>
+                    <input type="number" class="form-control">
+                  </td>
+                  <td>
+                    <input type="number" class="form-control">
+                    <hr>
+                    <input type="number" class="form-control">
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <div class="col-md-4 col-xs-12">
+            <div class="panel panel-primary">
+              <div class="panel-heading">
+                <h1 class="panel-title">Glyphs</h1>
+              </div>
+              <table class="table table-bordered">
+                <tr>
+                  <th class="bg-grey"></th>
+                  <th class="danger">Red</th>
+                  <th class="warning">Yellow</th>
+                </tr>
+                <tr>
+                  <th>Jail</th>
+                  <td>
+                    <input type="number" class="form-control">
+                    <hr>
+                    <input type="number" class="form-control">
+                  </td>
+                  <td>
+                    <input type="number" class="form-control">
+                    <hr>
+                    <input type="number" class="form-control">
+                  </td>
+                </tr>
+                <tr>
+                  <th>Yukko</th>
+                  <td>
+                    <input type="number" class="form-control">
+                    <hr>
+                    <input type="number" class="form-control">
+                  </td>
+                  <td>
+                    <input type="number" class="form-control">
+                    <hr>
+                    <input type="number" class="form-control">
+                  </td>
+                </tr>
+                <tr>
+                  <th>Alarm</th>
+                  <td>
+                    <input type="number" class="form-control">
+                    <hr>
+                    <input type="number" class="form-control">
+                  </td>
+                  <td>
+                    <input type="number" class="form-control">
+                    <hr>
+                    <input type="number" class="form-control">
+                  </td>
+                </tr>
+                <tr>
+                  <th>Gotcha</th>
+                  <td>
+                    <input type="number" class="form-control">
+                    <hr>
+                    <input type="number" class="form-control">
+                  </td>
+                  <td>
+                    <input type="number" class="form-control">
+                    <hr>
+                    <input type="number" class="form-control">
+                  </td>
+                </tr>
+                <tr>
+                  <th>Recharge</th>
+                  <td>
+                    <input type="number" class="form-control">
+                    <hr>
+                    <input type="number" class="form-control">
+                  </td>
+                  <td>
+                    <input type="number" class="form-control">
+                    <hr>
+                    <input type="number" class="form-control">
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
 {% endblock %}
 
