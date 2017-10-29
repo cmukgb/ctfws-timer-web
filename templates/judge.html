@@ -9,10 +9,10 @@
       }
 
       function updateInputColor() {
-        cell = $(this).parent()
-        inputs = cell.children("input");
-        topStr = $.trim(inputs[0].value);
-        bottomStr = $.trim(inputs[1].value);
+        var cell = $(this).parent()
+        var inputs = cell.children("input");
+        var topStr = $.trim(inputs[0].value);
+        var bottomStr = $.trim(inputs[1].value);
         if (topStr === bottomStr && topStr !== "") {
           cell.addClass("success");
         } else {
@@ -20,8 +20,26 @@
         }
       }
 
+      function postStuffForm() {
+        $("#saveTotalsResult").text("");
+        $("#saveTotalsResult").removeClass("text-success");
+        $("#saveTotalsResult").removeClass("text-danger");
+        var result = $.post($("#stuffForm").attr("action"),
+          $("#stuffForm").serialize());
+        result.done(function () {
+          $("#saveTotalsResult").addClass("text-success");
+          $("#saveTotalsResult").text("Saved!");
+        });
+        result.fail(function (response) {
+          $("#saveTotalsResult").addClass("text-danger");
+          $("#saveTotalsResult").text("Error: " + response.responseText);
+        });
+      }
+
       $(document).ready(function () {
         $(".form-ajax-submit").submit(postForm);
+        $(".form-no-submit").submit(function (e) {e.preventDefault();});
+        $("#saveTotalsButton").click(postStuffForm)
         $("#stuffTables input").on("input", updateInputColor)
       });
     </script>
@@ -239,199 +257,268 @@
   <div role="tabpanel" class="tab-pane" id="stuffTabPane">
     <div class="row">
       <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-        <div class="row" id="stuffTables">
-          <div class="col-md-8 col-xs-12">
-            <div class="panel panel-primary">
-              <div class="panel-heading">
-                <h1 class="panel-title">Stuff</h1>
+        <form id="stuffForm" class="form-no-submit" method="post"
+            action="{% url 'judge' %}">
+          {% csrf_token %}
+
+          <div class="row" id="stuffTables">
+            <div class="col-md-8 col-xs-12">
+              <div class="panel panel-primary">
+                <div class="panel-heading">
+                  <h1 class="panel-title">Stuff</h1>
+                </div>
+                <table class="table table-bordered">
+                  <tr>
+                    <th class="bg-grey"></th>
+                    <th class="danger">Red</th>
+                    <th class="success">Green</th>
+                    <th class="info">Blue</th>
+                    <th>White</th>
+                  </tr>
+                  <tr>
+                    <th>Wands</th>
+                    <td>
+                      <input type="number" class="form-control">
+                      <hr>
+                      <input type="number" class="form-control"
+                        name="{{ form.red_wands.html_name }}"
+                        value="{{ totals.red_wands }}">
+                    </td>
+                    <td>
+                      <input type="number" class="form-control">
+                      <hr>
+                      <input type="number" class="form-control"
+                        name="{{ form.green_wands.html_name }}"
+                        value="{{ totals.green_wands }}">
+                    </td>
+                    <td>
+                      <input type="number" class="form-control">
+                      <hr>
+                      <input type="number" class="form-control"
+                        name="{{ form.blue_wands.html_name }}"
+                        value="{{ totals.blue_wands }}">
+                    </td>
+                    <td>
+                      <input type="number" class="form-control">
+                      <hr>
+                      <input type="number" class="form-control"
+                        name="{{ form.white_wands.html_name }}"
+                        value="{{ totals.white_wands }}">
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>Belts</th>
+                    <td>
+                      <input type="number" class="form-control">
+                      <hr>
+                      <input type="number" class="form-control"
+                        name="{{ form.red_belts.html_name }}"
+                        value="{{ totals.red_belts }}">
+                    </td>
+                    <td>
+                      <input type="number" class="form-control">
+                      <hr>
+                      <input type="number" class="form-control"
+                        name="{{ form.green_belts.html_name }}"
+                        value="{{ totals.green_belts }}">
+                    </td>
+                    <td>
+                      <input type="number" class="form-control">
+                      <hr>
+                      <input type="number" class="form-control"
+                        name="{{ form.blue_belts.html_name }}"
+                        value="{{ totals.blue_belts }}">
+                    </td>
+                    <td>
+                      <input type="number" class="form-control">
+                      <hr>
+                      <input type="number" class="form-control"
+                        name="{{ form.white_belts.html_name }}"
+                        value="{{ totals.white_belts }}">
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>Potions</th>
+                    <td>
+                      <input type="number" class="form-control">
+                      <hr>
+                      <input type="number" class="form-control"
+                        name="{{ form.red_potions.html_name }}"
+                        value="{{ totals.red_potions }}">
+                    </td>
+                    <td>
+                      <input type="number" class="form-control">
+                      <hr>
+                      <input type="number" class="form-control"
+                        name="{{ form.green_potions.html_name }}"
+                        value="{{ totals.green_potions }}">
+                    </td>
+                    <td>
+                      <input type="number" class="form-control">
+                      <hr>
+                      <input type="number" class="form-control"
+                        name="{{ form.blue_potions.html_name }}"
+                        value="{{ totals.blue_potions }}">
+                    </td>
+                    <td>
+                      <input type="number" class="form-control">
+                      <hr>
+                      <input type="number" class="form-control"
+                        name="{{ form.white_potions.html_name }}"
+                        value="{{ totals.white_potions }}">
+                    </td>
+                  </tr>
+                </table>
               </div>
-              <table class="table table-bordered">
-                <tr>
-                  <th class="bg-grey"></th>
-                  <th class="danger">Red</th>
-                  <th class="success">Green</th>
-                  <th class="info">Blue</th>
-                  <th>White</th>
-                </tr>
-                <tr>
-                  <th>Wands</th>
-                  <td>
-                    <input type="number" class="form-control">
-                    <hr>
-                    <input type="number" class="form-control">
-                  </td>
-                  <td>
-                    <input type="number" class="form-control">
-                    <hr>
-                    <input type="number" class="form-control">
-                  </td>
-                  <td>
-                    <input type="number" class="form-control">
-                    <hr>
-                    <input type="number" class="form-control">
-                  </td>
-                  <td>
-                    <input type="number" class="form-control">
-                    <hr>
-                    <input type="number" class="form-control">
-                  </td>
-                </tr>
-                <tr>
-                  <th>Belts</th>
-                  <td>
-                    <input type="number" class="form-control">
-                    <hr>
-                    <input type="number" class="form-control">
-                  </td>
-                  <td>
-                    <input type="number" class="form-control">
-                    <hr>
-                    <input type="number" class="form-control">
-                  </td>
-                  <td>
-                    <input type="number" class="form-control">
-                    <hr>
-                    <input type="number" class="form-control">
-                  </td>
-                  <td>
-                    <input type="number" class="form-control">
-                    <hr>
-                    <input type="number" class="form-control">
-                  </td>
-                </tr>
-                <tr>
-                  <th>Potions</th>
-                  <td>
-                    <input type="number" class="form-control">
-                    <hr>
-                    <input type="number" class="form-control">
-                  </td>
-                  <td>
-                    <input type="number" class="form-control">
-                    <hr>
-                    <input type="number" class="form-control">
-                  </td>
-                  <td>
-                    <input type="number" class="form-control">
-                    <hr>
-                    <input type="number" class="form-control">
-                  </td>
-                  <td>
-                    <input type="number" class="form-control">
-                    <hr>
-                    <input type="number" class="form-control">
-                  </td>
-                </tr>
-              </table>
+
+              <div class="panel panel-primary">
+                <div class="panel-heading">
+                  <h1 class="panel-title">Flags</h1>
+                </div>
+                <table class="table table-bordered">
+                  <tr>
+                    <th class="bg-grey"></th>
+                    <th class="danger">Red</th>
+                    <th class="warning">Yellow</th>
+                  </tr>
+                  <tr>
+                    <th>Flags</th>
+                    <td>
+                      <input type="number" class="form-control">
+                      <hr>
+                      <input type="number" class="form-control"
+                        name="{{ form.red_flags.html_name }}"
+                        value="{{ totals.red_flags }}">
+                    </td>
+                    <td>
+                      <input type="number" class="form-control">
+                      <hr>
+                      <input type="number" class="form-control"
+                        name="{{ form.yellow_flags.html_name }}"
+                        value="{{ totals.yellow_flags }}">
+                    </td>
+                  </tr>
+                </table>
+              </div>
             </div>
 
-            <div class="panel panel-primary">
-              <div class="panel-heading">
-                <h1 class="panel-title">Flags</h1>
+            <div class="col-md-4 col-xs-12">
+              <div class="panel panel-primary">
+                <div class="panel-heading">
+                  <h1 class="panel-title">Glyphs</h1>
+                </div>
+                <table class="table table-bordered">
+                  <tr>
+                    <th class="bg-grey"></th>
+                    <th class="danger">Red</th>
+                    <th class="warning">Yellow</th>
+                  </tr>
+                  <tr>
+                    <th>Jail</th>
+                    <td>
+                      <input type="number" class="form-control">
+                      <hr>
+                      <input type="number" class="form-control"
+                        name="{{ form.red_jail.html_name }}"
+                        value="{{ totals.red_jail }}">
+                    </td>
+                    <td>
+                      <input type="number" class="form-control">
+                      <hr>
+                      <input type="number" class="form-control"
+                        name="{{ form.yellow_jail.html_name }}"
+                        value="{{ totals.yellow_jail }}">
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>Yukko</th>
+                    <td>
+                      <input type="number" class="form-control">
+                      <hr>
+                      <input type="number" class="form-control"
+                        name="{{ form.red_yukko.html_name }}"
+                        value="{{ totals.red_yukko }}">
+                    </td>
+                    <td>
+                      <input type="number" class="form-control">
+                      <hr>
+                      <input type="number" class="form-control"
+                        name="{{ form.yellow_yukko.html_name }}"
+                        value="{{ totals.yellow_yukko }}">
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>Alarm</th>
+                    <td>
+                      <input type="number" class="form-control">
+                      <hr>
+                      <input type="number" class="form-control"
+                        name="{{ form.red_alarm.html_name }}"
+                        value="{{ totals.red_alarm }}">
+                    </td>
+                    <td>
+                      <input type="number" class="form-control">
+                      <hr>
+                      <input type="number" class="form-control"
+                        name="{{ form.yellow_alarm.html_name }}"
+                        value="{{ totals.yellow_alarm }}">
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>Gotcha</th>
+                    <td>
+                      <input type="number" class="form-control">
+                      <hr>
+                      <input type="number" class="form-control"
+                        name="{{ form.red_gotcha.html_name }}"
+                        value="{{ totals.red_gotcha }}">
+                    </td>
+                    <td>
+                      <input type="number" class="form-control">
+                      <hr>
+                      <input type="number" class="form-control"
+                        name="{{ form.yellow_gotcha.html_name }}"
+                        value="{{ totals.yellow_gotcha }}">
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>Recharge</th>
+                    <td>
+                      <input type="number" class="form-control">
+                      <hr>
+                      <input type="number" class="form-control"
+                        name="{{ form.red_recharge.html_name }}"
+                        value="{{ totals.red_recharge }}">
+                    </td>
+                    <td>
+                      <input type="number" class="form-control">
+                      <hr>
+                      <input type="number" class="form-control"
+                        name="{{ form.yellow_recharge.html_name }}"
+                        value="{{ totals.yellow_recharge }}">
+                    </td>
+                  </tr>
+                </table>
               </div>
-              <table class="table table-bordered">
-                <tr>
-                  <th class="bg-grey"></th>
-                  <th class="danger">Red</th>
-                  <th class="warning">Yellow</th>
-                </tr>
-                <tr>
-                  <th>Flags</th>
-                  <td>
-                    <input type="number" class="form-control">
-                    <hr>
-                    <input type="number" class="form-control">
-                  </td>
-                  <td>
-                    <input type="number" class="form-control">
-                    <hr>
-                    <input type="number" class="form-control">
-                  </td>
-                </tr>
-              </table>
             </div>
           </div>
 
-          <div class="col-md-4 col-xs-12">
-            <div class="panel panel-primary">
-              <div class="panel-heading">
-                <h1 class="panel-title">Glyphs</h1>
-              </div>
-              <table class="table table-bordered">
-                <tr>
-                  <th class="bg-grey"></th>
-                  <th class="danger">Red</th>
-                  <th class="warning">Yellow</th>
-                </tr>
-                <tr>
-                  <th>Jail</th>
-                  <td>
-                    <input type="number" class="form-control">
-                    <hr>
-                    <input type="number" class="form-control">
-                  </td>
-                  <td>
-                    <input type="number" class="form-control">
-                    <hr>
-                    <input type="number" class="form-control">
-                  </td>
-                </tr>
-                <tr>
-                  <th>Yukko</th>
-                  <td>
-                    <input type="number" class="form-control">
-                    <hr>
-                    <input type="number" class="form-control">
-                  </td>
-                  <td>
-                    <input type="number" class="form-control">
-                    <hr>
-                    <input type="number" class="form-control">
-                  </td>
-                </tr>
-                <tr>
-                  <th>Alarm</th>
-                  <td>
-                    <input type="number" class="form-control">
-                    <hr>
-                    <input type="number" class="form-control">
-                  </td>
-                  <td>
-                    <input type="number" class="form-control">
-                    <hr>
-                    <input type="number" class="form-control">
-                  </td>
-                </tr>
-                <tr>
-                  <th>Gotcha</th>
-                  <td>
-                    <input type="number" class="form-control">
-                    <hr>
-                    <input type="number" class="form-control">
-                  </td>
-                  <td>
-                    <input type="number" class="form-control">
-                    <hr>
-                    <input type="number" class="form-control">
-                  </td>
-                </tr>
-                <tr>
-                  <th>Recharge</th>
-                  <td>
-                    <input type="number" class="form-control">
-                    <hr>
-                    <input type="number" class="form-control">
-                  </td>
-                  <td>
-                    <input type="number" class="form-control">
-                    <hr>
-                    <input type="number" class="form-control">
-                  </td>
-                </tr>
-              </table>
+          <div class="row vertical-center">
+            <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+              <button id="saveTotalsButton" type="button"
+                  class="btn btn-primary center-block">
+                Save Count Totals
+              </button>
+              <p id="saveTotalsResult" class="text-center"></p>
+              <p class="text-center help-block">
+                Store the current totals (denominators) on the server so the
+                page loads with them pre-populated next time.
+              </p>
             </div>
           </div>
-        </div>
+
+          <input type="hidden" name="command" value="save_count_totals">
+        </form>
       </div>
     </div>
   </div>
