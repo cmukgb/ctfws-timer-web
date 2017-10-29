@@ -37,21 +37,21 @@
         if (useWords) {
           var result = "";
           if (hours > 0) {
-            result += hours + " hr" + (hours == 1 ? "" : "s") + " ";
+            result += hours + " hr" + (hours === 1 ? "" : "s") + " ";
           }
           if (minutes > 0) {
-            result += minutes + " min" + (minutes == 1 ? "" : "s") + " ";
+            result += minutes + " min" + (minutes === 1 ? "" : "s") + " ";
           }
           // Add seconds if there are any or add "0 secs" if there are no
           // hours and no minutes
           if (seconds > 0 || (minutes <= 0 && hours <= 0)) {
-            result += seconds + " sec" + (seconds == 1 ? "" : "s");
+            result += seconds + " sec" + (seconds === 1 ? "" : "s");
           }
           return (negative ? "minus " : "") + result;
 
         } else {
           var result = "";
-          if (hours == 0) {
+          if (hours === 0) {
             result = minutes + ":" + (seconds < 10 ? "0" + seconds : seconds);
           } else {
             result =  hours + ":" + (minutes < 10 ? "0" + minutes : minutes) +
@@ -161,7 +161,7 @@
           var gameDuration = gameEnd - setupEnd;
           var setupEndDate = new Date(setupEnd * 1000);
           var gameStartText = setupEndDate.toLocaleTimeString();
-          var numText = gameNumber == 0 ? "State" : gameNumber;
+          var numText = gameNumber === 0 ? "State" : gameNumber;
 
           if ((gameEndtime >= gameStarttime && gameEndtime <= now) ||
               gameEnd <= now) {
@@ -349,7 +349,7 @@
       function splitOnFirstWhitespace(str) {
         var newStr = str.replace(/\s+/, ' ');
         var index = newStr.indexOf(' ');
-        if (index == -1) {
+        if (index === -1) {
           console.log("Message cannot be split on whitespace: " + str);
           throw "cannot split message";
         }
@@ -369,7 +369,7 @@
         var topic = message.destinationName.substring(11);
         switch (topic) {
           case 'config':
-            if (msg == "none") {
+            if (msg === "none") {
               gameValid = false;
             } else {
               var split = splitOnWhitespace(msg, 6);
@@ -394,7 +394,7 @@
             }
             break;
           case 'flags':
-            if (msg == "?") {
+            if (msg === "?") {
               showFlags = false;
             } else {
               var split = splitOnWhitespace(msg, 2);
@@ -439,7 +439,7 @@
         updateUI();
         // If it took more than 3 seconds to get here this interval will
         // already be set up. Otherwise, start it now.
-        if (updateUIIntervalObject == false) {
+        if (updateUIIntervalObject === false) {
           updateUIIntervalObject = setInterval(updateUI, updateUIIntervalTime);
         }
       }
@@ -483,7 +483,7 @@
         // interval.
         updateUIIntervalObject = false; // Intentionally global
         setTimeout(function () {
-          if (updateUIIntervalObject == false) {
+          if (updateUIIntervalObject === false) {
             updateUI();
             updateUIIntervalObject = setInterval(updateUI, updateUIIntervalTime);
           }
