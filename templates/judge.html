@@ -27,8 +27,20 @@
     </script>
 {% endblock %}
 
+{% block title %}
+    CtFwS Judges
+{% endblock %}
+
 {% block page_title %}
     Judges
+{% endblock %}
+
+{% block judge_label %}
+    Logout
+{% endblock %}
+
+{% block judge_link %}
+    {% url 'logout' %}
 {% endblock %}
 
 {% block container %}
