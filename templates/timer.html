@@ -167,13 +167,17 @@
               gameEnd <= now) {
             // Over
             setGameHeader("Game " + numText + ": ", "Over", "text-danger");
-            $("#startTimeLabel").text("Game started at " + gameStartText);
             var secs = 0;
+            var gameEndDate = null;
             if (gameEndtime >= gameStarttime && gameEndtime <= now) {
               secs = Math.max(Math.min(gameEndtime, gameEnd) - setupEnd, 0);
+              gameEndDate = new Date(Math.min(gameEndtime, gameEnd) * 1000);
             } else {
               secs = gameEnd - setupEnd;
+              gameEndDate = new Date(gameEnd * 1000);
             }
+            var gameEndText = gameEndDate.toLocaleTimeString();
+            $("#startTimeLabel").text("Game ended at " + gameEndText);
             var roundNum = Math.floor((secs - 1) / roundDuration); // 0-indexed
             var roundSecs = secs - roundNum * roundDuration;
             $("#setupJailbreakLabel").text("Jailbreak " + (roundNum + 1));
