@@ -83,173 +83,207 @@
 
 <div class="tab-content">
   <div role="tabpanel" class="tab-pane active" id="gameTabPane">
+    <div class="row">
+      <div class="col-lg-offset-3 col-lg-6 col-md-offset-2 col-md-8
+          col-sm-offset-1 col-sm-10 col-xs-12">
 
-    <div class="row vertical-center">
-      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-        <p class="text-center help-block">
-          Leave any timestamp blank to use the current server time when the
-          command is run.
-        </p>
-      </div>
-    </div>
+        <div class="row vertical-center">
+          <div class="col-xs-12">
+            <p class="text-center help-block">
+              Leave any timestamp blank to use the current server time when the
+              command is run.
+            </p>
+          </div>
+        </div>
 
-    <div class="row vertical-center">
-      <div class="col-sm-offset-1 col-sm-10 col-xs-12 text-center">
 
-        <form class="form-inline form-ajax-submit" method="post"
-            action="{% url 'judge' %}">
+        <form class="form-ajax-submit" method="post" action="{% url 'judge' %}">
           {% csrf_token %}
+          <div class="row row-small-gutter vertical-center">
 
-          <div class="form-group">
-            <label class="sr-only" for="startTimeInput">
-              Start timestamp</label>
-            <input type="text" class="form-control" id="startTimeInput"
-                name="start_timestamp" placeholder="Start timestamp">
+            <div class="col-sm-3 col-xs-12">
+              <div class="form-group">
+                <label class="sr-only" for="startTimeInput">
+                  Start timestamp</label>
+                <input type="text" class="form-control" id="startTimeInput"
+                    name="start_timestamp" placeholder="Start timestamp">
+              </div>
+            </div>
+
+            <div class="col-sm-3 col-xs-6">
+              <div class="form-group">
+                <label class="sr-only" for="numFlagsInput">
+                  Number of flags
+                </label>
+                <input type="text" class="form-control" id="numFlagsInput"
+                    name="num_flags" placeholder="Number of flags">
+              </div>
+            </div>
+
+            <div class="col-sm-3 col-xs-6">
+              <div class="form-group">
+                <label class="sr-only" for="gameNumInput">Game number</label>
+                <input type="text" class="form-control" id="gameNumInput"
+                    name="game_num" placeholder="Game number">
+              </div>
+            </div>
+
+            <div class="col-sm-3 col-xs-12">
+              <div class="form-group">
+                <button type="submit" class="center-block btn btn-primary">
+                  Start Game
+                </button>
+              </div>
+            </div>
+
           </div>
-
-          <div class="form-group">
-            <label class="sr-only" for="numFlagsInput">Number of flags</label>
-            <input type="text" class="form-control" id="numFlagsInput"
-                name="num_flags" placeholder="Number of flags">
-          </div>
-
-          <div class="form-group">
-            <label class="sr-only" for="gameNumInput">Game number</label>
-            <input type="text" class="form-control" id="gameNumInput"
-                name="game_num" placeholder="Game number">
-          </div>
-
-          <div class="form-group">
-            <button type="submit" class="btn btn-primary">
-              Start Game
-            </button>
-          </div>
-
           <input type="hidden" name="command" value="start_game">
         </form>
 
-      </div>
-    </div>
+        <hr class="hr-below-form">
 
-    <hr class="visible-xs">
+        <form class="form-ajax-submit" method="post" action="{% url 'judge' %}">
+          {% csrf_token %}
+          <div class="row row-small-gutter vertical-center">
 
-    <form class="form-ajax-submit" method="post" action="{% url 'judge' %}">
-      {% csrf_token %}
-      <div class="row vertical-center">
+            <div class="col-sm-9 col-xs-12">
+              <div class="row row-small-gutter vertical-center">
+                <div class="form-group col-xs-6">
+                  <label class="sr-only" for="messageTimeInput">
+                    Message timestamp
+                  </label>
+                  <input type="text" class="form-control" id="messageTimrInput"
+                      name="message_timestamp" placeholder="Message timestamp">
+                </div>
 
-        <div class="col-lg-offset-3 col-sm-offset-2 col-lg-5 col-sm-6 col-xs-12">
-          <div class="row vertical-center">
-            <div class="form-group col-xs-6">
-              <label class="sr-only" for="messageTimeInput">
-                Message timestamp
-              </label>
-              <input type="text" class="form-control" id="messageTimrInput"
-                  name="message_timestamp" placeholder="Message timestamp">
+                <div class="form-group text-center col-xs-6">
+                  <label class="radio-inline">
+                    <input type="radio" name="message_type" value="players">
+                    Players
+                  </label>
+                  <label class="radio-inline">
+                    <input type="radio" name="message_type" value="jail">
+                    Jail
+                  </label>
+                  <label class="radio-inline">
+                    <input type="radio" name="message_type" value="both">
+                    Both
+                  </label>
+                </div>
+              </div>
+
+              <div class="row row-small-gutter">
+                <div class="form-group col-xs-12">
+                  <label class="sr-only" for="messageInput">Message</label>
+                  <input type="text" class="form-control" id="messageInput"
+                      name="message" placeholder="Message">
+                </div>
+              </div>
             </div>
 
-            <div class="form-group text-center col-xs-6">
-              <label class="radio-inline">
-                <input type="radio" name="message_type" value="players"> Players
-              </label>
-              <label class="radio-inline">
-                <input type="radio" name="message_type" value="jail"> Jail
-              </label>
-              <label class="radio-inline">
-                <input type="radio" name="message_type" value="both"> Both
-              </label>
+            <div class="col-sm-3 col-xs-12">
+              <div class="form-group">
+                <button type="submit" class="center-block btn btn-primary">
+                  Send Message
+                </button>
+              </div>
             </div>
+
+          </div>
+          <input type="hidden" name="command" value="send_message">
+        </form>
+
+        <hr class="hr-below-form">
+
+        <div class="row row-small-gutter vertical-center">
+          <div class="col-sm-9 col-xs-12">
+            <form class="form-ajax-submit" method="post"
+                action="{% url 'judge' %}">
+              {% csrf_token %}
+              <div class="row row-small-gutter vertical-center">
+
+                <div class="col-sm-9 col-xs-12">
+                  <div class="row row-small-gutter vertical-center">
+                    <div class="col-xs-6">
+                      <div class="form-group">
+                        <label class="sr-only" for="redFlagsInput">
+                          Red score
+                        </label>
+                        <input type="text" class="form-control"
+                            id="redFlagsInput" name="red_flags"
+                            placeholder="Red score">
+                      </div>
+                    </div>
+
+                    <div class="col-xs-6">
+                      <div class="form-group">
+                        <label class="sr-only" for="yellowFlagsInput">
+                          Yellow score
+                        </label>
+                        <input type="text" class="form-control"
+                            id="yellowFlagsInput" name="yellow_flags"
+                            placeholder="Yellow score">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-sm-3 col-xs-12">
+                  <div class="form-group">
+                    <button type="submit" class="center-block btn btn-primary">
+                      Set Flags
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+              <input type="hidden" name="command" value="set_flags_number">
+            </form>
           </div>
 
-          <div class="row">
-            <div class="form-group col-xs-12">
-              <label class="sr-only" for="messageInput">Message</label>
-              <input type="text" class="form-control" id="messageInput"
-                  name="message" placeholder="Message">
-            </div>
+          <div class="col-sm-3 col-xs-12">
+            <form class="form-ajax-submit" method="post"
+                action="{% url 'judge' %}">
+              {% csrf_token %}
+              <div class="form-group">
+                <button type="submit" class="center-block btn btn-success">
+                  Set Flags to ?
+                </button>
+              </div>
+              <input type="hidden" name="command" value="set_flags_hidden">
+            </form>
           </div>
         </div>
 
-        <div class="col-lg-1 col-sm-2 col-xs-12">
-          <div class="form-group">
-            <button type="submit" class="center-block btn btn-primary">
-              Send Message
-            </button>
+        <hr class="hr-below-form">
+
+        <div class="row vertical-center">
+          <div class="col-xs-6">
+            <form class="form-ajax-submit" method="post"
+                action="{% url 'judge' %}">
+              {% csrf_token %}
+              <div class="form-group">
+                <button type="submit" class="center-block btn btn-warning">
+                  End Game
+                </button>
+              </div>
+              <input type="hidden" name="command" value="end_game">
+            </form>
+          </div>
+
+          <div class="col-xs-6">
+            <form class="form-ajax-submit" method="post"
+                action="{% url 'judge' %}">
+              {% csrf_token %}
+              <div class="form-group">
+                <button type="submit" class="center-block btn btn-danger">
+                  No Game
+                </button>
+              </div>
+              <input type="hidden" name="command" value="no_game">
+            </form>
           </div>
         </div>
-
-      </div>
-      <input type="hidden" name="command" value="send_message">
-    </form>
-
-    <hr class="visible-xs">
-
-    <div class="row vertical-center">
-      <div class="col-sm-offset-1 col-sm-10 col-xs-12 text-center">
-
-        <form class="form-inline form-ajax-submit" method="post"
-            action="{% url 'judge' %}">
-          {% csrf_token %}
-
-          <div class="form-group">
-            <label class="sr-only" for="redFlagsInput">Red score</label>
-            <input type="text" class="form-control" id="redFlagsInput"
-                name="red_flags" placeholder="Red score">
-          </div>
-
-          <div class="form-group">
-            <label class="sr-only" for="yellowFlagsInput">Yellow score</label>
-            <input type="text" class="form-control" id="yellowFlagsInput"
-                name="yellow_flags" placeholder="Yellow score">
-          </div>
-
-          <div class="form-group">
-            <button type="submit" class="btn btn-primary">
-              Set Flags
-            </button>
-          </div>
-
-          <input type="hidden" name="command" value="set_flags_number">
-        </form>
-
-        <form class="form-inline form-ajax-submit" method="post"
-            action="{% url 'judge' %}">
-          {% csrf_token %}
-          <div class="form-group">
-            <button type="submit" class="btn btn-success">
-              Set Flags to ?
-            </button>
-          </div>
-          <input type="hidden" name="command" value="set_flags_hidden">
-        </form>
-
-      </div>
-    </div>
-
-    <hr class="visible-xs">
-
-    <div class="row vertical-center">
-      <div class="col-lg-offset-4 col-sm-offset-3 col-lg-2 col-sm-3 col-xs-6">
-        <form class="form-ajax-submit" method="post" action="{% url 'judge' %}">
-          {% csrf_token %}
-          <div class="form-group">
-            <button type="submit" class="center-block btn btn-warning">
-              End Game
-            </button>
-          </div>
-          <input type="hidden" name="command" value="end_game">
-        </form>
-      </div>
-
-      <div class="col-lg-2 col-sm-3 col-xs-6">
-        <form class="form-ajax-submit" method="post" action="{% url 'judge' %}">
-          {% csrf_token %}
-          <div class="form-group">
-            <button type="submit" class="center-block btn btn-danger">
-              No Game
-            </button>
-          </div>
-          <input type="hidden" name="command" value="no_game">
-        </form>
       </div>
     </div>
   </div>
