@@ -1,7 +1,11 @@
 #!/bin/bash
 
+# Get this script file. Since readlink -f doesn't work on every system, just
+# return $0 if it fails. We don't support linking the script on those systems.
+script_file=$(readlink -f "$0" 2> /dev/null || echo "$0")
+
 # Sets $password_file
-source get_password.sh
+source $(dirname "$script_file")/get_password.sh
 
 if [ "$#" -ne 1 ]
 then
