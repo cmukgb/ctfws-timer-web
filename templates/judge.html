@@ -96,7 +96,6 @@
           </div>
         </div>
 
-
         <form class="form-ajax-submit" method="post" action="{% url 'judge' %}">
           {% csrf_token %}
           <div class="row row-small-gutter vertical-center">
@@ -258,14 +257,14 @@
 
         <hr class="hr-below-form">
 
-        <div class="row row-small-gutter vertical-center">
+        <div class="row row-small-gutter">
           <div class="col-sm-9 col-xs-12">
             <form class="form-ajax-submit" method="post"
                 action="{% url 'judge' %}">
               {% csrf_token %}
-              <div class="row row-small-gutter vertical-center">
+              <div class="row row-small-gutter">
 
-                <div class="col-sm-6 col-xs-8">
+                <div class="col-sm-5 col-xs-5">
                   <div class="form-group">
                     <label class="sr-only" for="endTimeInput">
                       End timestamp
@@ -275,7 +274,16 @@
                   </div>
                 </div>
 
-                <div class="col-sm-3 col-xs-4">
+                <div class="col-sm-3 col-xs-3">
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" value="hide_flags">
+                      Hide flags
+                    </label>
+                  </div>
+                </div>
+
+                <div class="col-sm-2 col-xs-4">
                   <div class="form-group">
                     <button type="submit" class="center-block btn btn-warning">
                       End Game
