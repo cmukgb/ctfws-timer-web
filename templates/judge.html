@@ -104,7 +104,8 @@
             <div class="col-sm-3 col-xs-12">
               <div class="form-group">
                 <label class="sr-only" for="startTimeInput">
-                  Start timestamp</label>
+                  Start timestamp
+                </label>
                 <input type="text" class="form-control" id="startTimeInput"
                     name="start_timestamp" placeholder="Start timestamp">
               </div>
@@ -257,21 +258,41 @@
 
         <hr class="hr-below-form">
 
-        <div class="row vertical-center">
-          <div class="col-xs-6">
+        <div class="row row-small-gutter vertical-center">
+          <div class="col-sm-9 col-xs-12">
             <form class="form-ajax-submit" method="post"
                 action="{% url 'judge' %}">
               {% csrf_token %}
-              <div class="form-group">
-                <button type="submit" class="center-block btn btn-warning">
-                  End Game
-                </button>
+              <div class="row row-small-gutter vertical-center">
+
+                <div class="col-sm-6 col-xs-8">
+                  <div class="form-group">
+                    <label class="sr-only" for="endTimeInput">
+                      End timestamp
+                    </label>
+                    <input type="text" class="form-control" id="endTimeInput"
+                        name="end_timestamp" placeholder="End timestamp">
+                  </div>
+                </div>
+
+                <div class="col-sm-3 col-xs-4">
+                  <div class="form-group">
+                    <button type="submit" class="center-block btn btn-warning">
+                      End Game
+                    </button>
+                  </div>
+                </div>
+
               </div>
               <input type="hidden" name="command" value="end_game">
             </form>
           </div>
 
-          <div class="col-xs-6">
+          <div class="col-xs-12 visible-xs">
+            <hr class="hr-below-form">
+          </div>
+
+          <div class="col-sm-3 col-xs-12">
             <form class="form-ajax-submit" method="post"
                 action="{% url 'judge' %}">
               {% csrf_token %}
