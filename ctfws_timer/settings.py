@@ -17,16 +17,17 @@ from django.urls import reverse_lazy
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = False
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '#l5u0#j58v96)70b&g=@aa)sd&xj)5r7xs3$9x1@eh#=wq@y4*'
+if DEBUG:
+    SECRET_KEY = '#l5u0#j58v96)70b&g=@aa)sd&xj)5r7xs3$9x1@eh#=wq@y4*'
+else:
+    with open(os.path.join(BASE_DIR, 'secret_key.txt')) as f:
+        SECRET_KEY = f.read().strip()
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [] if DEBUG else ['.cmukgb.org'] # Allow any subdomain
 
 
 # Application definition
@@ -121,6 +122,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATIC_ROOT = '/var/www/ctfws-timer/static/'
+
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 
@@ -131,4 +134,13 @@ LOGIN_REDIRECT_URL = reverse_lazy('judge')
 LOGIN_URL = reverse_lazy('login')
 
 LOGOUT_REDIRECT_URL = reverse_lazy('index')
+
+
+# HTTPS
+
+CSRF_COOKIE_SECURE = not DEBUG # Use secure cookie in production
+
+# SESSION_COOKIE_SECURE = not DEBUG # Use secure sessions in production
+
+X_FRAME_OPTIONS = 'DENY'
 
