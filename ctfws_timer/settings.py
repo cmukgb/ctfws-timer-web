@@ -28,7 +28,7 @@ else:
         SECRET_KEY = f.read().strip()
 
 # The leading dots allow for any subdomain
-ALLOWED_HOSTS = ['.cmukgb.org', '.kgb.cmu.io']
+ALLOWED_HOSTS = ['.cmukgb.org', '.kgb.cmu.io', '.kgb.club.cc.cmu.edu']
 if DEBUG:
     ALLOWED_HOSTS += ['localhost', '127.0.0.1', '[::1]']
 
