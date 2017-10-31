@@ -2,6 +2,8 @@
 
 {% block scripts %}
     <script>
+      var totalsLocked = true; // Whether the stuff count totals are disabled
+
       function postForm(e) {
         e.preventDefault(); // Prevent normal form submission
 
@@ -24,7 +26,7 @@
       }
 
       function updateInputColor() {
-        var cell = $(this).parent()
+        var cell = $(this).parent();
         var inputs = cell.children("input");
         var topStr = $.trim(inputs[0].value);
         var bottomStr = $.trim(inputs[1].value);
@@ -51,11 +53,47 @@
         });
       }
 
+      function clearStuffFormCounts() {
+        $("#stuffTables td").each(function () {
+          var numer = $("input", this).get(0); // Get the 1st input in the td
+          if (typeof numer !== "undefined") {
+            numer.value = "";
+            $(numer).trigger("input");
+          }
+        });
+      }
+
+      function toggleStuffTotalsLock() {
+        totalsLocked = !totalsLocked;
+        updateStuffTotalsDisabledState();
+      }
+
+      function updateStuffTotalsDisabledState() {
+        $("#stuffTables td").each(function () {
+          var denom = $("input", this).get(1); // Get the 2nd input in the td
+          if (typeof denom !== "undefined") {
+            if (totalsLocked) {
+              $(denom).attr("disabled", "");
+            } else {
+              $(denom).removeAttr("disabled");
+            }
+          }
+        });
+        if (totalsLocked) {
+          $("#lockUnlockText").text("Unlock");
+        } else {
+          $("#lockUnlockText").text("Lock");
+        }
+      }
+
       $(document).ready(function () {
         $(".form-ajax-submit").submit(postForm);
         $(".form-no-submit").submit(function (e) {e.preventDefault();});
-        $("#saveTotalsButton").click(postStuffForm)
-        $("#stuffTables input").on("input", updateInputColor)
+        $("#stuffTables input").on("input", updateInputColor);
+        $("#clearCountsButton").click(clearStuffFormCounts);
+        $("#lockTotalsButton").click(toggleStuffTotalsLock);
+        $("#saveTotalsButton").click(postStuffForm);
+        updateStuffTotalsDisabledState(); // Update based on the initial value
       });
     </script>
 {% endblock %}
@@ -595,10 +633,30 @@
           </div>
 
           <div class="row vertical-center">
-            <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+            <div class="col-xs-6">
+              <div class="form-group">
+                <button id="clearCountsButton" type="button"
+                    class="btn btn-warning center-block">
+                  Clear Counts
+                </button>
+              </div>
+            </div>
+
+            <div class="col-xs-6">
+              <div class="form-group">
+                <button id="lockTotalsButton" type="button"
+                    class="btn btn-info center-block">
+                  <span id="lockUnlockText"></span> Totals
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="row vertical-center">
+            <div class="col-xs-12">
               <button id="saveTotalsButton" type="button"
                   class="btn btn-primary center-block">
-                Save Count Totals
+                Save Totals
               </button>
               <p id="saveTotalsResult" class="text-center"></p>
               <p class="text-center help-block">
