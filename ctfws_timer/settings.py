@@ -28,7 +28,9 @@ else:
         SECRET_KEY = f.read().strip()
 
 # The leading dots allow for any subdomain
-ALLOWED_HOSTS = [] if DEBUG else ['.cmukgb.org', '.kgb.cmu.io']
+ALLOWED_HOSTS = ['.cmukgb.org', '.kgb.cmu.io']
+if DEBUG:
+    ALLOWED_HOSTS += ['localhost', '127.0.0.1', '[::1]']
 
 
 # Application definition
@@ -139,7 +141,7 @@ LOGOUT_REDIRECT_URL = reverse_lazy('index')
 
 # HTTPS
 
-CSRF_COOKIE_SECURE = not DEBUG # Use secure cookie in production
+# CSRF_COOKIE_SECURE = not DEBUG # Use secure cookie in production
 
 # SESSION_COOKIE_SECURE = not DEBUG # Use secure sessions in production
 
