@@ -2,3 +2,4 @@
 password.txt
 secret_key.txt
 __pycache__
+db.sqlite3
