@@ -27,7 +27,8 @@ else:
     with open(os.path.join(BASE_DIR, 'secret_key.txt')) as f:
         SECRET_KEY = f.read().strip()
 
-ALLOWED_HOSTS = [] if DEBUG else ['.cmukgb.org'] # Allow any subdomain
+# The leading dots allow for any subdomain
+ALLOWED_HOSTS = [] if DEBUG else ['.cmukgb.org', '.kgb.cmu.io']
 
 
 # Application definition
