@@ -4,8 +4,23 @@
     <script>
       function postForm(e) {
         e.preventDefault(); // Prevent normal form submission
-        $.post($(this).attr("action"), $(this).serialize());
-        $(this)[0].reset(); // Use [0] to get the underlying DOM object
+
+        var error = false;
+
+        // Check each element within the form that has class input-required
+        $(".input-required", this).each(function () {
+          if ($.trim(this.value) === "") {
+            error = true;
+            $(this).closest(".form-group").addClass("has-error");
+          } else {
+            $(this).closest(".form-group").removeClass("has-error");
+          }
+        });
+
+        if (!error) {
+          $.post($(this).attr("action"), $(this).serialize());
+          $(this)[0].reset(); // Use [0] to get the underlying DOM object
+        }
       }
 
       function updateInputColor() {
@@ -102,7 +117,7 @@
 
             <div class="col-sm-3 col-xs-12">
               <div class="form-group">
-                <label class="sr-only" for="startTimeInput">
+                <label class="control-label sr-only" for="startTimeInput">
                   Start timestamp
                 </label>
                 <input type="text" class="form-control" id="startTimeInput"
@@ -111,20 +126,28 @@
             </div>
 
             <div class="col-sm-3 col-xs-6">
-              <div class="form-group">
-                <label class="sr-only" for="numFlagsInput">
+              <div class="form-group has-feedback">
+                <label class="control-label sr-only" for="numFlagsInput">
                   Number of flags
                 </label>
-                <input type="text" class="form-control" id="numFlagsInput"
-                    name="num_flags" placeholder="Number of flags">
+                <input type="text" class="form-control input-required"
+                    id="numFlagsInput" name="num_flags"
+                    placeholder="Number of flags">
+                <span class="glyphicon glyphicon-remove form-control-feedback"
+                    aria-hidden="true"></span>
               </div>
             </div>
 
             <div class="col-sm-3 col-xs-6">
-              <div class="form-group">
-                <label class="sr-only" for="gameNumInput">Game number</label>
-                <input type="text" class="form-control" id="gameNumInput"
-                    name="game_num" placeholder="Game number">
+              <div class="form-group has-feedback">
+                <label class="control-label sr-only" for="gameNumInput">
+                  Game number
+                </label>
+                <input type="text" class="form-control input-required"
+                    id="gameNumInput" name="game_num"
+                    placeholder="Game number">
+                <span class="glyphicon glyphicon-remove form-control-feedback"
+                    aria-hidden="true"></span>
               </div>
             </div>
 
@@ -152,24 +175,28 @@
                 <div class="col-sm-9 col-xs-12">
                   <div class="row row-small-gutter vertical-center">
                     <div class="col-xs-6">
-                      <div class="form-group">
-                        <label class="sr-only" for="redFlagsInput">
+                      <div class="form-group has-feedback">
+                        <label class="control-label sr-only" for="redFlagsInput">
                           Red score
                         </label>
-                        <input type="text" class="form-control"
+                        <input type="text" class="form-control input-required"
                             id="redFlagsInput" name="red_flags"
                             placeholder="Red score">
+                        <span class="glyphicon glyphicon-remove form-control-feedback"
+                            aria-hidden="true"></span>
                       </div>
                     </div>
 
                     <div class="col-xs-6">
-                      <div class="form-group">
-                        <label class="sr-only" for="yellowFlagsInput">
+                      <div class="form-group has-feedback">
+                        <label class="control-label sr-only" for="yellowFlagsInput">
                           Yellow score
                         </label>
-                        <input type="text" class="form-control"
+                        <input type="text" class="form-control input-required"
                             id="yellowFlagsInput" name="yellow_flags"
                             placeholder="Yellow score">
+                        <span class="glyphicon glyphicon-remove form-control-feedback"
+                            aria-hidden="true"></span>
                       </div>
                     </div>
                   </div>
@@ -211,7 +238,7 @@
             <div class="col-sm-9 col-xs-12">
               <div class="row row-small-gutter vertical-center">
                 <div class="form-group col-xs-6">
-                  <label class="sr-only" for="messageTimeInput">
+                  <label class="control-label sr-only" for="messageTimeInput">
                     Message timestamp
                   </label>
                   <input type="text" class="form-control" id="messageTimrInput"
@@ -237,7 +264,7 @@
 
               <div class="row row-small-gutter">
                 <div class="form-group col-xs-12">
-                  <label class="sr-only" for="messageInput">Message</label>
+                  <label class="control-label sr-only" for="messageInput">Message</label>
                   <input type="text" class="form-control" id="messageInput"
                       name="message" placeholder="Message">
                 </div>
@@ -267,7 +294,7 @@
 
                 <div class="col-sm-5 col-xs-5">
                   <div class="form-group">
-                    <label class="sr-only" for="endTimeInput">
+                    <label class="control-label sr-only" for="endTimeInput">
                       End timestamp
                     </label>
                     <input type="text" class="form-control" id="endTimeInput"
