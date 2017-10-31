@@ -3,8 +3,10 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import user_passes_test
 from django.forms import modelform_factory
 
+import os
 from subprocess import call
 
+from ctfws_timer import settings
 from .models import StuffCount
 
 StuffCountForm = modelform_factory(StuffCount, fields='__all__')
@@ -16,29 +18,39 @@ def user_is_judge(user):
     return user.groups.filter(name='judges').exists()
 
 def get_args(post):
+
+    base_dir = settings.BASE_DIR
+    no_game = os.path.join(base_dir, 'scripts', 'no_game.sh')
+    start_game = os.path.join(base_dir, 'scripts', 'start_game.sh')
+    end_game = os.path.join(base_dir, 'scripts', 'end_game.sh')
+    set_flags = os.path.join(base_dir, 'scripts', 'set_flags.sh')
+    send_message = os.path.join(base_dir, 'scripts', 'send_message.sh')
+    send_player_message = os.path.join(base_dir, 'scripts', 'send_player_message.sh')
+    send_jail_message = os.path.join(base_dir, 'scripts', 'send_jail_message.sh')
+
     com = post['command']
     if com == 'no_game':
-        return ['scripts/no_game.sh']
+        return [no_game]
     elif com == 'end_game':
-        result = ['scripts/end_game.sh']
+        result = [end_game]
         if 'hide_flags' in post and post['hide_flags'] == 'on':
             result += ['--hide-flags']
         if 'end_timestamp' in post and post['end_timestamp'] != '':
             result += [post['end_timestamp']]
         return result
     elif com == 'set_flags_hidden':
-        return ['scripts/set_flags.sh', '?']
+        return [set_flags, '?']
     elif com == 'set_flags_number':
         red = post['red_flags']
         yellow = post['yellow_flags']
-        return ['scripts/set_flags.sh', red + ' ' + yellow]
+        return [set_flags, red + ' ' + yellow]
     elif com == 'send_message':
         if post['message_type'] == 'both':
-            result = ['scripts/send_message.sh']
+            result = [send_message]
         elif post['message_type'] == 'players':
-            result = ['scripts/send_player_message.sh']
+            result = [send_player_message]
         elif post['message_type'] == 'jail':
-            result = ['scripts/send_jail_message.sh']
+            result = [send_jail_message]
         else:
             return None
         result += [post['message']]
@@ -46,7 +58,7 @@ def get_args(post):
             result += [post['message_timestamp']]
         return result
     elif com == 'start_game':
-        result = ['scripts/start_game.sh', post['num_flags'], post['game_num']]
+        result = [start_game, post['num_flags'], post['game_num']]
         if 'start_timestamp' in post and post['start_timestamp'] != '':
             result += [post['start_timestamp']]
         return result
