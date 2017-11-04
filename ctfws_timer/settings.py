@@ -18,7 +18,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 # SECURITY WARNING: keep the secret key used in production secret!
 if DEBUG:
@@ -139,11 +139,13 @@ LOGIN_URL = reverse_lazy('login')
 LOGOUT_REDIRECT_URL = reverse_lazy('index')
 
 
-# HTTPS
+# HTTPS (not set up on the server config)
 
 # CSRF_COOKIE_SECURE = not DEBUG # Use secure cookie in production
 
 # SESSION_COOKIE_SECURE = not DEBUG # Use secure sessions in production
+
+# SECURE_SSL_REDIRECT = not DEBUG # Use SSL in production
 
 X_FRAME_OPTIONS = 'DENY'
 
