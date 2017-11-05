@@ -16,7 +16,7 @@ then
   exit 1
 else
   m="$1"
-  mosquitto_pub -h kgb.club.cc.cmu.edu -u ctfwsmaster -P $(cat "$password_file") -q 1 -r -t ctfws/game/flags -m "$m"
+  mosquitto_pub -h kgb.club.cc.cmu.edu -u ctfwsmaster -P $(cat "$password_file") -q 1 -r -t ctfws/game/flags -m "$m" &&
   echo "Set flags to $m"
 fi
 

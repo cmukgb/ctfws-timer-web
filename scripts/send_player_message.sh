@@ -19,7 +19,7 @@ else
     d=$(date +%s)
   fi
   m="$d $1"
-  mosquitto_pub -h kgb.club.cc.cmu.edu -u ctfwsmaster -P $(cat "$password_file") -q 1 -r -t ctfws/game/message/player -m "$m"
+  mosquitto_pub -h kgb.club.cc.cmu.edu -u ctfwsmaster -P $(cat "$password_file") -q 1 -r -t ctfws/game/message/player -m "$m" &&
   echo "Sent player message at $d"
 fi
 
