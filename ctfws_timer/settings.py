@@ -30,7 +30,7 @@ else:
 # The leading dots allow for any subdomain
 ALLOWED_HOSTS = ['.cmukgb.org', '.kgb.cmu.io', '.kgb.club.cc.cmu.edu']
 if DEBUG:
-    ALLOWED_HOSTS += ['localhost', '127.0.0.1', '[::1]']
+    ALLOWED_HOSTS += ['localhost', '127.0.0.1', '[::1]', '.local']
 
 
 # Application definition
