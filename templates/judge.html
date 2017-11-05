@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 
 {% block scripts %}
+    <!-- Inserts a <script> containing all the MQTT JavaScript common to this
+         and the timer page -->
+    {% include "mqtt.html" %}
+
     <script>
       var totalsLocked = true; // Whether the stuff count totals are disabled
 
@@ -21,7 +25,7 @@
 
         if (!error) {
           $.post($(this).attr("action"), $(this).serialize());
-          $(this)[0].reset(); // Use [0] to get the underlying DOM object
+          // $(this)[0].reset(); // Use [0] to get the underlying DOM object
         }
       }
 
@@ -86,14 +90,105 @@
         }
       }
 
+      // Show the spans for the selected message type and hide the other spans
+      function showCurrentMessageSpans() {
+        $("#playerMessageTimeSpan").addClass("hidden");
+        $("#jailMessageTimeSpan").addClass("hidden");
+        $("#bothMessageTimeSpan").addClass("hidden");
+        $("#playerMessageSpan").addClass("hidden");
+        $("#jailMessageSpan").addClass("hidden");
+        $("#bothMessageSpan").addClass("hidden");
+        $("#" + this.value + "MessageTimeSpan").removeClass("hidden");
+        $("#" + this.value + "MessageSpan").removeClass("hidden");
+      }
+
+      // Called when a message arrives
+      function onMessageArrived(message) {
+        console.log("onMessageArrived: " + message.destinationName + ": " +
+            message.payloadString);
+
+        var msg = message.payloadString;
+        var topic = message.destinationName.substring(11);
+        switch (topic) {
+          case 'config':
+            if (msg === "none") {
+              $("#startTimeSpan").text("none");
+              $("#numFlagsSpan").text("");
+              $("#gameNumSpan").text("");
+            } else {
+              var split = splitOnWhitespace(msg, 6);
+              $("#startTimeSpan").text(split[0]);
+              $("#numFlagsSpan").text(split[4]);
+              $("#gameNumSpan").text(split[5]);
+            }
+            break;
+          case 'flags':
+            if (msg === "?") {
+              $("#hiddenFlagsSpan").text("?");
+              $("#redFlagsSpan").text("");
+              $("#yellowFlagsSpan").text("");
+            } else {
+              var split = splitOnWhitespace(msg, 2);
+              $("#hiddenFlagsSpan").text("");
+              $("#redFlagsSpan").text(split[0]);
+              $("#yellowFlagsSpan").text(split[1]);
+            }
+            break;
+          case 'endtime':
+            $("#endTimeSpan").text(msg);
+            break;
+          // In all three message cases, append a non-breaking space so that
+          // empty messages don't change the page layout.
+          case 'message':
+            var split = splitOnFirstWhitespace(msg);
+            $("#bothMessageTimeSpan").text(split[0]);
+            $("#bothMessageSpan").text(split[1]);
+            $("#bothMessageSpan").append("&nbsp;");
+            break;
+          case 'message/player':
+            var split = splitOnFirstWhitespace(msg);
+            $("#playerMessageTimeSpan").text(split[0]);
+            $("#playerMessageSpan").text(split[1]);
+            $("#playerMessageSpan").append("&nbsp;");
+            break;
+          case 'message/jail':
+            var split = splitOnFirstWhitespace(msg);
+            $("#jailMessageTimeSpan").text(split[0]);
+            $("#jailMessageSpan").text(split[1]);
+            $("#jailMessageSpan").append("&nbsp;");
+            break;
+          default:
+            console.log("Unknown topic: " + message.destinationName);
+        }
+      }
+
       $(document).ready(function () {
+        // Form submit actions
         $(".form-ajax-submit").submit(postForm);
         $(".form-no-submit").submit(function (e) {e.preventDefault();});
+
+        // Message type changes
+        $("input[name='message_type']").change(showCurrentMessageSpans);
+
+        // Stuf table cell coloring
         $("#stuffTables input").on("input", updateInputColor);
+
+        // Stuff table buttons
         $("#clearCountsButton").click(clearStuffFormCounts);
         $("#lockTotalsButton").click(toggleStuffTotalsLock);
         $("#saveTotalsButton").click(postStuffForm);
         updateStuffTotalsDisabledState(); // Update based on the initial value
+
+        // MQTT
+        //   Create a client instance - this variable is intentionally global
+        client = new Paho.MQTT.Client(hostname, clientId + "_judge");
+        //   Set callback handlers
+        client.onConnectionLost = onConnectionLost;
+        client.onMessageArrived = onMessageArrived;
+        //   Connect the client
+        client.connect({onSuccess:onConnect,onFailure:onConnectFail});
+
+        console.log("Finished setup");
       });
     </script>
 {% endblock %}
@@ -140,18 +235,23 @@
       <div class="col-lg-offset-3 col-lg-6 col-md-offset-2 col-md-8
           col-sm-offset-1 col-sm-10 col-xs-12">
 
-        <div class="row vertical-center">
+        <div class="row">
           <div class="col-xs-12">
             <p class="text-center help-block">
+              The current server value of each field is shown below it's input
+              box.
+              <br>
               Leave any timestamp blank to use the current server time when the
               command is run.
             </p>
           </div>
         </div>
 
+        <hr class="hr-below-form">
+
         <form class="form-ajax-submit" method="post" action="{% url 'judge' %}">
           {% csrf_token %}
-          <div class="row row-small-gutter vertical-center">
+          <div class="row row-small-gutter">
 
             <div class="col-sm-3 col-xs-12">
               <div class="form-group">
@@ -160,6 +260,7 @@
                 </label>
                 <input type="text" class="form-control" id="startTimeInput"
                     name="start_timestamp" placeholder="Start timestamp">
+                <p id="startTimeSpan" class="judge-value text-center"></p>
               </div>
             </div>
 
@@ -173,6 +274,7 @@
                     placeholder="Number of flags">
                 <span class="glyphicon glyphicon-remove form-control-feedback"
                     aria-hidden="true"></span>
+                <p id="numFlagsSpan" class="judge-value text-center"></p>
               </div>
             </div>
 
@@ -186,6 +288,7 @@
                     placeholder="Game number">
                 <span class="glyphicon glyphicon-remove form-control-feedback"
                     aria-hidden="true"></span>
+                <p id="gameNumSpan" class="judge-value text-center"></p>
               </div>
             </div>
 
@@ -203,15 +306,15 @@
 
         <hr class="hr-below-form">
 
-        <div class="row row-small-gutter vertical-center">
+        <div class="row row-small-gutter">
           <div class="col-sm-9 col-xs-12">
             <form class="form-ajax-submit" method="post"
                 action="{% url 'judge' %}">
               {% csrf_token %}
-              <div class="row row-small-gutter vertical-center">
+              <div class="row row-small-gutter">
 
                 <div class="col-sm-9 col-xs-12">
-                  <div class="row row-small-gutter vertical-center">
+                  <div class="row row-small-gutter">
                     <div class="col-xs-6">
                       <div class="form-group has-feedback">
                         <label class="control-label sr-only" for="redFlagsInput">
@@ -222,6 +325,7 @@
                             placeholder="Red score">
                         <span class="glyphicon glyphicon-remove form-control-feedback"
                             aria-hidden="true"></span>
+                        <p id="redFlagsSpan" class="judge-value text-center"></p>
                       </div>
                     </div>
 
@@ -235,9 +339,15 @@
                             placeholder="Yellow score">
                         <span class="glyphicon glyphicon-remove form-control-feedback"
                             aria-hidden="true"></span>
+                        <p id="yellowFlagsSpan" class="judge-value text-center"></p>
                       </div>
                     </div>
                   </div>
+
+                  <p id="hiddenFlagsSpan"
+                    class="judge-value-hidden text-center">
+                  </p>
+
                 </div>
 
                 <div class="col-sm-3 col-xs-12">
@@ -281,11 +391,20 @@
                   </label>
                   <input type="text" class="form-control" id="messageTimrInput"
                       name="message_timestamp" placeholder="Message timestamp">
+                  <p id="playerMessageTimeSpan"
+                    class="hidden judge-value text-center">
+                  </p>
+                  <p id="jailMessageTimeSpan"
+                    class="hidden judge-value text-center">
+                  </p>
+                  <p id="bothMessageTimeSpan"
+                    class="judge-value text-center">
+                  </p>
                 </div>
 
                 <div class="form-group text-center col-xs-6">
                   <label class="radio-inline">
-                    <input type="radio" name="message_type" value="players">
+                    <input type="radio" name="message_type" value="player">
                     Players
                   </label>
                   <label class="radio-inline">
@@ -305,6 +424,15 @@
                   <label class="control-label sr-only" for="messageInput">Message</label>
                   <input type="text" class="form-control" id="messageInput"
                       name="message" placeholder="Message">
+                  <p id="playerMessageSpan"
+                    class="hidden judge-value text-center">
+                  </p>
+                  <p id="jailMessageSpan"
+                    class="hidden judge-value text-center">
+                  </p>
+                  <p id="bothMessageSpan"
+                    class="judge-value text-center">
+                  </p>
                 </div>
               </div>
             </div>
@@ -337,6 +465,7 @@
                     </label>
                     <input type="text" class="form-control" id="endTimeInput"
                         name="end_timestamp" placeholder="End timestamp">
+                    <p id="endTimeSpan" class="judge-value text-center"></p>
                   </div>
                 </div>
 

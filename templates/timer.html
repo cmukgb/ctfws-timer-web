@@ -3,8 +3,12 @@
 {% load static %}
 
 {% block scripts %}
-    <!-- ServerDate JavaScript served from the same place as this file -->
+    <!-- ServerDate JavaScript served from the same server as this file -->
     <script src="{% static 'ServerDate.js' %}"></script>
+
+    <!-- Inserts a <script> containing all the MQTT JavaScript common to this
+         and the judges page -->
+    {% include "mqtt.html" %}
 
     <script>
       // Timing constants
@@ -13,10 +17,6 @@
       var clockOffsetInitialChecks = [1, 2, 3, 5, 10, 15, 30]; // seconds
       var clockOffsetInterval = 60 * 1000; // ms
       var clockOffsetThreshold = 15; // seconds
-
-      // MQTT config
-      var hostname = "ws://kgb.club.cc.cmu.edu:1884/mqtt";
-      var clientId = "cmukgb_webapp_" + Math.random().toString(16).substr(2, 8);
 
       // If useWords, then convert seconds to
       // "[minus ][H hr[s]][M min[s]]S sec[s]"
@@ -319,47 +319,6 @@
         updateUI();
       }
 
-      // Called when the client connects
-      function onConnect() {
-        // Once a connection has been made, subscribe to all topics.
-        console.log("onConnect");
-        client.subscribe("ctfws/game/#");
-      }
-
-      // Called if the client can't connect
-      function onConnectFail(failureObject) {
-        console.log("onConnectFail: " + failureObject);
-      }
-
-      // Called when the client loses its connection
-      function onConnectionLost(responseObject) {
-        if (responseObject.errorCode !== 0) {
-          console.log("onConnectionLost: " + responseObject.errorMessage);
-        }
-      }
-
-      // Split a string into an array, splitting on whitespace
-      // Also check that the resulting array has the expected length
-      function splitOnWhitespace(str, expectedLen) {
-        var a = str.split(/\s+/);
-        if (a.length != expectedLen) {
-          console.log("Message does not have the expected number of fields (" +
-              expectedLen + "): " + str);
-          throw "wrong number of fields";
-        }
-        return a;
-      }
-
-      function splitOnFirstWhitespace(str) {
-        var newStr = str.replace(/\s+/, ' ');
-        var index = newStr.indexOf(' ');
-        if (index === -1) {
-          console.log("Message cannot be split on whitespace: " + str);
-          throw "cannot split message";
-        }
-        return [newStr.substring(0, index), newStr.substring(index + 1)];
-      }
-
       function compare_messages(a, b) {
         return a[0] - b[0];
       }
@@ -447,11 +406,6 @@
           updateUIIntervalObject = setInterval(updateUI, updateUIIntervalTime);
         }
       }
-
-      $(window).unload(function() {
-        console.log("Disconnecting on window close");
-        client.disconnect();
-      });
 
       $(document).ready(function() {
         // Mobile Safari has a bug that prevents popovers from closing when the

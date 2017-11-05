@@ -47,7 +47,7 @@ def get_args(post):
     elif com == 'send_message':
         if post['message_type'] == 'both':
             result = [send_message]
-        elif post['message_type'] == 'players':
+        elif post['message_type'] == 'player':
             result = [send_player_message]
         elif post['message_type'] == 'jail':
             result = [send_jail_message]
