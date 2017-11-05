@@ -124,8 +124,8 @@
       }
 
       // UI const variables
-      var redFlagsText = "Red has captured: ";
-      var yellowFlagsText = "Yellow has captured: ";
+      var redFlagsText = "Red has: ";
+      var yellowFlagsText = "Yellow has: ";
       var flagsText = "Total per side: ";
 
       // UI state variables
@@ -340,10 +340,10 @@
               var setup = parseInt(split[1]);
               var rounds = parseInt(split[2]);
               var roundlen = parseInt(split[3]);
-              var flags = parseInt(split[4]);
-              var game = parseInt(split[5]);
+              var flags = split[4];
+              var game = split[5];
               if (!isNaN(start) && !isNaN(setup) && !isNaN(rounds) &&
-                  !isNaN(roundlen) && !isNaN(flags) && !isNaN(game)) {
+                  !isNaN(roundlen)) {
                 gameStarttime = start;
                 setupDuration = setup;
                 numRounds = rounds;
@@ -473,7 +473,7 @@
         <p id="startTimeLabel" class="lead text-center"></p>
         <p id="offsetLabel" class="hidden text-muted text-center">
           <strong>Note:</strong> Your clock is
-          <span id="offsetAheadBehind"><!-- ahead of / behind--></span>
+          <span id="offsetAheadBehind"><!-- ahead of / behind --></span>
           the game's by <span id="offsetAmount"></span>.
           <a id="offsetPopover" tabindex="0" role="button"
             data-toggle="popover" data-trigger="focus" data-placement="auto"
@@ -588,6 +588,16 @@
     <div class="row vertical-center">
 
       <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+        <p class="text-muted text-center">
+          Note: The head judge may choose to report a score for each team
+          rather than a number of flags.
+        </p>
+      </div>
+
+    </div>
+    <div class="row vertical-center">
+
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
         <h3 id="flagsHeader" class="text-center">Total per side: 0</h3>
       </div>
 
@@ -596,13 +606,13 @@
 
       <div class="col-sm-offset-1 col-sm-5 col-xs-6">
         <h3 id="redFlagsHeader" class="text-center text-danger">
-          Red has captured: 0
+          Red has: 0
         </h3>
       </div>
 
       <div class="col-sm-5 col-xs-6">
         <h3 id="yellowFlagsHeader" class="text-center text-warning">
-          Yellow has captured: 0
+          Yellow has: 0
         </h3>
       </div>
 
