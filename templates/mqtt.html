@@ -46,10 +46,5 @@
     }
     return [newStr.substring(0, index), newStr.substring(index + 1)];
   }
-
-  $(window).unload(function() {
-    console.log("Disconnecting on window close");
-    client.disconnect();
-  });
 </script>
 
