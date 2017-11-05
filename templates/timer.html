@@ -277,7 +277,7 @@
         var firstRow = '<tr><th class="col-sm-2 col-xs-2">Time<\/th>' +
           '<th>Message<\/th><\/tr>';
         $("#messageTable").html(firstRow);
-        for (i = gameMessages.length - 1; i >= 0; i--) {
+        for (var i = gameMessages.length - 1; i >= 0; i--) {
           var secs = gameMessages[i][0];
           var time = (new Date(secs * 1000)).toLocaleTimeString();
           var color = "";
@@ -319,8 +319,17 @@
         updateUI();
       }
 
-      function compare_messages(a, b) {
+      function compareMessages(a, b) {
         return a[0] - b[0];
+      }
+
+      function messageInList(msg, msgList) {
+        for (var i = 0; i < msgList.length; i++) {
+          if (msg[0] === msgList[i][0] && msg[1] === msgList[i][1]) {
+            return true;
+          }
+        }
+        return false;
       }
 
       // Called when an MQTT message arrives
@@ -385,9 +394,9 @@
             var split = splitOnFirstWhitespace(msg);
             var secs = parseInt(split[0]);
             var body = split[1];
-            if (!isNaN(secs)) {
+            if (!isNaN(secs) && !messageInList([secs, body], gameMessages)) {
               gameMessages.push([secs, body]);
-              gameMessages = gameMessages.sort(compare_messages);
+              gameMessages = gameMessages.sort(compareMessages);
             } else {
               console.log("Unknown message message: " + msg);
             }

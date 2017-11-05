@@ -1,10 +1,13 @@
+{# This comment helps vim figure out this is a Django HTML file type #}
 <!-- This HTML file contains the MQTT Paho JavaScript library and one
      additional <script> element which contains all the MQTT JavaScript common
      to the timer page and judges page. It is meant to be inserted into each of
      those pages using the Django include tag. -->
 
-<!-- Latest compiled and minified MQTT Paho JavaScript -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
+{% load static %}
+
+<!-- Compiled and minified MQTT Paho JavaScript -->
+<script src="{% static 'paho-mqtt-min.js' %}"></script>
 
 <script>
   // The global object for the MQTT connection
@@ -74,7 +77,8 @@
     mqttClient.onMessageArrived = onMessageArrived;
 
     // Connect the client
-    mqttClient.connect({onSuccess:onConnectSuccess,onFailure:onConnectFailure});
+    mqttClient.connect({onSuccess:onConnectSuccess, onFailure:onConnectFailure,
+      reconnect:true});
   }
 </script>
 
