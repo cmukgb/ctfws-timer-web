@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.forms import modelform_factory
 
 import os
-from subprocess import call
+import subprocess
 
 from ctfws_timer import settings
 from .models import StuffCount
@@ -79,15 +79,18 @@ def judge(request):
             form = StuffCountForm(request.POST, instance=totals)
             if form.is_valid():
                 form.save()
+                return HttpResponse()
             else:
                 return HttpResponse('Invalid data', status=500)
         else:
             args = get_args(request.POST)
             if args is None:
                 return HttpResponse('Unknown command', status=500)
-            call(args)
-        return HttpResponse()
-
+            try:
+                output = subprocess.check_output(args, stderr=subprocess.STDOUT)
+                return HttpResponse(output)
+            except subprocess.CalledProcessError as err:
+                return HttpResponse(err.output, status=500)
     else:
         query = StuffCount.objects.all()
         if query.count() > 0:
