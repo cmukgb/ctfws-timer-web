@@ -148,7 +148,7 @@
       //   Messages
       var gameMessages = [];
 
-      // Function which updates the page based on the above variables
+      // Function which updates the page based on the UI state variables
       function updateUI() {
         var now = getServerNow();
 
@@ -323,7 +323,7 @@
         return a[0] - b[0];
       }
 
-      // Called when a message arrives
+      // Called when an MQTT message arrives
       function onMessageArrived(message) {
         console.log("onMessageArrived: " + message.destinationName + ": " +
             message.payloadString);
@@ -447,14 +447,10 @@
           }
         }, 3 * 1000); // 3 seconds
 
-        // MQTT
-        //   Create a client instance - this variable is intentionally global
-        client = new Paho.MQTT.Client(hostname, clientId);
-        //   Set callback handlers
-        client.onConnectionLost = onConnectionLost;
-        client.onMessageArrived = onMessageArrived;
-        //   Connect the client
-        client.connect({onSuccess:onConnect,onFailure:onConnectFail});
+        // Setup the MQTT client and connect. This function is defined in
+        // mqtt.html, which is included above. This defines mqttClient as the
+        // global variable for the client connection.
+        initMqtt();
 
         console.log("Finished setup");
       });

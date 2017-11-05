@@ -126,7 +126,7 @@
         $("#" + this.value + "MessageSpan").removeClass("hidden");
       }
 
-      // Called when a message arrives
+      // Called when an MQTT message arrives
       function onMessageArrived(message) {
         console.log("onMessageArrived: " + message.destinationName + ": " +
             message.payloadString);
@@ -203,14 +203,10 @@
         $("#saveTotalsButton").click(postStuffForm);
         updateStuffTotalsDisabledState(); // Update based on the initial value
 
-        // MQTT
-        //   Create a client instance - this variable is intentionally global
-        client = new Paho.MQTT.Client(hostname, clientId + "_judge");
-        //   Set callback handlers
-        client.onConnectionLost = onConnectionLost;
-        client.onMessageArrived = onMessageArrived;
-        //   Connect the client
-        client.connect({onSuccess:onConnect,onFailure:onConnectFail});
+        // Setup the MQTT client and connect. This function is defined in
+        // mqtt.html, which is included above. This defines mqttClient as the
+        // global variable for the client connection.
+        initMqtt();
 
         console.log("Finished setup");
       });
