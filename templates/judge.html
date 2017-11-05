@@ -8,6 +8,10 @@
     <script>
       var totalsLocked = true; // Whether the stuff count totals are disabled
 
+      function replaceNewlines(str) {
+        return str.trim().replace(/\n/g, "; ");
+      }
+
       function postForm(e) {
         e.preventDefault(); // Prevent normal form submission
 
@@ -24,7 +28,27 @@
         });
 
         if (!error) {
-          $.post($(this).attr("action"), $(this).serialize());
+          $("#commandResult").removeClass("text-success");
+          $("#commandResult").removeClass("text-danger");
+          $("#commandResult").addClass("text-primary");
+          $("#commandResult").text("Sending...");
+
+          var result = $.post($(this).attr("action"), $(this).serialize());
+
+          result.done(function (response) {
+            $("#commandResult").removeClass("text-primary");
+            $("#commandResult").addClass("text-success");
+            $("#commandResult").text(replaceNewlines(response));
+          });
+          result.fail(function (response) {
+            var errorMessage = replaceNewlines(response.responseText);
+            if (errorMessage === "") {
+              errorMessage = "Unknown error. (The server may be unreachable.)"
+            }
+            $("#commandResult").removeClass("text-primary");
+            $("#commandResult").addClass("text-danger");
+            $("#commandResult").text(errorMessage);
+          });
           // $(this)[0].reset(); // Use [0] to get the underlying DOM object
         }
       }
@@ -244,6 +268,7 @@
               Leave any timestamp blank to use the current server time when the
               command is run.
             </p>
+              <h4 id="commandResult" class="text-center">&nbsp;</h4>
           </div>
         </div>
 
