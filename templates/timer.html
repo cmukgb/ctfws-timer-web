@@ -10,13 +10,14 @@
          and the judges page -->
     {% include "mqtt.html" %}
 
+    <!-- Runtime + Compiler version of Vue from CDN. Should be vue.min.js in
+         production -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js"></script>
+
     <script>
       // Timing constants
       var updateUIIntervalTime = 500; // ms
       var serverDateLogInterval = 60 * 1000; // ms
-      var clockOffsetInitialChecks = [1, 2, 3, 5, 10, 15, 30]; // seconds
-      var clockOffsetInterval = 60 * 1000; // ms
-      var clockOffsetThreshold = 15; // seconds
 
       // If useWords, then convert seconds to
       // "[minus ][H hr[s]][M min[s]]S sec[s]"
@@ -91,21 +92,6 @@
           " ms");
       }
 
-      // Every clockOffsetInterval seconds, check if the server time is different from the
-      // client time by more than clockOffsetThreshhold seconds. If so, warn the user.
-      function checkServerDateOffset() {
-        var delta = getServerNow() - getClientNow(); // seconds
-        if (Math.abs(delta) > clockOffsetThreshold) {
-          var serverAhead = delta > 0;
-          delta = Math.abs(delta);
-          $("#offsetAmount").text(toHMSWords(delta));
-          $("#offsetAheadBehind").text(serverAhead ? "behind" : "ahead of");
-          $("#offsetLabel").removeClass("hidden");
-        } else {
-          $("#offsetLabel").addClass("hidden");
-        }
-      }
-
       // Sets the two spans which form the game header text field
       function setGameHeader(firstText, secondText, secondClass) {
         $("#gameHeader1").text(firstText);
@@ -124,8 +110,8 @@
       }
 
       // UI const variables
-      var redFlagsText = "Red has: ";
-      var yellowFlagsText = "Yellow has: ";
+      // var redFlagsText = "Red has: ";
+      // var yellowFlagsText = "Yellow has: ";
       var flagsText = "Total per side: ";
 
       // UI state variables
@@ -138,11 +124,11 @@
       var flagsPerTeam = 0;
       var gameNumber = 0;
       //   Stun Timer
-      var stunStart = 0;
+      // var stunStart = 0;
       //   Flags
       var showFlags = true;
-      var numRedFlags = 0;
-      var numYellowFlags = 0;
+      // var numRedFlags = 0;
+      // var numYellowFlags = 0;
       //   Endtime
       var gameEndtime = 0;
       //   Messages
@@ -150,6 +136,7 @@
 
       // Function which updates the page based on the UI state variables
       function updateUI() {
+        return;
         var now = getServerNow();
 
         // Config and Endtime
@@ -243,35 +230,35 @@
         // Stun Timer
         if (stunStart > 0) {
           // Stun active or over
-          $("#stunRow").removeClass("hidden");
-          var stunLength = 60
-          var secs = Math.min(now - stunStart, stunLength);
-          var percent = Math.round((100 * secs) / stunLength);
-          $("#stunBar").width(percent + "%");
-          $("#stunBarLabel").text(toHMS(secs) + " / " + toHMS(stunLength));
-          if (percent < 100) {
-            $("#cancelButton").text("Cancel");
-          } else {
-            $("#cancelButton").text("Done");
-          }
-          $("#stunButtonRow").addClass("hidden");
-          $("#cancelButtonRow").removeClass("hidden");
+          // $("#stunRow").removeClass("hidden");
+          // var stunLength = 60
+          // var secs = Math.min(now - stunStart, stunLength);
+          // var percent = Math.round((100 * secs) / stunLength);
+          // $("#stunBar").width(percent + "%");
+          // $("#stunBarLabel").text(toHMS(secs) + " / " + toHMS(stunLength));
+          // if (percent < 100) {
+          //   $("#cancelButton").text("Cancel");
+          // } else {
+          //   $("#cancelButton").text("Done");
+          // }
+          // $("#stunButtonRow").addClass("hidden");
+          // $("#cancelButtonRow").removeClass("hidden");
         } else {
           // No stun
-          $("#stunRow").addClass("hidden");
-          $("#cancelButtonRow").addClass("hidden");
-          $("#stunButtonRow").removeClass("hidden");
-          $("#stunBar").width("0%");
+          // $("#stunRow").addClass("hidden");
+          // $("#cancelButtonRow").addClass("hidden");
+          // $("#stunButtonRow").removeClass("hidden");
+          // $("#stunBar").width("0%");
         }
 
         // Flags
-        if (showFlags) {
-          $("#redFlagsHeader").text(redFlagsText + numRedFlags);
-          $("#yellowFlagsHeader").text(yellowFlagsText + numYellowFlags);
-        } else {
-          $("#redFlagsHeader").text(redFlagsText + "?");
-          $("#yellowFlagsHeader").text(yellowFlagsText + "?");
-        }
+        // if (showFlags) {
+          // $("#redFlagsHeader").text(redFlagsText + numRedFlags);
+          // $("#yellowFlagsHeader").text(yellowFlagsText + numYellowFlags);
+        // } else {
+          // $("#redFlagsHeader").text(redFlagsText + "?");
+          // $("#yellowFlagsHeader").text(yellowFlagsText + "?");
+        // }
 
         // Messages
         var firstRow = '<tr><th class="col-sm-2 col-xs-2">Time<\/th>' +
@@ -304,19 +291,6 @@
             gameMessages[i][1] + '<\/td><\/tr>';
           $("#messageTable").append(newRow);
         }
-      }
-
-      // Button functions
-      function clickStun() {
-        console.info("onStunButtonClick");
-        stunStart = getServerNow();
-        updateUI();
-      }
-
-      function clickCancel() {
-        console.info("onCancelButtonClick");
-        stunStart = 0;
-        updateUI();
       }
 
       function compareMessages(a, b) {
@@ -373,8 +347,8 @@
               var r = parseInt(split[0]);
               var y = parseInt(split[1]);
               if (!isNaN(r) && !isNaN(y)) {
-                numRedFlags = r;
-                numYellowFlags = y;
+                // numRedFlags = r;
+                // numYellowFlags = y;
                 showFlags = true;
               } else {
                 console.error("Unknown flag message: " + msg);
@@ -418,31 +392,14 @@
         }
       }
 
+      // New Vue constants
+      var updateNowIntervalTime = 500; // ms
+      var clockOffsetThreshold = 15; // seconds
+
       $(document).ready(function() {
-        // Mobile Safari has a bug that prevents popovers from closing when the
-        // user taps away from them. This can be fixed with the below CSS, but
-        // we only want to do this when needed because if the device does have
-        // a mouse, it makes the mouse always the "clickable" style pointer.
-        if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
-          $("body").css("cursor", "pointer");
-        }
-
-        // Enable the popover on the "What's this?" shown when there is a
-        // clock offset.
-        $("#offsetPopover").popover();
-
         // Log the ServerDate precision and delta
         logServerDate();
         setInterval(logServerDate, serverDateLogInterval);
-
-        // Check the clock offset and display if needed
-        checkServerDateOffset();
-        setInterval(checkServerDateOffset, clockOffsetInterval);
-        // Because it might take a few seconds to get the initial value, check
-        // frequently (e.g. 1,2,3,5,10,15,30) secs initially.
-        clockOffsetInitialChecks.forEach(function (secs) {
-          setTimeout(checkServerDateOffset, secs * 1000);
-        });
 
         // The UI looks cleanest if we don't update it until the MQTT client
         // has connected. So we give it 3 seconds connect before we set up the
@@ -451,7 +408,7 @@
         // and if it still connects after 3 seconds, it will not touch the
         // interval.
         updateUIIntervalObject = false; // Intentionally global
-        setTimeout(function () {
+        setTimeout(function() {
           if (updateUIIntervalObject === false) {
             updateUI();
             updateUIIntervalObject = setInterval(updateUI, updateUIIntervalTime);
@@ -462,6 +419,86 @@
         // mqtt.html, which is included above. This defines mqttClient as the
         // global variable for the client connection.
         initMqtt();
+
+        new Vue({
+          el: '#app',
+          delimiters: ['[[', ']]'],
+          data: {
+            serverNow: getServerNow(),
+            clientNow: getClientNow(),
+            showFlags: true,
+            numRedFlags: 13,
+            numYellowFlags: 13,
+            stunStart: 0,
+            stunLength: 5, // Fixed total length of stun
+          },
+          created: function() {
+            var vm = this;
+            setInterval(function() {
+              vm.serverNow = getServerNow();
+              vm.clientNow = getClientNow();
+            }, updateNowIntervalTime);
+          },
+          computed: {
+            serverClientDelta: function() {
+              return this.serverNow - this.clientNow;
+            },
+            serverClientAbsDelta: function() {
+              return Math.abs(this.serverClientDelta);
+            },
+            offsetShow: function() {
+              // Check if the server time is different from the client time by
+              // more than clockOffsetThreshhold seconds. If so, warn the user.
+              return this.serverClientAbsDelta > clockOffsetThreshold;
+            },
+            offsetAmount: function() {
+              return toHMSWords(this.serverClientAbsDelta);
+            },
+            offsetAheadBehind: function() {
+              var serverAhead = this.serverClientDelta > 0;
+              return serverAhead ? "behind" : "ahead of"
+            },
+            now: function() {
+              return this.serverNow;
+            },
+            stunElapsed: function() {
+              return Math.min(this.now - this.stunStart, this.stunLength);
+            },
+            stunPercent: function() {
+              return Math.round((100 * this.stunElapsed) / this.stunLength);
+            },
+          },
+          methods: {
+            toHMS: toHMS,
+            toHMSWords: toHMSWords,
+            clickStun: function() {
+              console.info("onStunButtonClick");
+              this.stunStart = this.now;
+            },
+            clickCancel: function() {
+              console.info("onCancelButtonClick");
+              this.stunStart = 0;
+            },
+          },
+          mounted: function() {
+            // All initial jQuery needs to be done in here, after Vue has set up
+            // the DOM
+
+            // Mobile Safari has a bug that prevents popovers from closing when
+            // the user taps away from them. This can be fixed with the below
+            // CSS, but we only want to do this when needed because if the
+            // device does have a mouse, it makes the mouse always the
+            // "clickable" style pointer.
+            if (/iPad|iPhone|iPod/.test(navigator.userAgent) &&
+                !window.MSStream) {
+              $("body").css("cursor", "pointer");
+            }
+
+            // Enable the popover on the "What's this?" shown when there is a
+            // clock offset.
+            $("#offsetPopover").popover();
+          },
+        });
 
         console.info("Finished setup");
       });
@@ -474,187 +511,192 @@
 {% endblock %}
 
 {% block container %}
-    <div class="row vertical-center">
+    <div id="app">
 
-      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-        <p id="startTimeLabel" class="lead text-center"></p>
-        <p id="offsetLabel" class="hidden text-muted text-center">
-          <strong>Note:</strong> Your clock is
-          <span id="offsetAheadBehind"><!-- ahead of / behind --></span>
-          the game's by <span id="offsetAmount"></span>.
-          <a id="offsetPopover" tabindex="0" role="button"
-            data-toggle="popover" data-trigger="focus" data-placement="auto"
-            data-html=true data-content=
-            "We correct for any difference between your clock
-            and the game clock, so you don’t have to do anything for the app
-            to work.
-            <br>
-            However, we still display the game start time and any messages
-            using the game clock. Because your clock is off by more than a
-            few seconds, this means the times shown may not agree with the
-            clock shown on your device."
-            >
-            What's&nbsp;this?
-          </a>
-        </p>
+      <div class="row vertical-center">
+
+        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+          <p id="startTimeLabel" class="lead text-center"></p>
+          <p v-show="offsetShow" class="text-muted text-center">
+            <strong>Note:</strong> Your clock is [[ offsetAheadBehind ]]
+            the game's by [[ offsetAmount ]].
+            <a id="offsetPopover" tabindex="0" role="button"
+              data-toggle="popover" data-trigger="focus" data-placement="auto"
+              data-html=true data-content=
+              "We correct for any difference between your clock
+              and the game clock, so you don’t have to do anything for the app
+              to work.
+              <br>
+              However, we still display the game start time and any messages
+              using the game clock. Because your clock is off by more than a
+              few seconds, this means the times shown may not agree with the
+              clock shown on your device."
+              >
+              What's&nbsp;this?
+            </a>
+          </p>
+        </div>
+
       </div>
+      <div class="row vertical-center">
 
-    </div>
-    <div class="row vertical-center">
+        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+        </div>
 
-      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
       </div>
+      <div class="row vertical-center">
 
-    </div>
-    <div class="row vertical-center">
+        <div class="col-sm-offset-1 col-sm-2 col-xs-3">
+          <p id="setupJailbreakLabel" class="lead text-center">Setup</p>
+        </div>
 
-      <div class="col-sm-offset-1 col-sm-2 col-xs-3">
-        <p id="setupJailbreakLabel" class="lead text-center">Setup</p>
-      </div>
-
-      <div class="col-sm-6 col-xs-6">
-        <div class="progress">
-          <div id="firstBar" class="progress-bar" role="progressbar"
-            style="width: 0%">
+        <div class="col-sm-6 col-xs-6">
+          <div class="progress">
+            <div id="firstBar" class="progress-bar" role="progressbar"
+              style="width: 0%">
+            </div>
           </div>
         </div>
+
+        <div class="col-sm-2 col-xs-3">
+          <p id="firstBarLabel" class="lead text-center">0:00 / 15:00</p>
+        </div>
+
       </div>
+      <div class="row vertical-center">
 
-      <div class="col-sm-2 col-xs-3">
-        <p id="firstBarLabel" class="lead text-center">0:00 / 15:00</p>
-      </div>
+        <div class="col-sm-offset-1 col-sm-2 col-xs-3">
+          <p class="lead text-center">Game Time Elapsed</p>
+        </div>
 
-    </div>
-    <div class="row vertical-center">
-
-      <div class="col-sm-offset-1 col-sm-2 col-xs-3">
-        <p class="lead text-center">Game Time Elapsed</p>
-      </div>
-
-      <div class="col-sm-6 col-xs-6">
-        <div class="progress">
-          <div id="secondBar" class="progress-bar" role="progressbar"
-            style="width: 0%">
+        <div class="col-sm-6 col-xs-6">
+          <div class="progress">
+            <div id="secondBar" class="progress-bar" role="progressbar"
+              style="width: 0%">
+            </div>
           </div>
         </div>
+
+        <div class="col-sm-2 col-xs-3">
+          <p id="secondBarLabel" class="lead text-center">0:00 / 1:00:00</p>
+        </div>
+
       </div>
+      <div v-show="stunStart > 0" class="row vertical-center">
 
-      <div class="col-sm-2 col-xs-3">
-        <p id="secondBarLabel" class="lead text-center">0:00 / 1:00:00</p>
-      </div>
+        <div class="col-sm-offset-1 col-sm-2 col-xs-3">
+          <p class="lead text-center">Stun Timer</p>
+        </div>
 
-    </div>
-    <div id="stunRow" class="hidden row vertical-center">
-
-      <div class="col-sm-offset-1 col-sm-2 col-xs-3">
-        <p class="lead text-center">Stun Timer</p>
-      </div>
-
-      <div class="col-sm-6 col-xs-6">
-        <div class="progress">
-          <div id="stunBar" class="progress-bar progress-bar-info"
-            role="progressbar" style="width: 0%">
+        <div class="col-sm-6 col-xs-6">
+          <div class="progress">
+            <div class="progress-bar progress-bar-info"
+              role="progressbar" :style="{ width: stunPercent + '%' }">
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="col-sm-2 col-xs-3">
-        <p id="stunBarLabel" class="lead text-center">0:00 / 1:00</p>
-      </div>
-
-    </div>
-    <div id="cancelButtonRow" class="hidden row vertical-center">
-
-      <div class="col-sm-offset-1 col-sm-10 col-xs-12 text-center">
-        <button id="cancelButton" class="btn btn-info btn-lg" type="button"
-          onclick="clickCancel()">
-          Cancel
-        </button>
-      </div>
-
-    </div>
-    <div id="stunButtonRow" class="row vertical-center">
-
-      <div class="col-sm-offset-1 col-sm-10 col-xs-12 text-center">
-        <button id="stunButton" class="btn btn-info btn-lg" type="button"
-          onclick="clickStun()">
-          Stun Timer
-        </button>
-      </div>
-
-    </div>
-    <div class="row vertical-center">
-
-      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-        <div class="page-header">
-          <h2 class="text-center">Flags</h2>
+        <div class="col-sm-2 col-xs-3">
+          <p class="lead text-center">
+            [[ toHMS(stunElapsed) ]] / [[ toHMS(stunLength) ]]
+          </p>
         </div>
+
       </div>
+      <div v-show="stunStart > 0" class="row vertical-center">
 
-    </div>
-    <div class="row vertical-center">
-
-      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-        <p class="text-muted text-center">
-          Note: The head judge may choose to report a score for each team
-          rather than a number of flags.
-        </p>
-      </div>
-
-    </div>
-    <div class="row vertical-center">
-
-      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-        <h3 id="flagsHeader" class="text-center">Total per side: 0</h3>
-      </div>
-
-    </div>
-    <div id="flagsRow" class="row vertical-center">
-
-      <div class="col-sm-offset-1 col-sm-5 col-xs-6">
-        <h3 id="redFlagsHeader" class="text-center text-danger">
-          Red has: 0
-        </h3>
-      </div>
-
-      <div class="col-sm-5 col-xs-6">
-        <h3 id="yellowFlagsHeader" class="text-center text-warning">
-          Yellow has: 0
-        </h3>
-      </div>
-
-    </div>
-    <div class="row vertical-center">
-
-      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-        <div class="page-header">
-          <h2 class="text-center">Messages</h2>
+        <div class="col-sm-offset-1 col-sm-10 col-xs-12 text-center">
+          <button class="btn btn-info btn-lg" type="button"
+            @click="clickCancel">
+            [[ stunPercent < 100 ? 'Cancel' : 'Done' ]]
+          </button>
         </div>
+
       </div>
+      <div v-show="stunStart === 0" class="row vertical-center">
 
-    </div>
-    <div class="row vertical-center">
+        <div class="col-sm-offset-1 col-sm-10 col-xs-12 text-center">
+          <button class="btn btn-info btn-lg" type="button"
+            @click="clickStun">
+            Stun Timer
+          </button>
+        </div>
 
-      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-        <p>
-        Note: Messages sent before the last time the page was loaded may not
-        appear.
-        <br>
-        Messages sent before game start are
-        <span class="text-muted">grey</span>, during setup are
-        <span class="text-info">blue</span>, during game play are
-        <span class="text-success">green</span>, and after game end are
-        <span class="text-danger">red</span>.
-        </p>
       </div>
+      <div class="row vertical-center">
 
-    </div>
-    <div class="row vertical-center">
+        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+          <div class="page-header">
+            <h2 class="text-center">Flags</h2>
+          </div>
+        </div>
 
-      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-        <table id="messageTable" class="table">
-          <tr><th>Time</th><th>Message</th></tr>
-        </table>
+      </div>
+      <div class="row vertical-center">
+
+        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+          <p class="text-muted text-center">
+            Note: The head judge may choose to report a score for each team
+            rather than a number of flags.
+          </p>
+        </div>
+
+      </div>
+      <div class="row vertical-center">
+
+        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+          <h3 id="flagsHeader" class="text-center">Total per side: 0</h3>
+        </div>
+
+      </div>
+      <div id="flagsRow" class="row vertical-center">
+
+        <div class="col-sm-offset-1 col-sm-5 col-xs-6">
+          <h3 id="redFlagsHeader" class="text-center text-danger">
+            Red has: [[ showFlags ? numRedFlags : '?' ]]
+          </h3>
+        </div>
+
+        <div class="col-sm-5 col-xs-6">
+          <h3 id="yellowFlagsHeader" class="text-center text-warning">
+            Yellow has: [[ showFlags ? numYellowFlags : '?' ]]
+          </h3>
+        </div>
+
+      </div>
+      <div class="row vertical-center">
+
+        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+          <div class="page-header">
+            <h2 class="text-center">Messages</h2>
+          </div>
+        </div>
+
+      </div>
+      <div class="row vertical-center">
+
+        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+          <p>
+          Note: Messages sent before the last time the page was loaded may not
+          appear.
+          <br>
+          Messages sent before game start are
+          <span class="text-muted">grey</span>, during setup are
+          <span class="text-info">blue</span>, during game play are
+          <span class="text-success">green</span>, and after game end are
+          <span class="text-danger">red</span>.
+          </p>
+        </div>
+
+      </div>
+      <div class="row vertical-center">
+
+        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+          <table id="messageTable" class="table">
+            <tr><th>Time</th><th>Message</th></tr>
+          </table>
+        </div>
+
       </div>
 
     </div>
