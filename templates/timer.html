@@ -446,17 +446,10 @@
             serverClientAbsDelta: function() {
               return Math.abs(this.serverClientDelta);
             },
-            offsetShow: function() {
+            showOffset: function() {
               // Check if the server time is different from the client time by
               // more than clockOffsetThreshhold seconds. If so, warn the user.
               return this.serverClientAbsDelta > clockOffsetThreshold;
-            },
-            offsetAmount: function() {
-              return toHMSWords(this.serverClientAbsDelta);
-            },
-            offsetAheadBehind: function() {
-              var serverAhead = this.serverClientDelta > 0;
-              return serverAhead ? "behind" : "ahead of"
             },
             now: function() {
               return this.serverNow;
@@ -469,8 +462,6 @@
             },
           },
           methods: {
-            toHMS: toHMS,
-            toHMSWords: toHMSWords,
             clickStun: function() {
               console.info("onStunButtonClick");
               this.stunStart = this.now;
@@ -479,6 +470,10 @@
               console.info("onCancelButtonClick");
               this.stunStart = 0;
             },
+          },
+          filters: {
+            toHMS: toHMS,
+            toHMSWords: toHMSWords,
           },
           mounted: function() {
             // All initial jQuery needs to be done in here, after Vue has set up
@@ -517,9 +512,10 @@
 
         <div class="col-sm-offset-1 col-sm-10 col-xs-12">
           <p id="startTimeLabel" class="lead text-center"></p>
-          <p v-show="offsetShow" class="text-muted text-center">
-            <strong>Note:</strong> Your clock is [[ offsetAheadBehind ]]
-            the game's by [[ offsetAmount ]].
+          <p v-show="showOffset" class="text-muted text-center">
+            <strong>Note:</strong> Your clock is
+            [[ this.serverClientDelta > 0 ? 'behind' : 'ahead of' ]]
+            the game's by [[ serverClientAbsDelta | toHMSWords ]].
             <a id="offsetPopover" tabindex="0" role="button"
               data-toggle="popover" data-trigger="focus" data-placement="auto"
               data-html=true data-content=
@@ -598,7 +594,7 @@
 
         <div class="col-sm-2 col-xs-3">
           <p class="lead text-center">
-            [[ toHMS(stunElapsed) ]] / [[ toHMS(stunLength) ]]
+            [[ stunElapsed | toHMS ]] / [[ stunLength | toHMS ]]
           </p>
         </div>
 
