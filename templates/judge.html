@@ -128,7 +128,7 @@
 
       // Called when an MQTT message arrives
       function onMessageArrived(message) {
-        console.log("onMessageArrived: " + message.destinationName + ": " +
+        console.info("onMessageArrived: " + message.destinationName + ": " +
             message.payloadString);
 
         var msg = message.payloadString;
@@ -182,7 +182,7 @@
             $("#jailMessageSpan").append("&nbsp;");
             break;
           default:
-            console.log("Unknown topic: " + message.destinationName);
+            console.error("Unknown topic: " + message.destinationName);
         }
       }
 
@@ -208,7 +208,7 @@
         // global variable for the client connection.
         initMqtt();
 
-        console.log("Finished setup");
+        console.info("Finished setup");
       });
     </script>
 {% endblock %}
@@ -824,4 +824,3 @@
 
 </div>
 {% endblock %}
-

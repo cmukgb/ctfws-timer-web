@@ -16,25 +16,25 @@
   // Called when the client's connect call succeeds
   function onConnectSuccess() {
     // Once a connection has been made, subscribe to all topics.
-    console.log("onConnectSuccess");
+    console.info("onConnectSuccess");
     mqttClient.subscribe("ctfws/game/#");
   }
 
   // Called if the client can't connect
   function onConnectFailure(failureObject) {
-    console.log("onConnectFailure: " + failureObject);
+    console.info("onConnectFailure: " + failureObject);
   }
 
   // Called when the client loses its connection
   function onConnectionLost(responseObject) {
     if (responseObject.errorCode !== 0) {
-      console.log("onConnectionLost: " + responseObject.errorMessage);
+      console.warn("onConnectionLost: " + responseObject.errorMessage);
     }
   }
 
   // Called any time the client connects (including reconnect)
   function onConnected(reconnect) {
-    console.log("onConnected: reconnect = " + reconnect);
+    console.info("onConnected: reconnect = " + reconnect);
   }
 
   // Split a string into an array, splitting on whitespace
@@ -42,7 +42,7 @@
   function splitOnWhitespace(str, expectedLen) {
     var a = str.split(/\s+/);
     if (a.length != expectedLen) {
-      console.log("Message does not have the expected number of fields (" +
+      console.error("Message does not have the expected number of fields (" +
           expectedLen + "): " + str);
       throw "wrong number of fields";
     }
@@ -53,7 +53,7 @@
     var newStr = str.replace(/\s+/, ' ');
     var index = newStr.indexOf(' ');
     if (index === -1) {
-      console.log("Message cannot be split on whitespace: " + str);
+      console.error("Message cannot be split on whitespace: " + str);
       throw "cannot split message";
     }
     return [newStr.substring(0, index), newStr.substring(index + 1)];
@@ -81,4 +81,3 @@
       reconnect:true});
   }
 </script>
-

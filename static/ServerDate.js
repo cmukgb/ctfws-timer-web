@@ -184,13 +184,13 @@ function synchronize() {
 	// so that we don't get the browser cached Javascript file.
         // Which character to use for concatenation (it's either ? or &) depends on if current URL already has some GET parameters
         var concatenationChar;
-        
+
         if (URL.indexOf('?') > -1) {
             concatenationChar='&';
         } else {
             concatenationChar='?';
         }
-        
+
 	request.open("HEAD", URL + concatenationChar + "noCache=" + Date.now() + parseInt(Math.random()*1000000));
 
     // At the earliest possible moment of the response, record the time at
@@ -265,7 +265,8 @@ function synchronize() {
 
 // Tag logged messages for better readability.
 function log(message) {
-    if (console && console.log) { console.log("[ServerDate] " + message); }
+    // Below commented by mjmurphy so ServerDate doesn't spam the console
+    // if (console && console.log) { console.log("[ServerDate] " + message); }
 }
 
 offset = serverNow - scriptLoadTime;
