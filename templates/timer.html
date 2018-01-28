@@ -394,9 +394,11 @@
             var split = splitOnFirstWhitespace(msg);
             var secs = parseInt(split[0]);
             var body = split[1];
-            if (!isNaN(secs) && !messageInList([secs, body], gameMessages)) {
-              gameMessages.push([secs, body]);
-              gameMessages = gameMessages.sort(compareMessages);
+            if (!isNaN(secs)) {
+              if (!messageInList([secs, body], gameMessages)) {
+                gameMessages.push([secs, body]);
+                gameMessages = gameMessages.sort(compareMessages);
+              }
             } else {
               console.log("Unknown message message: " + msg);
             }
