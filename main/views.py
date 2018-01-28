@@ -12,7 +12,7 @@ from .models import StuffCount
 StuffCountForm = modelform_factory(StuffCount, fields='__all__')
 
 def index(request):
-    return render(request, 'timer.html')
+    return render(request, 'timer.html', {'DEBUG': settings.DEBUG})
 
 def user_is_judge(user):
     return user.groups.filter(name='judges').exists()
