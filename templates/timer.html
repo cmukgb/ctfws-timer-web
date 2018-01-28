@@ -47,7 +47,7 @@
           if (seconds > 0 || (minutes <= 0 && hours <= 0)) {
             result += seconds + " sec" + (seconds === 1 ? "" : "s");
           }
-          return (negative ? "minus " : "") + result;
+          return (negative ? "minus " : "") + result.trim();
 
         } else {
           var result = "";
