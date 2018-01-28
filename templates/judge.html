@@ -206,7 +206,7 @@
         // Setup the MQTT client and connect. This function is defined in
         // mqtt.html, which is included above. This defines mqttClient as the
         // global variable for the client connection.
-        initMqtt();
+        initMqtt(onMessageArrived, true);
 
         console.info("Finished setup");
       });

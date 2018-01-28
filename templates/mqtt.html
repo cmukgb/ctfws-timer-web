@@ -62,7 +62,7 @@
   // Construct the mqttClient and connect. The isJudge argument is a bool
   // saying whether the caller is the judges page. It only affects the
   // clientId.
-  function initMqtt(isJudge) {
+  function initMqtt(onMessageArrived, isJudge) {
     // Set the hostname and clientID
     var hostname = "ws://kgb.club.cc.cmu.edu:1884/mqtt";
     var clientId = "kgb_web" + (isJudge ? "judge" : "app") + "_" +
@@ -77,7 +77,10 @@
     mqttClient.onMessageArrived = onMessageArrived;
 
     // Connect the client
-    mqttClient.connect({onSuccess:onConnectSuccess, onFailure:onConnectFailure,
-      reconnect:true});
+    mqttClient.connect({
+      onSuccess: onConnectSuccess,
+      onFailure: onConnectFailure,
+      reconnect: true,
+    });
   }
 </script>
