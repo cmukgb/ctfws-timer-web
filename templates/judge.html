@@ -6,6 +6,10 @@
     {% include "mqtt.html" %}
 
     <script>
+      {% if DEBUG %}
+          "use strict";
+      {% endif %}
+
       var totalsLocked = true; // Whether the stuff count totals are disabled
 
       function replaceNewlines(str) {

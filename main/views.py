@@ -98,5 +98,5 @@ def judge(request):
         else:
             totals = StuffCount() # Defaults all fields to 0
         form = StuffCountForm()
-        return render(request, 'judge.html', {'totals': totals, 'form': form})
-
+        return render(request, 'judge.html',
+            {'totals': totals, 'form': form, 'DEBUG': settings.DEBUG})
