@@ -18,6 +18,11 @@
         <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.min.js"></script>
     {% endif %}
 
+    <!-- Minified version of vuejs-storage from CDN -->
+    <!-- This must be version 1.0.0 as there is a bug in 1.0.1 (the latest as of
+         this writing) -->
+    <script src="https://cdn.jsdelivr.net/npm/vuejs-storage@1.0.0/dist/vuejs-storage.min.js"></script>
+
     <script>
       // Timing constants
       var updateUIIntervalTime = 500; // ms
@@ -423,6 +428,8 @@
           }
         }, 3 * 1000); // 3 seconds
 
+        Vue.use(vuejsStorage);
+
         new Vue({
           el: '#app',
           delimiters: ['[[', ']]'],
@@ -438,7 +445,17 @@
               numRed: 0,
               numYellow: 0,
             },
-            messages: [],
+          },
+          // Used by vuejs-storage: Everything in this.storage.data should work
+          // exactly the same as things in this.data (including being available
+          // just as this.foo), except data in storage will persist accross page
+          // loads, until the browser is restarted (see window.sessionStorage).
+          storage: {
+            data: {
+              messages: [],
+            },
+            storage: sessionStorage,
+            namespace: 'ctfws-timer',
           },
           created: function() {
             // Setup the MQTT client and connect. This function is defined in
@@ -474,6 +491,9 @@
             },
             stunPercent: function() {
               return Math.round((100 * this.stunElapsed) / this.stun.length);
+            },
+            sortedMessages: function() {
+              return this.messages.sort(compareMessages);
             },
           },
           methods: {
@@ -548,9 +568,14 @@
                   var secs = parseInt(split[0]);
                   var body = split[1];
                   if (!isNaN(secs)) {
-                    if (!messageInList([secs, body], this.messages)) {
-                      var newMessages = this.messages.concat([[secs, body]]);
-                      this.messages = newMessages.sort(compareMessages);
+                    if (secs === 1) {
+                      // Somewhat "hidden" feature to force clients to clear
+                      // their message list in case the judge really needs to
+                      // recall a message. If secs is exactly 1, the list is
+                      // cleared and the message is ignored.
+                      this.messages = []
+                    } else if (!messageInList([secs, body], this.messages)) {
+                      this.messages.push([secs, body]);
                     }
                   } else {
                     console.error("Unknown message message: " + msg);
@@ -769,8 +794,7 @@
 
         <div class="col-sm-offset-1 col-sm-10 col-xs-12">
           <p>
-          Note: Messages sent before the last time the page was loaded may not
-          appear.
+          <strong>Note:</strong> Messages sent while the browser is inactive may not appear.
           <br>
           Messages sent before game start are
           <span class="text-muted">grey</span>, during setup are
@@ -789,7 +813,7 @@
               <th class="col-sm-2 col-xs-2">Time</th>
               <th>Message</th>
             </tr>
-            <tr v-for="message in messages" ><!-- :class="TODO" -->
+            <tr v-for="message in sortedMessages" ><!-- :class="TODO" -->
               <td>[[ message[0] | secsToLocaleTimeString ]]</td>
               <td>[[ message[1] ]]</td>
             </tr>
