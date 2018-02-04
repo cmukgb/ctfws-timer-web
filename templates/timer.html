@@ -28,9 +28,8 @@
           "use strict";
       {% endif %}
 
-      // Timing constants
+      // TODO deleteme Timing constants
       var updateUIIntervalTime = 500; // ms
-      var serverDateLogInterval = 60 * 1000; // ms
 
       // If useWords, then convert seconds to
       // "[minus ][H hr[s]][M min[s]]S sec[s]"
@@ -106,12 +105,12 @@
       }
 
       // Sets the two spans which form the game header text field
-      function setGameHeader(firstText, secondText, secondClass) {
-        $("#gameHeader1").text(firstText);
-        $("#gameHeader2").text(secondText);
-        $("#gameHeader2").removeClass();
-        $("#gameHeader2").addClass(secondClass);
-      }
+      // function setGameHeader(firstText, secondText, secondClass) {
+      //   $("#gameHeader1").text(firstText);
+      //   $("#gameHeader2").text(secondText);
+      //   $("#gameHeader2").removeClass();
+      //   $("#gameHeader2").addClass(secondClass);
+      // }
 
       // Sets the color of a progress bar
       function setBarColor(barName, color) {
@@ -125,17 +124,17 @@
       // UI const variables
       // var redFlagsText = "Red has: ";
       // var yellowFlagsText = "Yellow has: ";
-      var flagsText = "Total per side: ";
+      // var flagsText = "Total per side: ";
 
       // UI state variables
       //   Config
-      var gameValid = false; // whether the most recent config msg was "none"
-      var gameStarttime = 0;
-      var setupDuration = 0;
-      var numRounds = 0;
-      var roundDuration = 0;
-      var flagsPerTeam = 0;
-      var gameNumber = 0;
+      // var gameValid = false; // whether the most recent config msg was "none"
+      // var gameStarttime = 0;
+      // var setupDuration = 0;
+      // var numRounds = 0;
+      // var roundDuration = 0;
+      // var flagsPerTeam = 0;
+      // var gameNumber = 0;
       //   Stun Timer
       // var stunStart = 0;
       //   Flags
@@ -143,7 +142,7 @@
       // var numRedFlags = 0;
       // var numYellowFlags = 0;
       //   Endtime
-      var gameEndtime = 0;
+      // var gameEndtime = 0;
       //   Messages
       // var gameMessages = [];
 
@@ -154,30 +153,30 @@
 
         // Config and Endtime
         if (gameValid) {
-          $("#flagsHeader").text(flagsText + flagsPerTeam);
+          // $("#flagsHeader").text(flagsText + flagsPerTeam);
 
-          var setupEnd = gameStarttime + setupDuration;
-          var gameEnd = setupEnd + (numRounds * roundDuration); // scheduled end
-          var gameDuration = gameEnd - setupEnd;
-          var setupEndDate = new Date(setupEnd * 1000);
-          var gameStartText = setupEndDate.toLocaleTimeString();
-          var numText = gameNumber === 0 ? "State" : gameNumber;
+          // var setupEnd = gameStarttime + setupDuration;
+          // var gameEnd = setupEnd + (numRounds * roundDuration); // scheduled end
+          // var gameDuration = gameEnd - setupEnd;
+          // var setupEndDate = new Date(setupEnd * 1000);
+          // var gameStartText = setupEndDate.toLocaleTimeString();
+          // var numText = gameNumber === 0 ? "State" : gameNumber;
 
           if ((gameEndtime >= gameStarttime && gameEndtime <= now) ||
               gameEnd <= now) {
             // Over
-            setGameHeader("Game " + numText + ": ", "Over", "text-danger");
+            // setGameHeader("Game " + numText + ": ", "Over", "text-danger");
             var secs = 0;
-            var gameEndDate = null;
+            // var gameEndDate = null;
             if (gameEndtime >= gameStarttime && gameEndtime <= now) {
               secs = Math.max(Math.min(gameEndtime, gameEnd) - setupEnd, 0);
-              gameEndDate = new Date(Math.min(gameEndtime, gameEnd) * 1000);
+              // gameEndDate = new Date(Math.min(gameEndtime, gameEnd) * 1000);
             } else {
               secs = gameEnd - setupEnd;
-              gameEndDate = new Date(gameEnd * 1000);
+              // gameEndDate = new Date(gameEnd * 1000);
             }
-            var gameEndText = gameEndDate.toLocaleTimeString();
-            $("#startTimeLabel").text("Game ended at " + gameEndText);
+            // var gameEndText = gameEndDate.toLocaleTimeString();
+            // $("#startTimeLabel").text("Game ended at " + gameEndText);
             var roundNum = Math.floor((secs - 1) / roundDuration); // 0-indexed
             var roundSecs = secs - roundNum * roundDuration;
             $("#setupJailbreakLabel").text("Jailbreak " + (roundNum + 1));
@@ -193,9 +192,9 @@
                 toHMS(gameDuration));
           } else if (setupEnd <= now) {
             // Playing
-            setGameHeader("Game " + numText + ": ", "In Progress",
-                "text-success");
-            $("#startTimeLabel").text("Game started at " + gameStartText);
+            // setGameHeader("Game " + numText + ": ", "In Progress",
+            //     "text-success");
+            // $("#startTimeLabel").text("Game started at " + gameStartText);
             var secs = now - setupEnd;
             var roundNum = Math.floor((secs - 1) / roundDuration); // 0-indexed
             var roundSecs = secs - roundNum * roundDuration;
@@ -212,8 +211,8 @@
                 toHMS(gameDuration));
           } else {
             // Setup
-            setGameHeader("Game " + numText + ": ", "Setup", "text-info");
-            $("#startTimeLabel").text("Game starts at " + gameStartText);
+            // setGameHeader("Game " + numText + ": ", "Setup", "text-info");
+            // $("#startTimeLabel").text("Game starts at " + gameStartText);
             $("#setupJailbreakLabel").text("Setup");
             var secs = now - gameStarttime;
             var percent = Math.round((100 * secs) / setupDuration);
@@ -228,8 +227,8 @@
 
         } else {
           // No Game
-          setGameHeader("No Current Game", "", "");
-          $("#startTimeLabel").text("");
+          // setGameHeader("No Current Game", "", "");
+          // $("#startTimeLabel").text("");
           $("#setupJailbreakLabel").text("Setup");
           $("#firstBar").width("0%");
           setBarColor("#firstBar", "progress-bar-danger");
@@ -237,7 +236,7 @@
           $("#secondBar").width("0%");
           setBarColor("#secondBar", "progress-bar-danger");
           $("#secondBarLabel").text("0:00 / 1:00:00");
-          $("#flagsHeader").text(flagsText + "0");
+          // $("#flagsHeader").text(flagsText + "0");
         }
 
         // Stun Timer
@@ -277,33 +276,33 @@
         // var firstRow = '<tr><th class="col-sm-2 col-xs-2">Time<\/th>' +
         //   '<th>Message<\/th><\/tr>';
         // $("#messageTable").html(firstRow);
-        for (var i = gameMessages.length - 1; i >= 0; i--) {
-          var secs = gameMessages[i][0];
-          var time = (new Date(secs * 1000)).toLocaleTimeString();
-          var color = "";
-          if (gameValid) {
-            var setupEnd = gameStarttime + setupDuration;
-            var gameEnd = setupEnd + (numRounds * roundDuration); // scheduled end
-            var cutoff = 0;
-            if (gameEndtime >= gameStarttime && gameEndtime <= now) {
-              cutoff = Math.min(gameEndtime, gameEnd);
-            } else {
-              cutoff = gameEnd;
-            }
-            if (secs < gameStarttime) {
-              color = "active";
-            } else if (secs < setupEnd) {
-              color = "info";
-            } else if (secs < cutoff) {
-              color = "success";
-            } else {
-              color = "danger";
-            }
-          }
+        // for (var i = gameMessages.length - 1; i >= 0; i--) {
+        //   var secs = gameMessages[i][0];
+        //   var time = (new Date(secs * 1000)).toLocaleTimeString();
+        //   var color = "";
+        //   if (gameValid) {
+        //     var setupEnd = gameStarttime + setupDuration;
+        //     var gameEnd = setupEnd + (numRounds * roundDuration); // scheduled end
+        //     var cutoff = 0;
+        //     if (gameEndtime >= gameStarttime && gameEndtime <= now) {
+        //       cutoff = Math.min(gameEndtime, gameEnd);
+        //     } else {
+        //       cutoff = gameEnd;
+        //     }
+        //     if (secs < gameStarttime) {
+        //       color = "active";
+        //     } else if (secs < setupEnd) {
+        //       color = "info";
+        //     } else if (secs < cutoff) {
+        //       color = "success";
+        //     } else {
+        //       color = "danger";
+        //     }
+        //   }
           // var newRow = '<tr class="' + color + '"><td>' + time + '<\/td><td>' +
           //   gameMessages[i][1] + '<\/td><\/tr>';
           // $("#messageTable").append(newRow);
-        }
+        // }
       }
 
       // Compare messages by timestamp such that sorting will put them in order
@@ -322,104 +321,107 @@
       }
 
       // Called when an MQTT message arrives
-      function onMessageArrived(message) {
-        console.info("onMessageArrived: " + message.destinationName + ": " +
-            message.payloadString);
+      // function onMessageArrived(message) {
+      //   console.info("onMessageArrived: " + message.destinationName + ": " +
+      //       message.payloadString);
+      //
+      //   return;
+      //
+      //   var msg = message.payloadString;
+      //   var topic = message.destinationName.substring(11);
+      //   switch (topic) {
+      //     case 'config':
+      //       if (msg === "none") {
+      //         gameValid = false;
+      //       } else {
+      //         var split = splitOnWhitespace(msg, 6);
+      //         var start = parseInt(split[0]);
+      //         var setup = parseInt(split[1]);
+      //         var rounds = parseInt(split[2]);
+      //         var roundlen = parseInt(split[3]);
+      //         var flags = split[4];
+      //         var game = split[5];
+      //         if (!isNaN(start) && !isNaN(setup) && !isNaN(rounds) &&
+      //             !isNaN(roundlen)) {
+      //           gameStarttime = start;
+      //           setupDuration = setup;
+      //           numRounds = rounds;
+      //           roundDuration = roundlen;
+      //           flagsPerTeam = flags;
+      //           gameNumber = game;
+      //           gameValid = true;
+      //         } else {
+      //           console.error("Unknown config message: " + msg);
+      //         }
+      //       }
+      //       break;
+      //     case 'flags':
+      //       if (msg === "?") {
+      //         showFlags = false;
+      //       } else {
+      //         var split = splitOnWhitespace(msg, 2);
+      //         var r = parseInt(split[0]);
+      //         var y = parseInt(split[1]);
+      //         if (!isNaN(r) && !isNaN(y)) {
+      //           numRedFlags = r;
+      //           numYellowFlags = y;
+      //           showFlags = true;
+      //         } else {
+      //           console.error("Unknown flag message: " + msg);
+      //         }
+      //       }
+      //       break;
+      //     case 'endtime':
+      //       var secs = parseInt(msg);
+      //       if (!isNaN(secs)) {
+      //         gameEndtime = secs;
+      //       } else {
+      //         colsole.log("Unknown endtime message: " + msg);
+      //       }
+      //       break;
+      //     case 'message':
+      //     case 'message/player':
+      //       var split = splitOnFirstWhitespace(msg);
+      //       var secs = parseInt(split[0]);
+      //       var body = split[1];
+      //       if (!isNaN(secs)) {
+      //         if (!messageInList([secs, body], gameMessages)) {
+      //           gameMessages.push([secs, body]);
+      //           gameMessages = gameMessages.sort(compareMessages);
+      //         }
+      //       } else {
+      //         console.error("Unknown message message: " + msg);
+      //       }
+      //       break;
+      //     case 'message/jail':
+      //       console.info("Ignoring jail message: " + msg);
+      //       break;
+      //     default:
+      //       console.warn("Unknown topic: " + message.destinationName);
+      //   }
+      //
+      //   updateUI();
+      //   // If it took more than 3 seconds to get here this interval will
+      //   // already be set up. Otherwise, start it now.
+      //   if (updateUIIntervalObject === false) {
+      //     updateUIIntervalObject = setInterval(updateUI, updateUIIntervalTime);
+      //   }
+      // }
 
-        return;
-
-        var msg = message.payloadString;
-        var topic = message.destinationName.substring(11);
-        switch (topic) {
-          case 'config':
-            if (msg === "none") {
-              gameValid = false;
-            } else {
-              var split = splitOnWhitespace(msg, 6);
-              var start = parseInt(split[0]);
-              var setup = parseInt(split[1]);
-              var rounds = parseInt(split[2]);
-              var roundlen = parseInt(split[3]);
-              var flags = split[4];
-              var game = split[5];
-              if (!isNaN(start) && !isNaN(setup) && !isNaN(rounds) &&
-                  !isNaN(roundlen)) {
-                gameStarttime = start;
-                setupDuration = setup;
-                numRounds = rounds;
-                roundDuration = roundlen;
-                flagsPerTeam = flags;
-                gameNumber = game;
-                gameValid = true;
-              } else {
-                console.error("Unknown config message: " + msg);
-              }
-            }
-            break;
-          case 'flags':
-            if (msg === "?") {
-              showFlags = false;
-            } else {
-              var split = splitOnWhitespace(msg, 2);
-              var r = parseInt(split[0]);
-              var y = parseInt(split[1]);
-              if (!isNaN(r) && !isNaN(y)) {
-                numRedFlags = r;
-                numYellowFlags = y;
-                showFlags = true;
-              } else {
-                console.error("Unknown flag message: " + msg);
-              }
-            }
-            break;
-          case 'endtime':
-            var secs = parseInt(msg);
-            if (!isNaN(secs)) {
-              gameEndtime = secs;
-            } else {
-              colsole.log("Unknown endtime message: " + msg);
-            }
-            break;
-          case 'message':
-          case 'message/player':
-            var split = splitOnFirstWhitespace(msg);
-            var secs = parseInt(split[0]);
-            var body = split[1];
-            if (!isNaN(secs)) {
-              if (!messageInList([secs, body], gameMessages)) {
-                gameMessages.push([secs, body]);
-                gameMessages = gameMessages.sort(compareMessages);
-              }
-            } else {
-              console.error("Unknown message message: " + msg);
-            }
-            break;
-          case 'message/jail':
-            console.info("Ignoring jail message: " + msg);
-            break;
-          default:
-            console.warn("Unknown topic: " + message.destinationName);
-        }
-
-        updateUI();
-        // If it took more than 3 seconds to get here this interval will
-        // already be set up. Otherwise, start it now.
-        if (updateUIIntervalObject === false) {
-          updateUIIntervalObject = setInterval(updateUI, updateUIIntervalTime);
-        }
-      }
-
-      // Vue constants
+      // Constants
       var updateNowIntervalTime = 500; // ms
       var clockOffsetThreshold = 15; // seconds
+      var serverDateLogInterval = 60 * 1000; // ms
 
       // TODO deleteme
       var updateUIIntervalObject = false;
+
       $(document).ready(function() {
         // Log the ServerDate precision and delta
         logServerDate();
         setInterval(logServerDate, serverDateLogInterval);
 
+        // TODO figure out if something like this is still needed
         // The UI looks cleanest if we don't update it until the MQTT client
         // has connected. So we give it 3 seconds connect before we set up the
         // UI interval. If it connects first, the below variable will still be
@@ -600,7 +602,7 @@
             toHMSWords: toHMSWords,
             secsToLocaleTimeString: function(secs) {
               return new Date(secs * 1000).toLocaleTimeString();
-            }
+            },
           },
           mounted: function() {
             // All initial jQuery needs to be done in here, after Vue has set up
