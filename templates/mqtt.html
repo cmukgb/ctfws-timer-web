@@ -48,7 +48,7 @@
     if (a.length != expectedLen) {
       console.error("Message does not have the expected number of fields (" +
           expectedLen + "): " + str);
-      throw "wrong number of fields";
+      throw new Error("Message has the wrong number of fields");
     }
     return a;
   }
@@ -58,7 +58,7 @@
     var index = newStr.indexOf(' ');
     if (index === -1) {
       console.error("Message cannot be split on whitespace: " + str);
-      throw "cannot split message";
+      throw new Error("Cannot split message");
     }
     return [newStr.substring(0, index), newStr.substring(index + 1)];
   }
