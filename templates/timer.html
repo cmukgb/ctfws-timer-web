@@ -308,12 +308,12 @@
       // Compare messages by timestamp such that sorting will put them in order
       // from newest to oldest
       function compareMessages(a, b) {
-        return b[0] - a[0];
+        return b.time - a.time;
       }
 
       function messageInList(msg, msgList) {
         for (var i = 0; i < msgList.length; i++) {
-          if (msg[0] === msgList[i][0] && msg[1] === msgList[i][1]) {
+          if (msg.time === msgList[i].time && msg.body === msgList[i].body) {
             return true;
           }
         }
@@ -438,12 +438,31 @@
 
         Vue.use(vuejsStorage);
 
+        // Unless otherwise noted, all durations are in stored in seconds and
+        // all times are stored as seconds since the UNIX epoch
         new Vue({
           el: '#app',
           delimiters: ['[[', ']]'],
           data: {
             serverNow: getServerNow(),
             clientNow: getClientNow(),
+            // Whether the most recent config message was not "none"
+            // Defaults to null (and is only ever set to null here), so if it's
+            // null, then we haven't gotten a config message yet.
+            displayGame: null,
+            gameNumber: 0,
+            times: {
+              start: 0,
+              earlyGameEnd: 0, // Time of game end if ended before schduled
+            },
+            rounds: {
+              // Number of jailbreaks. Set by the broker but always should be 4.
+              total: 4,
+              // Jailbreak length in secs. Also set by broker but always 15 min.
+              duration: 15 * 60,
+            },
+            // Setup length in secs. Also set by broker but always 15 min.
+            setupDuration: 15 * 60,
             stun: {
               start: 0,
               length: 60, // Fixed total length of stun
@@ -452,6 +471,7 @@
               show: true,
               numRed: 0,
               numYellow: 0,
+              perTeam: 0,
             },
           },
           // Used by vuejs-storage: Everything in this.storage.data should work
@@ -494,6 +514,58 @@
             now: function() {
               return this.serverNow;
             },
+            gameNumberText: function() {
+              // The CtFwS MQTT spec says a game number of 0 "may be
+              // interpreted as suppressing indication in the client"
+              return this.gameNumber === 0 ? "State" : this.gameNumber;
+            },
+            setupEnd: function() {
+              return this.times.start + this.setupDuration;
+            },
+            gameDuration: function() {
+              return this.rounds.total * this.rounds.duration;
+            },
+            scheduledGameEnd: function() {
+              return this.setupEnd + this.gameDuration;
+            },
+            actualGameEnd: function() {
+              if (this.times.earlyGameEnd >= this.times.start) {
+                return Math.min(this.times.earlyGameEnd, this.scheduledGameEnd);
+              } else {
+                return this.scheduledGameEnd;
+              }
+            },
+            gameState: function() {
+              if (this.now >= this.actualGameEnd) {
+                return {
+                  stateText: "Over",
+                  stateColor: "text-danger",
+                  subtitleText: "ended",
+                  subtitleTime: this.actualGameEnd,
+                };
+              } else if (this.now >= this.setupEnd) {
+                return {
+                  stateText: "In Progress",
+                  stateColor: "text-success",
+                  subtitleText: "started",
+                  subtitleTime: this.setupEnd,
+                };
+              } else if (this.now >= this.times.start) {
+                return {
+                  stateText: "Setup",
+                  stateColor: "text-info",
+                  subtitleText: "starts",
+                  subtitleTime: this.setupEnd,
+                };
+              } else {
+                return {
+                  stateText: "Pre-Setup",
+                  stateColor: "text-muted",
+                  subtitleText: "starts",
+                  subtitleTime: this.setupEnd,
+                };
+              }
+            },
             stunElapsed: function() {
               return Math.min(this.now - this.stun.start, this.stun.length);
             },
@@ -521,31 +593,31 @@
               var topic = message.destinationName.substring(
                   "ctfws/game/".length);
               switch (topic) {
-                // case 'config':
-                //   if (msg === "none") {
-                //     gameValid = false;
-                //   } else {
-                //     var split = splitOnWhitespace(msg, 6);
-                //     var start = parseInt(split[0]);
-                //     var setup = parseInt(split[1]);
-                //     var rounds = parseInt(split[2]);
-                //     var roundlen = parseInt(split[3]);
-                //     var flags = split[4];
-                //     var game = split[5];
-                //     if (!isNaN(start) && !isNaN(setup) && !isNaN(rounds) &&
-                //         !isNaN(roundlen)) {
-                //       gameStarttime = start;
-                //       setupDuration = setup;
-                //       numRounds = rounds;
-                //       roundDuration = roundlen;
-                //       flagsPerTeam = flags;
-                //       gameNumber = game;
-                //       gameValid = true;
-                //     } else {
-                //       console.error("Unknown config message: " + msg);
-                //     }
-                //   }
-                //   break;
+                case 'config':
+                  if (msg === "none") {
+                    this.displayGame = false;
+                  } else {
+                    var split = splitOnWhitespace(msg, 6);
+                    var start = parseInt(split[0]);
+                    var setup = parseInt(split[1]);
+                    var rounds = parseInt(split[2]);
+                    var roundlen = parseInt(split[3]);
+                    var flags = split[4];
+                    var gamenum = split[5];
+                    if (!isNaN(start) && !isNaN(setup) && !isNaN(rounds) &&
+                        !isNaN(roundlen)) {
+                      this.times.start = start;
+                      this.setupDuration = setup;
+                      this.rounds.total = rounds;
+                      this.rounds.duration = roundlen;
+                      this.flags.perTeam = flags;
+                      this.gameNumber = gamenum;
+                      this.displayGame = true;
+                    } else {
+                      console.error("Unknown config message: " + msg);
+                    }
+                  }
+                  break;
                 case 'flags':
                   if (msg === "?") {
                     this.flags.show = false;
@@ -562,28 +634,29 @@
                     }
                   }
                   break;
-                // case 'endtime':
-                //   var secs = parseInt(msg);
-                //   if (!isNaN(secs)) {
-                //     gameEndtime = secs;
-                //   } else {
-                //     colsole.log("Unknown endtime message: " + msg);
-                //   }
-                //   break;
+                case 'endtime':
+                  var secs = parseInt(msg);
+                  if (!isNaN(secs)) {
+                    this.times.earlyGameEnd = secs;
+                  } else {
+                    colsole.log("Unknown endtime message: " + msg);
+                  }
+                  break;
                 case 'message':
                 case 'message/player':
                   var split = splitOnFirstWhitespace(msg);
                   var secs = parseInt(split[0]);
                   var body = split[1];
                   if (!isNaN(secs)) {
+                    var newMessage = { time: secs, body: body };
                     if (secs === 1) {
                       // Somewhat "hidden" feature to force clients to clear
                       // their message list in case the judge really needs to
                       // recall a message. If secs is exactly 1, the list is
                       // cleared and the message is ignored.
                       this.messages = []
-                    } else if (!messageInList([secs, body], this.messages)) {
-                      this.messages.push([secs, body]);
+                    } else if (!messageInList(newMessage, this.messages)) {
+                      this.messages.push(newMessage);
                     }
                   } else {
                     console.error("Unknown message message: " + msg);
@@ -594,6 +667,23 @@
                   break;
                 default:
                   console.warn("Unknown topic: " + message.destinationName);
+              }
+            },
+            // Get the color class to apply to a message in the table given it's
+            // timestamp
+            toMessageColor: function(timestamp) {
+              if (this.displayGame) {
+                if (timestamp >= this.actualGameEnd) {
+                  return "danger"; // Red, game over
+                } else if (timestamp >= this.setupEnd) {
+                  return "success"; // Green, playing
+                } else if (timestamp >= this.times.start) {
+                  return "info"; // Blue, setup
+                } else {
+                  return "active"; // Grey, before setup
+                }
+              } else {
+                return "";
               }
             },
           },
@@ -827,13 +917,15 @@
               <th class="col-sm-2 col-xs-2">Time</th>
               <th>Message</th>
             </tr>
-            <tr v-for="message in sortedMessages" ><!-- :class="TODO" -->
-              <td>[[ message[0] | secsToLocaleTimeString ]]</td>
-              <td>[[ message[1] ]]</td>
-            </tr>
           </table>
         </div>
 
+          <tr v-for="message in sortedMessages"
+            :key="message.time + '|' + message.body"
+            :class="toMessageColor(message.time)">
+            <td>[[ message.time | secsToLocaleTimeString ]]</td>
+            <td>[[ message.body ]]</td>
+          </tr>
       </div>
 
     </div>
