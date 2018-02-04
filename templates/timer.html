@@ -720,212 +720,229 @@
 {% endblock %}
 
 {% block page_title %}
-    <span id="gameHeader1">Connecting...</span>
-    <span id="gameHeader2"></span>
+    <span v-if="displayGame === null">
+      Connecting...
+    </span>
+    <span v-else-if="displayGame">
+      Game [[ gameNumberText ]]:
+      <span :class="gameState.stateColor">[[ gameState.stateText ]]</span>
+    </span>
+    <span v-else>
+      No Current Game
+    </span>
 {% endblock %}
 
 {% block container %}
-    <div id="app">
+    <div class="row vertical-center">
 
-      <div class="row vertical-center">
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
 
-        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-          <p id="startTimeLabel" class="lead text-center"></p>
-          <p v-show="showOffset" class="text-muted text-center">
-            <strong>Note:</strong> Your clock is
-            [[ this.serverClientDelta > 0 ? 'behind' : 'ahead of' ]]
-            the game's by [[ serverClientAbsDelta | toHMSWords ]].
-            <a id="offsetPopover" tabindex="0" role="button"
-              data-toggle="popover" data-trigger="focus" data-placement="auto"
-              data-html=true data-content=
-              "We correct for any difference between your clock
-              and the game clock, so you don’t have to do anything for the app
-              to work.
-              <br>
-              However, we still display the game start time and any messages
-              using the game clock. Because your clock is off by more than a
-              few seconds, this means the times shown may not agree with the
-              clock shown on your device."
-              >
-              What's&nbsp;this?
-            </a>
-          </p>
-        </div>
+        <p class="lead text-center">
+          <span v-if="displayGame">
+            Game [[ gameState.subtitleText ]] at
+            [[ gameState.subtitleTime | secsToLocaleTimeString ]]
+          </span>
+        </p>
 
-      </div>
-      <div class="row vertical-center">
-
-        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-        </div>
+        <p v-show="showOffset" class="text-muted text-center">
+          <strong>Note:</strong> Your clock is
+          [[ this.serverClientDelta > 0 ? 'behind' : 'ahead of' ]]
+          the game's by [[ serverClientAbsDelta | toHMSWords ]].
+          <a id="offsetPopover" tabindex="0" role="button"
+            data-toggle="popover" data-trigger="focus" data-placement="auto"
+            data-html="data-html" data-content=
+            "We correct for any difference between your clock
+            and the game clock, so you don’t have to do anything for the app
+            to work.
+            <br>
+            However, we still display the game start time and any messages
+            using the game clock. Because your clock is off by more than a
+            few seconds, this means the times shown may not agree with the
+            clock shown on your device."
+            >
+            What's&nbsp;this?
+          </a>
+        </p>
 
       </div>
-      <div class="row vertical-center">
 
-        <div class="col-sm-offset-1 col-sm-2 col-xs-3">
-          <p id="setupJailbreakLabel" class="lead text-center">Setup</p>
-        </div>
+    </div>
+    <!-- TODO deleteme? <div class="row vertical-center">
 
-        <div class="col-sm-6 col-xs-6">
-          <div class="progress">
-            <div id="firstBar" class="progress-bar" role="progressbar"
-              style="width: 0%">
-            </div>
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+      </div>
+
+    </div> -->
+    <div class="row vertical-center">
+
+      <div class="col-sm-offset-1 col-sm-2 col-xs-3">
+        <p id="setupJailbreakLabel" class="lead text-center">Setup</p>
+      </div>
+
+      <div class="col-sm-6 col-xs-6">
+        <div class="progress">
+          <div id="firstBar" class="progress-bar" role="progressbar"
+            style="width: 0%">
           </div>
         </div>
-
-        <div class="col-sm-2 col-xs-3">
-          <p id="firstBarLabel" class="lead text-center">0:00 / 15:00</p>
-        </div>
-
       </div>
-      <div class="row vertical-center">
 
-        <div class="col-sm-offset-1 col-sm-2 col-xs-3">
-          <p class="lead text-center">Game Time Elapsed</p>
-        </div>
+      <div class="col-sm-2 col-xs-3">
+        <p id="firstBarLabel" class="lead text-center">0:00 / 15:00</p>
+      </div>
 
-        <div class="col-sm-6 col-xs-6">
-          <div class="progress">
-            <div id="secondBar" class="progress-bar" role="progressbar"
-              style="width: 0%">
-            </div>
+    </div>
+    <div class="row vertical-center">
+
+      <div class="col-sm-offset-1 col-sm-2 col-xs-3">
+        <p class="lead text-center">Game Time Elapsed</p>
+      </div>
+
+      <div class="col-sm-6 col-xs-6">
+        <div class="progress">
+          <div id="secondBar" class="progress-bar" role="progressbar"
+            style="width: 0%">
           </div>
         </div>
-
-        <div class="col-sm-2 col-xs-3">
-          <p id="secondBarLabel" class="lead text-center">0:00 / 1:00:00</p>
-        </div>
-
       </div>
-      <div v-show="stun.start > 0" class="row vertical-center">
 
-        <div class="col-sm-offset-1 col-sm-2 col-xs-3">
-          <p class="lead text-center">Stun Timer</p>
-        </div>
+      <div class="col-sm-2 col-xs-3">
+        <p id="secondBarLabel" class="lead text-center">0:00 / 1:00:00</p>
+      </div>
 
-        <div class="col-sm-6 col-xs-6">
-          <div class="progress">
-            <div class="progress-bar progress-bar-info"
-              role="progressbar" :style="{ width: stunPercent + '%' }">
-            </div>
+    </div>
+    <div v-if="stun.start > 0" class="row vertical-center">
+
+      <div class="col-sm-offset-1 col-sm-2 col-xs-3">
+        <p class="lead text-center">Stun Timer</p>
+      </div>
+
+      <div class="col-sm-6 col-xs-6">
+        <div class="progress">
+          <div class="progress-bar progress-bar-info"
+            role="progressbar" :style="{ width: stunPercent + '%' }">
           </div>
         </div>
-
-        <div class="col-sm-2 col-xs-3">
-          <p class="lead text-center">
-            [[ stunElapsed | toHMS ]] / [[ stun.length | toHMS ]]
-          </p>
-        </div>
-
       </div>
-      <div v-show="stun.start > 0" class="row vertical-center">
 
-        <div class="col-sm-offset-1 col-sm-10 col-xs-12 text-center">
-          <button class="btn btn-info btn-lg" type="button"
-            @click="clickCancel">
-            [[ stunPercent < 100 ? 'Cancel' : 'Done' ]]
-          </button>
-        </div>
-
+      <div class="col-sm-2 col-xs-3">
+        <p class="lead text-center">
+          [[ stunElapsed | toHMS ]] / [[ stun.length | toHMS ]]
+        </p>
       </div>
-      <div v-show="stun.start === 0" class="row vertical-center">
 
-        <div class="col-sm-offset-1 col-sm-10 col-xs-12 text-center">
-          <button class="btn btn-info btn-lg" type="button"
-            @click="clickStun">
-            Stun Timer
-          </button>
-        </div>
+    </div>
+    <div v-if="stun.start > 0" class="row vertical-center">
 
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12 text-center">
+        <button class="btn btn-info btn-lg" type="button"
+          @click="clickCancel">
+          [[ stunPercent < 100 ? 'Cancel' : 'Done' ]]
+        </button>
       </div>
-      <div class="row vertical-center">
 
-        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-          <div class="page-header">
-            <h2 class="text-center">Flags</h2>
-          </div>
-        </div>
+    </div>
+    <div v-else class="row vertical-center">
 
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12 text-center">
+        <button class="btn btn-info btn-lg" type="button"
+          @click="clickStun">
+          Stun Timer
+        </button>
       </div>
-      <div class="row vertical-center">
 
-        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-          <p class="text-muted text-center">
-            Note: The head judge may choose to report a score for each team
-            rather than a number of flags.
-          </p>
+    </div>
+    <div class="row vertical-center">
+
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+        <div class="page-header">
+          <h2 class="text-center">Flags</h2>
         </div>
-
       </div>
-      <div class="row vertical-center">
 
-        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-          <h3 id="flagsHeader" class="text-center">Total per side: 0</h3>
-        </div>
+    </div>
+    <div class="row vertical-center">
 
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+        <p class="text-muted text-center">
+          Note: The head judge may choose to report a score for each team
+          rather than a number of flags.
+        </p>
       </div>
-      <div class="row vertical-center">
 
-        <div v-show="flags.show" class="col-sm-offset-1 col-sm-5 col-xs-6">
+    </div>
+    <div class="row vertical-center">
+
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+        <h3 class="text-center">
+          Total per side: [[ displayGame ? flags.perTeam : 0 ]]
+        </h3>
+      </div>
+
+    </div>
+    <div v-if="flags.show" class="row vertical-center">
+
+        <div class="col-sm-offset-1 col-sm-5 col-xs-6">
           <h3 class="text-center text-danger">
             Red has: [[ flags.numRed ]]
           </h3>
         </div>
 
-        <div v-show="flags.show" class="col-sm-5 col-xs-6">
+        <div class="col-sm-5 col-xs-6">
           <h3 class="text-center text-warning">
             Yellow has: [[ flags.numYellow ]]
           </h3>
         </div>
 
-        <div v-show="!flags.show" class="col-sm-offset-1 col-sm-10 col-xs-12">
-          <h3 class="text-center text-info">
-            Team scores hidden
-          </h3>
-        </div>
+    </div>
+    <div v-else class="row vertical-center">
 
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+        <h3 class="text-center text-info">
+          Team scores hidden
+        </h3>
       </div>
-      <div class="row vertical-center">
 
-        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-          <div class="page-header">
-            <h2 class="text-center">Messages</h2>
-          </div>
+    </div>
+    <div class="row vertical-center">
+
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+        <div class="page-header">
+          <h2 class="text-center">Messages</h2>
         </div>
-
       </div>
-      <div class="row vertical-center">
 
-        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-          <p>
-          <strong>Note:</strong> Messages sent while the browser is inactive may not appear.
-          <br>
-          Messages sent before game start are
-          <span class="text-muted">grey</span>, during setup are
-          <span class="text-info">blue</span>, during game play are
-          <span class="text-success">green</span>, and after game end are
-          <span class="text-danger">red</span>.
-          </p>
-        </div>
+    </div>
+    <div class="row vertical-center">
 
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+        <p>
+        <strong>Note:</strong> Messages sent while the browser is inactive may not appear.
+        <br>
+        Messages sent before game start are
+        <span class="text-muted">grey</span>, during setup are
+        <span class="text-info">blue</span>, during game play are
+        <span class="text-success">green</span>, and after game end are
+        <span class="text-danger">red</span>.
+        </p>
       </div>
-      <div class="row vertical-center">
 
-        <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-          <table class="table">
-            <tr>
-              <th class="col-sm-2 col-xs-2">Time</th>
-              <th>Message</th>
-            </tr>
-          </table>
-        </div>
+    </div>
+    <div class="row vertical-center">
 
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+        <table class="table">
+          <tr>
+            <th class="col-sm-2 col-xs-2">Time</th>
+            <th>Message</th>
+          </tr>
           <tr v-for="message in sortedMessages"
             :key="message.time + '|' + message.body"
             :class="toMessageColor(message.time)">
             <td>[[ message.time | secsToLocaleTimeString ]]</td>
             <td>[[ message.body ]]</td>
           </tr>
+        </table>
       </div>
 
     </div>
