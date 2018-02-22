@@ -126,13 +126,15 @@
         logServerDate();
         setInterval(logServerDate, serverDateLogInterval);
 
+        // Vue plugin to store certain instance data in sessionStorage.
+        // Adds the 'storage' property to the Vue instance.
         Vue.use(vuejsStorage);
 
         // Unless otherwise noted, all durations are in stored in seconds and
         // all times are stored as seconds since the UNIX epoch
         new Vue({
-          el: '#app',
-          delimiters: ['[[', ']]'],
+          el: '#app', // Have Vue use the #app div as its template
+          delimiters: ['[[', ']]'], // Use these since Django uses {{ }}
           data: {
             serverNow: getServerNow(),
             clientNow: getClientNow(),
@@ -175,6 +177,7 @@
             storage: sessionStorage,
             namespace: 'ctfws-timer',
           },
+          // Called after the Vue instance is created
           created: function() {
             // Setup the MQTT client and connect. This function is defined in
             // mqtt.html, which is included above. This defines mqttClient as the
@@ -460,6 +463,7 @@
               return new Date(secs * 1000).toLocaleTimeString();
             },
           },
+          // Called after Vue has mounted its virtual DOM to the real DOM
           mounted: function() {
             // All initial jQuery needs to be done in here, after Vue has set up
             // the DOM
