@@ -134,7 +134,7 @@
         // all times are stored as seconds since the UNIX epoch
         new Vue({
           el: '#app', // Have Vue use the #app div as its template
-          delimiters: ['[[', ']]'], // Use these since Django uses {{ }}
+          delimiters: ['[[', ']]'], // Use these since Django uses { { } }
           data: {
             serverNow: getServerNow(),
             clientNow: getClientNow(),
