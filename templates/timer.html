@@ -376,7 +376,7 @@
       //       if (!isNaN(secs)) {
       //         gameEndtime = secs;
       //       } else {
-      //         colsole.log("Unknown endtime message: " + msg);
+      //         console.error("Unknown endtime message: " + msg);
       //       }
       //       break;
       //     case 'message':
@@ -712,7 +712,7 @@
                   if (!isNaN(secs)) {
                     this.times.earlyGameEnd = secs;
                   } else {
-                    colsole.log("Unknown endtime message: " + msg);
+                    console.error("Unknown endtime message: " + msg);
                   }
                   break;
                 case 'message':
