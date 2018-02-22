@@ -29,7 +29,7 @@
       {% endif %}
 
       // TODO deleteme Timing constants
-      var updateUIIntervalTime = 500; // ms
+      // var updateUIIntervalTime = 500; // ms
 
       // If useWords, then convert seconds to
       // "[minus ][H hr[s]][M min[s]]S sec[s]"
@@ -113,13 +113,13 @@
       // }
 
       // Sets the color of a progress bar
-      function setBarColor(barName, color) {
-        $(barName).removeClass("progress-bar-success");
-        $(barName).removeClass("progress-bar-info");
-        $(barName).removeClass("progress-bar-warning");
-        $(barName).removeClass("progress-bar-danger");
-        $(barName).addClass(color);
-      }
+      // function setBarColor(barName, color) {
+      //   $(barName).removeClass("progress-bar-success");
+      //   $(barName).removeClass("progress-bar-info");
+      //   $(barName).removeClass("progress-bar-warning");
+      //   $(barName).removeClass("progress-bar-danger");
+      //   $(barName).addClass(color);
+      // }
 
       // UI const variables
       // var redFlagsText = "Red has: ";
@@ -147,12 +147,12 @@
       // var gameMessages = [];
 
       // Function which updates the page based on the UI state variables
-      function updateUI() {
-        return;
-        var now = getServerNow();
+      // function updateUI() {
+        // return;
+        // var now = getServerNow();
 
         // Config and Endtime
-        if (gameValid) {
+        // if (gameValid) {
           // $("#flagsHeader").text(flagsText + flagsPerTeam);
 
           // var setupEnd = gameStarttime + setupDuration;
@@ -162,82 +162,82 @@
           // var gameStartText = setupEndDate.toLocaleTimeString();
           // var numText = gameNumber === 0 ? "State" : gameNumber;
 
-          if ((gameEndtime >= gameStarttime && gameEndtime <= now) ||
-              gameEnd <= now) {
+          // if ((gameEndtime >= gameStarttime && gameEndtime <= now) ||
+          //     gameEnd <= now) {
             // Over
             // setGameHeader("Game " + numText + ": ", "Over", "text-danger");
-            var secs = 0;
+            // var secs = 0;
             // var gameEndDate = null;
-            if (gameEndtime >= gameStarttime && gameEndtime <= now) {
-              secs = Math.max(Math.min(gameEndtime, gameEnd) - setupEnd, 0);
+            // if (gameEndtime >= gameStarttime && gameEndtime <= now) {
+            //   secs = Math.max(Math.min(gameEndtime, gameEnd) - setupEnd, 0);
               // gameEndDate = new Date(Math.min(gameEndtime, gameEnd) * 1000);
-            } else {
-              secs = gameEnd - setupEnd;
+            // } else {
+            //   secs = gameEnd - setupEnd;
               // gameEndDate = new Date(gameEnd * 1000);
-            }
+            // }
             // var gameEndText = gameEndDate.toLocaleTimeString();
             // $("#startTimeLabel").text("Game ended at " + gameEndText);
-            var roundNum = Math.floor((secs - 1) / roundDuration); // 0-indexed
-            var roundSecs = secs - roundNum * roundDuration;
-            $("#setupJailbreakLabel").text("Jailbreak " + (roundNum + 1));
-            var percent1 = Math.round((100 * roundSecs) / roundDuration);
-            $("#firstBar").width(percent1 + "%");
-            setBarColor("#firstBar", "progress-bar-danger");
-            $("#firstBarLabel").text(toHMS(roundSecs) + " / " +
-                toHMS(roundDuration));
-            var percent2 = Math.round((100 * secs) / gameDuration);
-            $("#secondBar").width(percent2 + "%");
-            setBarColor("#secondBar", "progress-bar-danger");
-            $("#secondBarLabel").text(toHMS(secs) + " / " +
-                toHMS(gameDuration));
-          } else if (setupEnd <= now) {
+            // var roundNum = Math.floor((secs - 1) / roundDuration); // 0-indexed
+            // var roundSecs = secs - roundNum * roundDuration;
+            // $("#setupJailbreakLabel").text("Jailbreak " + (roundNum + 1));
+            // var percent1 = Math.round((100 * roundSecs) / roundDuration);
+            // $("#firstBar").width(percent1 + "%");
+            // setBarColor("#firstBar", "progress-bar-danger");
+            // $("#firstBarLabel").text(toHMS(roundSecs) + " / " +
+            //     toHMS(roundDuration));
+            // var percent2 = Math.round((100 * secs) / gameDuration);
+            // $("#secondBar").width(percent2 + "%");
+            // setBarColor("#secondBar", "progress-bar-danger");
+            // $("#secondBarLabel").text(toHMS(secs) + " / " +
+            //     toHMS(gameDuration));
+          // } else if (setupEnd <= now) {
             // Playing
             // setGameHeader("Game " + numText + ": ", "In Progress",
             //     "text-success");
             // $("#startTimeLabel").text("Game started at " + gameStartText);
-            var secs = now - setupEnd;
-            var roundNum = Math.floor((secs - 1) / roundDuration); // 0-indexed
-            var roundSecs = secs - roundNum * roundDuration;
-            $("#setupJailbreakLabel").text("Jailbreak " + (roundNum + 1));
-            var percent1 = Math.round((100 * roundSecs) / roundDuration);
-            $("#firstBar").width(percent1 + "%");
-            setBarColor("#firstBar", "progress-bar-warning");
-            $("#firstBarLabel").text(toHMS(roundSecs) + " / " +
-                toHMS(roundDuration));
-            var percent2 = Math.round((100 * secs) / gameDuration);
-            $("#secondBar").width(percent2 + "%");
-            setBarColor("#secondBar", "progress-bar-success");
-            $("#secondBarLabel").text(toHMS(secs) + " / " +
-                toHMS(gameDuration));
-          } else {
+            // var secs = now - setupEnd;
+            // var roundNum = Math.floor((secs - 1) / roundDuration); // 0-indexed
+            // var roundSecs = secs - roundNum * roundDuration;
+            // $("#setupJailbreakLabel").text("Jailbreak " + (roundNum + 1));
+            // var percent1 = Math.round((100 * roundSecs) / roundDuration);
+            // $("#firstBar").width(percent1 + "%");
+            // setBarColor("#firstBar", "progress-bar-warning");
+            // $("#firstBarLabel").text(toHMS(roundSecs) + " / " +
+            //     toHMS(roundDuration));
+            // var percent2 = Math.round((100 * secs) / gameDuration);
+            // $("#secondBar").width(percent2 + "%");
+            // setBarColor("#secondBar", "progress-bar-success");
+            // $("#secondBarLabel").text(toHMS(secs) + " / " +
+            //     toHMS(gameDuration));
+          // } else {
             // Setup
             // setGameHeader("Game " + numText + ": ", "Setup", "text-info");
             // $("#startTimeLabel").text("Game starts at " + gameStartText);
-            $("#setupJailbreakLabel").text("Setup");
-            var secs = now - gameStarttime;
-            var percent = Math.round((100 * secs) / setupDuration);
-            $("#firstBar").width(percent + "%");
-            setBarColor("#firstBar", "progress-bar-info");
-            $("#firstBarLabel").text(toHMS(secs) + " / " +
-                toHMS(setupDuration));
-            $("#secondBar").width("0%");
-            setBarColor("#secondBar", "progress-bar-success");
-            $("#secondBarLabel").text(toHMS(0) + " / " + toHMS(gameDuration));
-          }
+            // $("#setupJailbreakLabel").text("Setup");
+            // var secs = now - gameStarttime;
+            // var percent = Math.round((100 * secs) / setupDuration);
+            // $("#firstBar").width(percent + "%");
+            // setBarColor("#firstBar", "progress-bar-info");
+            // $("#firstBarLabel").text(toHMS(secs) + " / " +
+            //     toHMS(setupDuration));
+            // $("#secondBar").width("0%");
+            // setBarColor("#secondBar", "progress-bar-success");
+            // $("#secondBarLabel").text(toHMS(0) + " / " + toHMS(gameDuration));
+          // }
 
-        } else {
+        // } else {
           // No Game
           // setGameHeader("No Current Game", "", "");
           // $("#startTimeLabel").text("");
-          $("#setupJailbreakLabel").text("Setup");
-          $("#firstBar").width("0%");
-          setBarColor("#firstBar", "progress-bar-danger");
-          $("#firstBarLabel").text("0:00 / 15:00");
-          $("#secondBar").width("0%");
-          setBarColor("#secondBar", "progress-bar-danger");
-          $("#secondBarLabel").text("0:00 / 1:00:00");
+          // $("#setupJailbreakLabel").text("Setup");
+          // $("#firstBar").width("0%");
+          // setBarColor("#firstBar", "progress-bar-danger");
+          // $("#firstBarLabel").text("0:00 / 15:00");
+          // $("#secondBar").width("0%");
+          // setBarColor("#secondBar", "progress-bar-danger");
+          // $("#secondBarLabel").text("0:00 / 1:00:00");
           // $("#flagsHeader").text(flagsText + "0");
-        }
+        // }
 
         // Stun Timer
         //if (stunStart > 0) {
@@ -303,7 +303,7 @@
           //   gameMessages[i][1] + '<\/td><\/tr>';
           // $("#messageTable").append(newRow);
         // }
-      }
+      // }
 
       // Compare messages by timestamp such that sorting will put them in order
       // from newest to oldest
@@ -414,7 +414,7 @@
       var serverDateLogInterval = 60 * 1000; // ms
 
       // TODO deleteme
-      var updateUIIntervalObject = false;
+      // var updateUIIntervalObject = false;
 
       $(document).ready(function() {
         // Log the ServerDate precision and delta
@@ -428,13 +428,13 @@
         // false and it will set up the interval. If not, we start the interval
         // and if it still connects after 3 seconds, it will not touch the
         // interval.
-        updateUIIntervalObject = false; // Intentionally global
-        setTimeout(function() {
-          if (updateUIIntervalObject === false) {
-            updateUI();
-            updateUIIntervalObject = setInterval(updateUI, updateUIIntervalTime);
-          }
-        }, 3 * 1000); // 3 seconds
+        // updateUIIntervalObject = false; // Intentionally global
+        // setTimeout(function() {
+        //   if (updateUIIntervalObject === false) {
+        //     updateUI();
+        //     updateUIIntervalObject = setInterval(updateUI, updateUIIntervalTime);
+        //   }
+        // }, 3 * 1000); // 3 seconds
 
         Vue.use(vuejsStorage);
 
@@ -522,11 +522,11 @@
             setupEnd: function() {
               return this.times.start + this.setupDuration;
             },
-            gameDuration: function() {
+            playDuration: function() {
               return this.rounds.total * this.rounds.duration;
             },
             scheduledGameEnd: function() {
-              return this.setupEnd + this.gameDuration;
+              return this.setupEnd + this.playDuration;
             },
             actualGameEnd: function() {
               if (this.times.earlyGameEnd >= this.times.start) {
@@ -535,20 +535,55 @@
                 return this.scheduledGameEnd;
               }
             },
+            playTimeElapsed: function() {
+              // How many seconds have elapsed in the playing portion of the
+              // game. Zero if we are before or during setup. The number of
+              // seconds played if the game is over.
+              var latestTime = Math.min(this.now, this.actualGameEnd);
+              return Math.max(latestTime - this.setupEnd, 0);
+            },
+            roundNumber: function() {
+              // Current jailbreak number (1-indexed)
+              return Math.ceil(this.playTimeElapsed / this.rounds.duration);
+            },
+            roundTimeElapsed: function() {
+              var roundStart = (this.roundNumber - 1) * this.rounds.duration;
+              return this.playTimeElapsed - roundStart;
+            },
             gameState: function() {
+              // In the setupEnd case, we use > rather than >=
+              // The UI looks best if the last tick of a round (including setup)
+              // belongs to that round (the progress bar actually fills all the
+              // way up). In the other two cases, we use >= because the moment
+              // the game starts we should exit "pre-setup" and the moment the
+              // game ends, we should show the end.
               if (this.now >= this.actualGameEnd) {
                 return {
                   stateText: "Over",
                   stateColor: "text-danger",
                   subtitleText: "ended",
                   subtitleTime: this.actualGameEnd,
+                  gameBarColor: "progress-bar-danger",
+                  roundBar: {
+                    label: "Jailbreak " + this.roundNumber,
+                    elapsed: this.roundTimeElapsed,
+                    total: this.rounds.duration,
+                    color: "progress-bar-danger",
+                  },
                 };
-              } else if (this.now >= this.setupEnd) {
+              } else if (this.now > this.setupEnd) {
                 return {
                   stateText: "In Progress",
                   stateColor: "text-success",
                   subtitleText: "started",
                   subtitleTime: this.setupEnd,
+                  gameBarColor: "progress-bar-success",
+                  roundBar: {
+                    label: "Jailbreak " + this.roundNumber,
+                    elapsed: this.roundTimeElapsed,
+                    total: this.rounds.duration,
+                    color: "progress-bar-warning",
+                  },
                 };
               } else if (this.now >= this.times.start) {
                 return {
@@ -556,6 +591,13 @@
                   stateColor: "text-info",
                   subtitleText: "starts",
                   subtitleTime: this.setupEnd,
+                  gameBarColor: "progress-bar-success",
+                  roundBar: {
+                    label: "Setup",
+                    elapsed: this.now - this.times.start,
+                    total: this.setupDuration,
+                    color: "progress-bar-info",
+                  },
                 };
               } else {
                 return {
@@ -563,14 +605,45 @@
                   stateColor: "text-muted",
                   subtitleText: "starts",
                   subtitleTime: this.setupEnd,
+                  gameBarColor: "progress-bar-success",
+                  roundBar: {
+                    label: "Setup",
+                    elapsed: 0,
+                    total: this.setupDuration,
+                    color: "progress-bar-info",
+                  },
+                };
+              }
+            },
+            roundProgressBar: function() {
+              if (this.displayGame) {
+                return this.gameState.roundBar;
+              } else {
+                return {
+                  label: "Setup",
+                  elapsed: 0,
+                  total: 15 * 60, // The default: fifteen minute setup
+                  color: "progress-bar-danger",
+                };
+              }
+            },
+            gameProgressBar: function() {
+              if (this.displayGame) {
+                return {
+                  elapsed: this.playTimeElapsed,
+                  total: this.playDuration,
+                  color: this.gameState.gameBarColor,
+                };
+              } else {
+                return {
+                  elapsed: 0,
+                  total: 4 * 15 * 60, // The default: four fifteen minute rounds
+                  color: "progress-bar-danger",
                 };
               }
             },
             stunElapsed: function() {
               return Math.min(this.now - this.stun.start, this.stun.length);
-            },
-            stunPercent: function() {
-              return Math.round((100 * this.stunElapsed) / this.stun.length);
             },
             sortedMessages: function() {
               return this.messages.sort(compareMessages);
@@ -669,13 +742,16 @@
                   console.warn("Unknown topic: " + message.destinationName);
               }
             },
+            toPercent: function(elapsed, total) {
+              return Math.round((100 * elapsed) / total);
+            },
             // Get the color class to apply to a message in the table given it's
             // timestamp
             toMessageColor: function(timestamp) {
               if (this.displayGame) {
                 if (timestamp >= this.actualGameEnd) {
                   return "danger"; // Red, game over
-                } else if (timestamp >= this.setupEnd) {
+                } else if (timestamp > this.setupEnd) { // See gameState() note
                   return "success"; // Green, playing
                 } else if (timestamp >= this.times.start) {
                   return "info"; // Blue, setup
@@ -776,19 +852,26 @@
     <div class="row vertical-center">
 
       <div class="col-sm-offset-1 col-sm-2 col-xs-3">
-        <p id="setupJailbreakLabel" class="lead text-center">Setup</p>
+        <p class="lead text-center">
+          [[ roundProgressBar.label ]]
+        </p>
       </div>
 
       <div class="col-sm-6 col-xs-6">
         <div class="progress">
-          <div id="firstBar" class="progress-bar" role="progressbar"
-            style="width: 0%">
+          <div class="progress-bar" role="progressbar"
+            :class="roundProgressBar.color"
+            :style="{ width: toPercent(roundProgressBar.elapsed,
+              roundProgressBar.total) + '%' }">
           </div>
         </div>
       </div>
 
       <div class="col-sm-2 col-xs-3">
-        <p id="firstBarLabel" class="lead text-center">0:00 / 15:00</p>
+        <p class="lead text-center">
+          [[ roundProgressBar.elapsed | toHMS ]] /
+          [[ roundProgressBar.total | toHMS ]]
+        </p>
       </div>
 
     </div>
@@ -800,14 +883,19 @@
 
       <div class="col-sm-6 col-xs-6">
         <div class="progress">
-          <div id="secondBar" class="progress-bar" role="progressbar"
-            style="width: 0%">
+          <div class="progress-bar" role="progressbar"
+            :class="gameProgressBar.color"
+            :style="{ width: toPercent(gameProgressBar.elapsed,
+              gameProgressBar.total) + '%' }">
           </div>
         </div>
       </div>
 
       <div class="col-sm-2 col-xs-3">
-        <p id="secondBarLabel" class="lead text-center">0:00 / 1:00:00</p>
+        <p class="lead text-center">
+          [[ gameProgressBar.elapsed | toHMS ]] /
+          [[ gameProgressBar.total | toHMS ]]
+        </p>
       </div>
 
     </div>
@@ -819,8 +907,8 @@
 
       <div class="col-sm-6 col-xs-6">
         <div class="progress">
-          <div class="progress-bar progress-bar-info"
-            role="progressbar" :style="{ width: stunPercent + '%' }">
+          <div class="progress-bar progress-bar-info" role="progressbar"
+            :style="{ width: toPercent(stunElapsed, stun.length) + '%' }">
           </div>
         </div>
       </div>
@@ -837,7 +925,7 @@
       <div class="col-sm-offset-1 col-sm-10 col-xs-12 text-center">
         <button class="btn btn-info btn-lg" type="button"
           @click="clickCancel">
-          [[ stunPercent < 100 ? 'Cancel' : 'Done' ]]
+          [[ stunElapsed < stun.length ? 'Cancel' : 'Done' ]]
         </button>
       </div>
 
