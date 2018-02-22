@@ -28,7 +28,12 @@ else:
         SECRET_KEY = f.read().strip()
 
 # The leading dots allow for any subdomain
-ALLOWED_HOSTS = ['.cmukgb.org', '.kgb.cmu.io', '.kgb.club.cc.cmu.edu']
+ALLOWED_HOSTS = [
+    '.cmukgb.org',
+    '.kgb.cmu.io',
+    '.kgb.club.cc.cmu.edu',
+    '.ctfws.org',
+]
 if DEBUG:
     ALLOWED_HOSTS += ['localhost', '127.0.0.1', '[::1]', '.local']
 
@@ -148,4 +153,3 @@ LOGOUT_REDIRECT_URL = reverse_lazy('index')
 # SECURE_SSL_REDIRECT = not DEBUG # Use SSL in production
 
 X_FRAME_OPTIONS = 'DENY'
-
