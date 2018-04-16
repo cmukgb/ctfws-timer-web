@@ -66,12 +66,16 @@
       function updateInputColor() {
         var cell = $(this).parent();
         var inputs = cell.children("input");
-        var topStr = $.trim(inputs[0].value);
-        var bottomStr = $.trim(inputs[1].value);
-        if (topStr === bottomStr && topStr !== "") {
-          cell.addClass("success");
-        } else {
-          cell.removeClass("success");
+        var top = parseInt(inputs[0].value);
+        var bottom = parseInt(inputs[1].value);
+        cell.removeClass("success");
+        cell.removeClass("success-dark");
+        if (!isNaN(top) && !isNaN(bottom)) {
+          if (top === bottom) {
+            cell.addClass("success");
+          } else if (top > bottom) {
+            cell.addClass("success-dark");
+          }
         }
       }
 
