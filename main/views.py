@@ -12,7 +12,7 @@ from .models import StuffCount
 StuffCountForm = modelform_factory(StuffCount, fields='__all__')
 
 def index(request):
-    return render(request, 'timer.html', {'DEBUG': settings.DEBUG})
+    return render(request, 'timer.html')
 
 def user_is_judge(user):
     return user.groups.filter(name='judges').exists()
@@ -98,5 +98,4 @@ def judge(request):
         else:
             totals = StuffCount() # Defaults all fields to 0
         form = StuffCountForm()
-        return render(request, 'judge.html',
-            {'totals': totals, 'form': form, 'DEBUG': settings.DEBUG})
+        return render(request, 'judge.html', {'totals': totals, 'form': form})

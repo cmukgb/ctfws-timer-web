@@ -23,8 +23,7 @@ from ctfws_timer import settings
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^login/$',
-        auth_views.LoginView.as_view(template_name='login.html',
-            extra_context={'DEBUG': settings.DEBUG}),
+        auth_views.LoginView.as_view(template_name='login.html'),
         name='login'),
     url(r'^logout/$',
         auth_views.LogoutView.as_view(),
