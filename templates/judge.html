@@ -80,19 +80,29 @@
       }
 
       function postStuffForm() {
-        $("#saveTotalsResult").text("");
-        $("#saveTotalsResult").removeClass("text-success");
-        $("#saveTotalsResult").removeClass("text-danger");
+        var message = $("#saveTotalsResult");
+        message.removeClass("text-success");
+        message.removeClass("text-danger");
+        message.removeClass("text-warning");
+        message.text("Saving...");
         var result = $.post($("#stuffForm").attr("action"),
           $("#stuffForm").serialize());
         result.done(function () {
-          $("#saveTotalsResult").addClass("text-success");
-          $("#saveTotalsResult").text("Saved!");
+          message.addClass("text-success");
+          message.text("Saved!");
         });
         result.fail(function (response) {
-          $("#saveTotalsResult").addClass("text-danger");
-          $("#saveTotalsResult").text("Error: " + response.responseText);
+          message.addClass("text-danger");
+          message.text("Error: " + response.responseText);
         });
+      }
+
+      function setUnsavedMessage() {
+        var message = $("#saveTotalsResult");
+        message.removeClass("text-danger");
+        message.removeClass("text-success");
+        message.addClass("text-warning");
+        message.text("Unsaved changes");
       }
 
       function clearStuffFormCounts() {
@@ -208,8 +218,11 @@
         // Message type changes
         $("input[name='message_type']").change(showCurrentMessageSpans);
 
-        // Stuf table cell coloring
+        // Stuff table cell coloring
         $("#stuffTables input").on("input", updateInputColor);
+
+        // Stuff table "unsaved changes" message
+        $("#stuffTables input:last-child").on("input", setUnsavedMessage);
 
         // Stuff table buttons
         $("#clearCountsButton").click(clearStuffFormCounts);
