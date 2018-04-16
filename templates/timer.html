@@ -712,7 +712,10 @@
             <th class="col-sm-2 col-xs-2">Time</th>
             <th>Message</th>
           </tr>
-          <tr v-for="message in sortedMessages"
+          <tr v-if="sortedMessages.length === 0">
+            <td colspan="2" class="text-center">No messages</td>
+          </tr>
+          <tr v-else v-for="message in sortedMessages"
             :key="message.time + '|' + message.body"
             :class="toMessageColor(message.time)">
             <td>[[ message.time | secsToLocaleTimeString ]]</td>
