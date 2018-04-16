@@ -21,13 +21,19 @@
 
         var error = false;
 
-        // Check each element within the form that has class input-required
+        // Check each element within the form that has class input-required.
+        // Setting has-feedback is recommended by Bootstrap, but it adds
+        // excessive padding that cuts off the text in the input. Looking
+        // through the Bootstrap CSS, it doesn't appear to do anything we need,
+        // so we won't add it.
         $(".input-required", this).each(function () {
           if ($.trim(this.value) === "") {
             error = true;
+            // $(this).closest(".form-group").addClass("has-feedback");
             $(this).closest(".form-group").addClass("has-error");
           } else {
             $(this).closest(".form-group").removeClass("has-error");
+            // $(this).closest(".form-group").removeClass("has-feedback");
           }
         });
 
@@ -290,7 +296,7 @@
             </div>
 
             <div class="col-sm-3 col-xs-6">
-              <div class="form-group has-feedback">
+              <div class="form-group">
                 <label class="control-label sr-only" for="numFlagsInput">
                   Number of flags
                 </label>
@@ -304,7 +310,7 @@
             </div>
 
             <div class="col-sm-3 col-xs-6">
-              <div class="form-group has-feedback">
+              <div class="form-group">
                 <label class="control-label sr-only" for="gameNumInput">
                   Game number
                 </label>
@@ -341,7 +347,7 @@
                 <div class="col-sm-9 col-xs-12">
                   <div class="row row-small-gutter">
                     <div class="col-xs-6">
-                      <div class="form-group has-feedback">
+                      <div class="form-group">
                         <label class="control-label sr-only" for="redFlagsInput">
                           Red score
                         </label>
@@ -355,7 +361,7 @@
                     </div>
 
                     <div class="col-xs-6">
-                      <div class="form-group has-feedback">
+                      <div class="form-group">
                         <label class="control-label sr-only" for="yellowFlagsInput">
                           Yellow score
                         </label>
