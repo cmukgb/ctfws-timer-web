@@ -654,34 +654,70 @@
                 </table>
               </div>
 
-              <div class="panel panel-primary">
-                <div class="panel-heading">
-                  <h1 class="panel-title">Flags</h1>
+              <div class="row">
+                <div class="col-xs-6">
+                  <div class="panel panel-primary">
+                    <div class="panel-heading">
+                      <h1 class="panel-title">Flags</h1>
+                    </div>
+                    <table class="table table-bordered">
+                      <tr>
+                        <th class="bg-grey"></th>
+                        <th class="danger">Red</th>
+                        <th class="warning">Yellow</th>
+                      </tr>
+                      <tr>
+                        <th>Flags</th>
+                        <td>
+                          <input type="number" class="form-control">
+                          <hr>
+                          <input type="number" class="form-control"
+                            name="{{ form.red_flags.html_name }}"
+                            value="{{ totals.red_flags }}">
+                        </td>
+                        <td>
+                          <input type="number" class="form-control">
+                          <hr>
+                          <input type="number" class="form-control"
+                            name="{{ form.yellow_flags.html_name }}"
+                            value="{{ totals.yellow_flags }}">
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
                 </div>
-                <table class="table table-bordered">
-                  <tr>
-                    <th class="bg-grey"></th>
-                    <th class="danger">Red</th>
-                    <th class="warning">Yellow</th>
-                  </tr>
-                  <tr>
-                    <th>Flags</th>
-                    <td>
-                      <input type="number" class="form-control">
-                      <hr>
-                      <input type="number" class="form-control"
-                        name="{{ form.red_flags.html_name }}"
-                        value="{{ totals.red_flags }}">
-                    </td>
-                    <td>
-                      <input type="number" class="form-control">
-                      <hr>
-                      <input type="number" class="form-control"
-                        name="{{ form.yellow_flags.html_name }}"
-                        value="{{ totals.yellow_flags }}">
-                    </td>
-                  </tr>
-                </table>
+
+                <div class="col-xs-6">
+                  <div class="panel panel-primary">
+                    <div class="panel-heading">
+                      <h1 class="panel-title">Hats</h1>
+                    </div>
+                    <table class="table table-bordered">
+                      <tr>
+                        <th class="bg-grey"></th>
+                        <th class="danger">Red</th>
+                        <th class="warning">Yellow</th>
+                      </tr>
+                      <tr>
+                        <th>Hats</th>
+                        <td>
+                          <input type="number" class="form-control">
+                          <hr>
+                          <input type="number" class="form-control"
+                            name="{{ form.red_hats.html_name }}"
+                            value="{{ totals.red_hats }}">
+                        </td>
+                        <td>
+                          <input type="number" class="form-control">
+                          <hr>
+                          <input type="number" class="form-control"
+                            name="{{ form.yellow_hats.html_name }}"
+                            value="{{ totals.yellow_hats }}">
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
 

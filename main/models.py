@@ -4,6 +4,9 @@ class StuffCount(models.Model):
     red_flags = models.IntegerField(default=0, blank=True, null=True)
     yellow_flags = models.IntegerField(default=0, blank=True, null=True)
 
+    red_hats = models.IntegerField(default=0, blank=True, null=True)
+    yellow_hats = models.IntegerField(default=0, blank=True, null=True)
+
     red_jail = models.IntegerField(default=0, blank=True, null=True)
     yellow_jail = models.IntegerField(default=0, blank=True, null=True)
     red_yukko = models.IntegerField(default=0, blank=True, null=True)
@@ -27,4 +30,3 @@ class StuffCount(models.Model):
     green_potions = models.IntegerField(default=0, blank=True, null=True)
     blue_potions = models.IntegerField(default=0, blank=True, null=True)
     white_potions = models.IntegerField(default=0, blank=True, null=True)
-
