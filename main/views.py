@@ -27,6 +27,7 @@ def get_args(post):
     send_message = os.path.join(base_dir, 'scripts', 'send_message.sh')
     send_player_message = os.path.join(base_dir, 'scripts', 'send_player_message.sh')
     send_jail_message = os.path.join(base_dir, 'scripts', 'send_jail_message.sh')
+    clear_messages = os.path.join(base_dir, 'scripts', 'clear_messages.sh')
 
     com = post['command']
     if com == 'no_game':
@@ -58,9 +59,17 @@ def get_args(post):
             result += [post['message_timestamp']]
         return result
     elif com == 'start_game':
-        result = [start_game, post['num_flags'], post['game_num']]
+        result = [start_game, post['num_flags'], post['game_num'],
+                post['territory']]
         if 'start_timestamp' in post and post['start_timestamp'] != '':
             result += [post['start_timestamp']]
+        if 'zero_flags' in post and post['zero_flags'] == 'on':
+            result += ['--zero-flags']
+        return result
+    elif com == 'clear_messages':
+        result = [clear_messages]
+        if 'clear_timestamp' in post and post['clear_timestamp'] != '':
+            result += [post['clear_timestamp']]
         return result
     else:
         return None

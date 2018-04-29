@@ -31,9 +31,9 @@ The commands are:
 * `./send_message.sh`
 * `./send_player_message.sh`
 * `./send_jail_message.sh`
+* `./clear_messages.sh`
 
 ## The Broker
 The MQTT broker is run from the kgb.club.cc.cmu.edu server. It should start
 itself properly when the server boots up. The config is in `/etc/mosquitto/`.
 To start, stop, or reload the broker, use `/etc/init.d/mosquitto`.
-

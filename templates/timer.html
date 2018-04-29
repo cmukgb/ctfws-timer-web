@@ -101,12 +101,6 @@
           " ms");
       }
 
-      // Compare messages by timestamp such that sorting will put them in order
-      // from newest to oldest
-      function compareMessages(a, b) {
-        return b.time - a.time;
-      }
-
       function messageInList(msg, msgList) {
         for (var i = 0; i < msgList.length; i++) {
           if (msg.time === msgList[i].time && msg.body === msgList[i].body) {
@@ -165,6 +159,9 @@
               numYellow: 0,
               perTeam: 0,
             },
+            // Whether the red team is defending Wean (null indicates error).
+            redInWean: null,
+            hideMessagesBefore: 0,
           },
           // Used by vuejs-storage: Everything in this.storage.data should work
           // exactly the same as things in this.data (including being available
@@ -180,8 +177,8 @@
           // Called after the Vue instance is created
           created: function() {
             // Setup the MQTT client and connect. This function is defined in
-            // mqtt.html, which is included above. This defines mqttClient as the
-            // global variable for the client connection.
+            // mqtt.html, which is included above. This defines mqttClient as
+            // the global variable for the client connection.
             initMqtt(this.onMessageArrived);
 
             // Update the "now" variables every updateNowIntervalTime. Vue will
@@ -338,8 +335,18 @@
             stunElapsed: function() {
               return Math.min(this.now - this.stun.start, this.stun.length);
             },
-            sortedMessages: function() {
-              return this.messages.sort(compareMessages);
+            sortedFilteredMessages: function() {
+              // Have to capture 'this' in order to use it in showMessage
+              var vm = this;
+              function showMessage(m) {
+                return m.time >= vm.hideMessagesBefore;
+              }
+              // Compare messages by timestamp such that sorting will put them
+              // in order from newest to oldest
+              function compareMessages(a, b) {
+                return b.time - a.time;
+              }
+              return this.messages.filter(showMessage).sort(compareMessages);
             },
           },
           methods: {
@@ -363,13 +370,14 @@
                   if (msg === "none") {
                     this.displayGame = false;
                   } else {
-                    var split = splitOnWhitespace(msg, 6);
+                    var split = splitOnWhitespace(msg, 7);
                     var start = parseInt(split[0]);
                     var setup = parseInt(split[1]);
                     var rounds = parseInt(split[2]);
                     var roundlen = parseInt(split[3]);
                     var flags = split[4];
                     var gamenum = split[5];
+                    var territory = split[6];
                     if (!isNaN(start) && !isNaN(setup) && !isNaN(rounds) &&
                         !isNaN(roundlen)) {
                       this.times.start = start;
@@ -378,6 +386,13 @@
                       this.rounds.duration = roundlen;
                       this.flags.perTeam = flags;
                       this.gameNumber = gamenum;
+                      if (territory === "wd") {
+                        this.redInWean = true;
+                      } else if (territory === "dw") {
+                        this.redInWean = false;
+                      } else {
+                        this.redInWean = null;
+                      }
                       this.displayGame = true;
                     } else {
                       console.error("Unknown config message: " + msg);
@@ -385,12 +400,15 @@
                   }
                   break;
                 case 'flags':
-                  if (msg === "?") {
+                  var split = splitOnFirstWhitespace(msg);
+                  // Ignore split[0] which is the timestamp
+                  var flags = split[1];
+                  if (flags === "?") {
                     this.flags.show = false;
                   } else {
-                    var split = splitOnWhitespace(msg, 2);
-                    var r = parseInt(split[0]);
-                    var y = parseInt(split[1]);
+                    var flagsSplit = splitOnWhitespace(flags, 2);
+                    var r = parseInt(flagsSplit[0]);
+                    var y = parseInt(flagsSplit[1]);
                     if (!isNaN(r) && !isNaN(y)) {
                       this.flags.numRed = r;
                       this.flags.numYellow = y;
@@ -420,6 +438,9 @@
                       // their message list in case the judge really needs to
                       // recall a message. If secs is exactly 1, the list is
                       // cleared and the message is ignored.
+                      // This is pretty much made useless by the message reset
+                      // topic, but there's no harm in leaving this code as a
+                      // backup. It serves a slightly different purpose.
                       this.messages = []
                     } else if (!messageInList(newMessage, this.messages)) {
                       this.messages.push(newMessage);
@@ -430,6 +451,14 @@
                   break;
                 case 'message/jail':
                   console.info("Ignoring jail message: " + msg);
+                  break;
+                case 'messagereset':
+                  var secs = parseInt(msg.trim());
+                  if (!isNaN(secs)) {
+                    this.hideMessagesBefore = secs;
+                  } else {
+                    console.error("Invalid messagereset message: " + msg);
+                  }
                   break;
                 default:
                   console.warn("Unknown topic: " + message.destinationName);
@@ -515,7 +544,7 @@
         </p>
 
         <p v-show="showOffset" class="text-muted text-center">
-          <strong>Note:</strong> Your clock is
+          Note: Your clock is
           [[ this.serverClientDelta > 0 ? 'behind' : 'ahead of' ]]
           the game's by [[ serverClientAbsDelta | toHMSWords ]].
           <a id="offsetPopover" tabindex="0" role="button"
@@ -640,6 +669,19 @@
     <div class="row vertical-center">
 
       <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+
+        <p v-if="displayGame" class="lead text-center">
+          <span v-if="redInWean === null">
+            Unable to determine team territories.
+          </span>
+          <span v-else>
+            <span class="text-danger">Red</span> defending
+            [[ redInWean ? 'Wean' : 'Doherty' ]].
+            <span class="text-warning">Yellow</span> defending
+            [[ redInWean ? 'Doherty' : 'Wean' ]].
+          </span>
+        </p>
+
         <p class="text-muted text-center">
           Note: The head judge may choose to report a score for each team
           rather than a number of flags.
@@ -693,7 +735,8 @@
 
       <div class="col-sm-offset-1 col-sm-10 col-xs-12">
         <p>
-        <strong>Note:</strong> Messages sent while the browser is inactive may not appear.
+        <strong>Note:</strong>
+        Messages sent while the browser is inactive may not appear.
         <br>
         Messages sent before game start are
         <span class="text-muted">grey</span>, during setup are
@@ -712,10 +755,10 @@
             <th class="col-sm-2 col-xs-2">Time</th>
             <th>Message</th>
           </tr>
-          <tr v-if="sortedMessages.length === 0">
+          <tr v-if="sortedFilteredMessages.length === 0">
             <td colspan="2" class="text-center">No messages</td>
           </tr>
-          <tr v-else v-for="message in sortedMessages"
+          <tr v-else v-for="message in sortedFilteredMessages"
             :key="message.time + '|' + message.body"
             :class="toMessageColor(message.time)">
             <td>[[ message.time | secsToLocaleTimeString ]]</td>

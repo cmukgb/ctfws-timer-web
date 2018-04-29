@@ -12,8 +12,16 @@
 
       var totalsLocked = true; // Whether the stuff count totals are disabled
 
-      function replaceNewlines(str) {
-        return str.trim().replace(/\n/g, "; ");
+      // Split off the first line of the input and replace any remaining
+      // newlines with semicolons
+      function formatResult(str) {
+        var split = str.trim().split(/\n+/);
+        if (split.length > 1) {
+          var first = split.shift();
+          return [first, split.join("; ")];
+        } else {
+          return [split[0], ""];
+        }
       }
 
       function postForm(e) {
@@ -37,27 +45,43 @@
           }
         });
 
+        $(".radio-required", this).each(function () {
+          if ($("input:radio:checked", this).length < 1) {
+            error = true;
+            $(this).closest(".form-group").addClass("has-error");
+          } else {
+            $(this).closest(".form-group").removeClass("has-error");
+          }
+        });
+
         if (!error) {
           $("#commandResult").removeClass("text-success");
           $("#commandResult").removeClass("text-danger");
           $("#commandResult").addClass("text-primary");
-          $("#commandResult").text("Sending...");
+          $("#firstCommandResult").text("Sending...");
+          $("#extraCommandResults").text("");
 
           var result = $.post($(this).attr("action"), $(this).serialize());
 
           result.done(function (response) {
             $("#commandResult").removeClass("text-primary");
+            $("#commandResult").removeClass("text-danger");
             $("#commandResult").addClass("text-success");
-            $("#commandResult").text(replaceNewlines(response));
+            var split = formatResult(response);
+            $("#firstCommandResult").text(split[0]);
+            $("#extraCommandResults").text(split[1]);
           });
           result.fail(function (response) {
-            var errorMessage = replaceNewlines(response.responseText);
+            var errorMessage = response.responseText.trim();
             if (errorMessage === "") {
               errorMessage = "Unknown error. (The server may be unreachable.)"
             }
             $("#commandResult").removeClass("text-primary");
+            $("#commandResult").removeClass("text-success");
             $("#commandResult").addClass("text-danger");
-            $("#commandResult").text(errorMessage);
+            var split = formatResult(errorMessage);
+            $("#firstCommandResult").text(split[0]);
+            $("#extraCommandResults").text(split[1]);
           });
           // $(this)[0].reset(); // Use [0] to get the underlying DOM object
         }
@@ -164,22 +188,26 @@
               $("#numFlagsSpan").text("");
               $("#gameNumSpan").text("");
             } else {
-              var split = splitOnWhitespace(msg, 6);
+              var split = splitOnWhitespace(msg, 7);
               $("#startTimeSpan").text(split[0]);
               $("#numFlagsSpan").text(split[4]);
               $("#gameNumSpan").text(split[5]);
+              $("#territorySpan").text(split[6]);
             }
             break;
           case 'flags':
-            if (msg === "?") {
+            var split = splitOnFirstWhitespace(msg);
+            // Ignore split[0] which is the timestamp
+            var flags = split[1];
+            if (flags === "?") {
               $("#hiddenFlagsSpan").text("?");
               $("#redFlagsSpan").text("");
               $("#yellowFlagsSpan").text("");
             } else {
-              var split = splitOnWhitespace(msg, 2);
+              var flagsSplit = splitOnWhitespace(flags, 2);
               $("#hiddenFlagsSpan").text("");
-              $("#redFlagsSpan").text(split[0]);
-              $("#yellowFlagsSpan").text(split[1]);
+              $("#redFlagsSpan").text(flagsSplit[0]);
+              $("#yellowFlagsSpan").text(flagsSplit[1]);
             }
             break;
           case 'endtime':
@@ -204,6 +232,9 @@
             $("#jailMessageTimeSpan").text(split[0]);
             $("#jailMessageSpan").text(split[1]);
             $("#jailMessageSpan").append("&nbsp;");
+            break;
+          case 'messagereset':
+            $("#hideMessagesTimeSpan").text(msg);
             break;
           default:
             console.error("Unknown topic: " + message.destinationName);
@@ -291,7 +322,10 @@
               Leave any timestamp blank to use the current server time when the
               command is run.
             </p>
-              <h4 id="commandResult" class="text-center">&nbsp;</h4>
+            <div id="commandResult">
+              <h4 id="firstCommandResult" class="text-center">&nbsp;</h4>
+              <h4 id="extraCommandResults" class="text-center"></h4>
+            </div>
           </div>
         </div>
 
@@ -299,49 +333,101 @@
 
         <form class="form-ajax-submit" method="post" action="{% url 'judge' %}">
           {% csrf_token %}
-          <div class="row row-small-gutter">
+          <div class="row row-small-gutter vertical-center">
+
+            <div class="col-sm-9 col-xs-12">
+
+              <div class="row row-small-gutter vertical-center">
+                <div class="col-xs-6">
+                  <div class="form-group">
+                    <label class="control-label sr-only" for="startTimeInput">
+                      Start timestamp
+                    </label>
+                    <div class="input-group">
+                      <div class="input-group-addon">
+                        <span class="glyphicon glyphicon-time"
+                            aria-hidden="true">
+                        </span>
+                      </div>
+                      <input type="text" class="form-control"
+                          id="startTimeInput" name="start_timestamp"
+                          placeholder="Start timestamp">
+                    </div>
+                    <p id="startTimeSpan" class="judge-value text-center"></p>
+                  </div>
+                </div>
+
+                <div class="col-xs-6">
+                  <div class="form-group text-center one-line-radio radio-required">
+                    <label class="radio-inline"
+                        title="Red defending Wean. Yellow defending Doherty.">
+                      <input type="radio" name="territory" value="wd">
+                      <span class="text-danger">WeH</span>
+                      /
+                      <span class="text-warning">DH</span>
+                    </label>
+                    <label class="radio-inline"
+                        title="Red defending Doherty. Yellow defending Wean.">
+                      <input type="radio" name="territory" value="dw">
+                      <span class="text-danger">DH</span>
+                      /
+                      <span class="text-warning">WeH</span>
+                    </label>
+                    <p id="territorySpan" class="judge-value text-center"></p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row row-small-gutter">
+                <div class="col-xs-6">
+                  <div class="form-group">
+                    <label class="control-label sr-only" for="numFlagsInput">
+                      Number of flags
+                    </label>
+                    <div class="input-group">
+                      <div class="input-group-addon">
+                        <span class="glyphicon glyphicon-flag"
+                            aria-hidden="true">
+                        </span>
+                      </div>
+                      <input type="text" class="form-control input-required"
+                          id="numFlagsInput" name="num_flags"
+                          placeholder="Number of flags">
+                    </div>
+                    <span class="glyphicon glyphicon-remove form-control-feedback"
+                        aria-hidden="true"></span>
+                    <p id="numFlagsSpan" class="judge-value text-center"></p>
+                  </div>
+                </div>
+
+                <div class="col-xs-6">
+                  <div class="form-group">
+                    <label class="control-label sr-only" for="gameNumInput">
+                      Game number
+                    </label>
+                    <div class="input-group">
+                      <div class="input-group-addon"><strong>#</strong></div>
+                      <input type="text" class="form-control input-required"
+                          id="gameNumInput" name="game_num"
+                          placeholder="Game number">
+                    </div>
+                    <span class="glyphicon glyphicon-remove form-control-feedback"
+                        aria-hidden="true"></span>
+                    <p id="gameNumSpan" class="judge-value text-center"></p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
 
             <div class="col-sm-3 col-xs-12">
-              <div class="form-group">
-                <label class="control-label sr-only" for="startTimeInput">
-                  Start timestamp
-                </label>
-                <input type="text" class="form-control" id="startTimeInput"
-                    name="start_timestamp" placeholder="Start timestamp">
-                <p id="startTimeSpan" class="judge-value text-center"></p>
-              </div>
-            </div>
-
-            <div class="col-sm-3 col-xs-6">
-              <div class="form-group">
-                <label class="control-label sr-only" for="numFlagsInput">
-                  Number of flags
-                </label>
-                <input type="text" class="form-control input-required"
-                    id="numFlagsInput" name="num_flags"
-                    placeholder="Number of flags">
-                <span class="glyphicon glyphicon-remove form-control-feedback"
-                    aria-hidden="true"></span>
-                <p id="numFlagsSpan" class="judge-value text-center"></p>
-              </div>
-            </div>
-
-            <div class="col-sm-3 col-xs-6">
-              <div class="form-group">
-                <label class="control-label sr-only" for="gameNumInput">
-                  Game number
-                </label>
-                <input type="text" class="form-control input-required"
-                    id="gameNumInput" name="game_num"
-                    placeholder="Game number">
-                <span class="glyphicon glyphicon-remove form-control-feedback"
-                    aria-hidden="true"></span>
-                <p id="gameNumSpan" class="judge-value text-center"></p>
-              </div>
-            </div>
-
-            <div class="col-sm-3 col-xs-12">
-              <div class="form-group">
+              <div class="form-group text-center">
+                <div class="checkbox checkbox-below-form">
+                  <label>
+                    <input type="checkbox" checked name="zero_flags" value="on">
+                    Set flags to 0
+                  </label>
+                </div>
                 <button type="submit" class="center-block btn btn-primary">
                   Start Game
                 </button>
@@ -354,7 +440,7 @@
 
         <hr class="hr-below-form">
 
-        <div class="row row-small-gutter">
+        <div class="row row-small-gutter row-contains-vr">
           <div class="col-sm-9 col-xs-12">
             <form class="form-ajax-submit" method="post"
                 action="{% url 'judge' %}">
@@ -365,29 +451,45 @@
                   <div class="row row-small-gutter">
                     <div class="col-xs-6">
                       <div class="form-group">
-                        <label class="control-label sr-only" for="redFlagsInput">
+                        <label class="control-label sr-only"
+                            for="redFlagsInput">
                           Red score
                         </label>
-                        <input type="text" class="form-control input-required"
-                            id="redFlagsInput" name="red_flags"
-                            placeholder="Red score">
+                        <div class="input-group">
+                          <div class="input-group-addon">
+                            <strong>R</strong>
+                          </div>
+                          <input type="text" class="form-control input-required"
+                              id="redFlagsInput" name="red_flags"
+                              placeholder="Red score">
+                        </div>
                         <span class="glyphicon glyphicon-remove form-control-feedback"
                             aria-hidden="true"></span>
-                        <p id="redFlagsSpan" class="judge-value text-center"></p>
+                        <p id="redFlagsSpan"
+                            class="judge-value text-center">
+                        </p>
                       </div>
                     </div>
 
                     <div class="col-xs-6">
                       <div class="form-group">
-                        <label class="control-label sr-only" for="yellowFlagsInput">
+                        <label class="control-label sr-only"
+                            for="yellowFlagsInput">
                           Yellow score
                         </label>
-                        <input type="text" class="form-control input-required"
-                            id="yellowFlagsInput" name="yellow_flags"
-                            placeholder="Yellow score">
+                        <div class="input-group">
+                          <div class="input-group-addon">
+                            <strong>Y</strong>
+                          </div>
+                          <input type="text" class="form-control input-required"
+                              id="yellowFlagsInput" name="yellow_flags"
+                              placeholder="Yellow score">
+                        </div>
                         <span class="glyphicon glyphicon-remove form-control-feedback"
                             aria-hidden="true"></span>
-                        <p id="yellowFlagsSpan" class="judge-value text-center"></p>
+                        <p id="yellowFlagsSpan"
+                            class="judge-value text-center">
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -411,6 +513,8 @@
             </form>
           </div>
 
+          <div><hr class="vr in-form"></div>
+
           <div class="col-sm-3 col-xs-12">
             <form class="form-ajax-submit" method="post"
                 action="{% url 'judge' %}">
@@ -427,18 +531,27 @@
 
         <hr class="hr-below-form">
 
-        <form class="form-ajax-submit" method="post" action="{% url 'judge' %}">
-          {% csrf_token %}
-          <div class="row row-small-gutter vertical-center">
+        <div class="row row-small-gutter vertical-center">
+          <div class="col-sm-9 col-xs-12">
 
-            <div class="col-sm-9 col-xs-12">
+            <form class="form-ajax-submit" method="post"
+                action="{% url 'judge' %}" id="messageForm">
+              {% csrf_token %}
               <div class="row row-small-gutter vertical-center">
+
                 <div class="form-group col-xs-6">
                   <label class="control-label sr-only" for="messageTimeInput">
                     Message timestamp
                   </label>
-                  <input type="text" class="form-control" id="messageTimrInput"
-                      name="message_timestamp" placeholder="Message timestamp">
+                  <div class="input-group">
+                    <div class="input-group-addon">
+                      <span class="glyphicon glyphicon-time" aria-hidden="true">
+                      </span>
+                    </div>
+                    <input type="text" class="form-control"
+                        id="messageTimeInput" name="message_timestamp"
+                        placeholder="Message timestamp">
+                  </div>
                   <p id="playerMessageTimeSpan"
                     class="hidden judge-value text-center">
                   </p>
@@ -450,7 +563,7 @@
                   </p>
                 </div>
 
-                <div class="form-group text-center col-xs-6">
+                <div class="form-group text-center col-xs-6 two-line-radio">
                   <label class="radio-inline">
                     <input type="radio" name="message_type" value="player">
                     Players
@@ -465,13 +578,23 @@
                     Both
                   </label>
                 </div>
-              </div>
 
+              </div>
               <div class="row row-small-gutter">
+
                 <div class="form-group col-xs-12">
-                  <label class="control-label sr-only" for="messageInput">Message</label>
-                  <input type="text" class="form-control" id="messageInput"
-                      name="message" placeholder="Message">
+                  <label class="control-label sr-only" for="messageInput">
+                    Message
+                  </label>
+                  <div class="input-group">
+                    <div class="input-group-addon">
+                      <span class="glyphicon glyphicon-comment"
+                          aria-hidden="true">
+                      </span>
+                    </div>
+                    <input type="text" class="form-control" id="messageInput"
+                        name="message" placeholder="Message">
+                  </div>
                   <p id="playerMessageSpan"
                     class="hidden judge-value text-center">
                   </p>
@@ -482,25 +605,74 @@
                     class="judge-value text-center">
                   </p>
                 </div>
-              </div>
-            </div>
 
-            <div class="col-sm-3 col-xs-12">
-              <div class="form-group">
-                <button type="submit" class="center-block btn btn-primary">
-                  Send Message
-                </button>
               </div>
-            </div>
-
+              <input type="hidden" name="command" value="send_message">
+            </form>
           </div>
-          <input type="hidden" name="command" value="send_message">
-        </form>
+
+          <div class="col-sm-3 col-xs-12">
+
+            <div class="form-group text-center">
+              <button type="submit" form="messageForm"
+                  class="center-block btn btn-primary">
+                Send Message
+              </button>
+              <div class="dropdown">
+                <a role="button" data-target="#"
+                    id="hideMessagesButton" data-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false">
+                  Hide messages...
+                </a>
+                <div class="dropdown-menu dropdown-form dropdown-menu-right"
+                    aria-labelledby="hideMessagesButton">
+                  <div class="container-fluid">
+                    <div class="row">
+                      <div class="col-xs-12 text-center">
+                        <form class="form-inline form-ajax-submit" method="post"
+                            action="{% url 'judge' %}">
+                          {% csrf_token %}
+                          <div class="form-group">
+                            <label class="control-label"
+                                for="hideMessagesTimeInput">
+                                Sent before
+                            </label>
+                            <div class="input-group">
+                              <div class="input-group-addon">
+                                <span class="glyphicon glyphicon-time"
+                                    aria-hidden="true">
+                                </span>
+                              </div>
+                              <input type="text" class="form-control"
+                                  id="hideMessagesTimeInput"
+                                  name="clear_timestamp"
+                                  placeholder="Timestamp">
+                            </div>
+                            <p id="hideMessagesTimeSpan"
+                                class="judge-value-xs">
+                            </p>
+                          </div>
+                          <button type="submit"
+                              class="btn btn-primary">
+                              Submit
+                          </button>
+                          <input type="hidden" name="command"
+                              value="clear_messages">
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
 
         <hr class="hr-below-form">
 
-        <div class="row row-small-gutter">
-          <div class="col-sm-9 col-xs-12">
+        <div class="row row-small-gutter row-contains-vr">
+          <div class="col-sm-8 col-xs-12">
             <form class="form-ajax-submit" method="post"
                 action="{% url 'judge' %}">
               {% csrf_token %}
@@ -511,8 +683,15 @@
                     <label class="control-label sr-only" for="endTimeInput">
                       End timestamp
                     </label>
-                    <input type="text" class="form-control" id="endTimeInput"
-                        name="end_timestamp" placeholder="End timestamp">
+                    <div class="input-group">
+                      <div class="input-group-addon">
+                        <span class="glyphicon glyphicon-time"
+                            aria-hidden="true">
+                        </span>
+                      </div>
+                      <input type="text" class="form-control" id="endTimeInput"
+                          name="end_timestamp" placeholder="End timestamp">
+                    </div>
                     <p id="endTimeSpan" class="judge-value text-center"></p>
                   </div>
                 </div>
@@ -526,7 +705,7 @@
                   </div>
                 </div>
 
-                <div class="col-sm-2 col-xs-4">
+                <div class="col-sm-3 col-xs-4">
                   <div class="form-group">
                     <button type="submit" class="center-block btn btn-warning">
                       End Game
@@ -538,6 +717,8 @@
               <input type="hidden" name="command" value="end_game">
             </form>
           </div>
+
+          <div class="col-sm-1"><hr class="vr in-form"></div>
 
           <div class="col-xs-12 visible-xs">
             <hr class="hr-below-form">

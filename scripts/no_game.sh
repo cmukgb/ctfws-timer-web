@@ -13,6 +13,6 @@ then
   exit 1
 else
   mosquitto_pub -u ctfwsmaster -P $(cat "$password_file") -q 1 -r -t ctfws/game/config -m none &&
-  mosquitto_pub -u ctfwsmaster -P $(cat "$password_file") -q 1 -r -t ctfws/game/flags -m "0 0" &&
-  echo "Set to no game"
+  echo "Set to no game" &&
+  $(dirname "$script_file")/set_flags.sh "0 0"
 fi

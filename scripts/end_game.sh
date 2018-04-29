@@ -50,7 +50,6 @@ else
 
   if [ "$do_hide_flags" = true ]
   then
-    mosquitto_pub -u ctfwsmaster -P $(cat "$password_file") -q 1 -r -t ctfws/game/flags -m "?" &&
-    echo "Set flags to ?"
+    $(dirname "$script_file")/set_flags.sh "?"
   fi
 fi

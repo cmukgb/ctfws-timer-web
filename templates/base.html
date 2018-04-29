@@ -97,10 +97,39 @@
         margin-top: 0px;
         margin-bottom: 0px;
       }
+      .judge-value-xs {
+        margin: 0;
+      }
+      @media (max-width: 767px) {
+        .judge-value-xs {
+          margin-top: 5px;
+          margin-bottom: -5px;
+        }
+      }
+
+      .dropdown-form {
+        min-width: 225px;
+      }
+      @media (min-width: 768px) {
+        .dropdown-form .input-group,button {
+          margin-top: 5px;
+          margin-bottom: 5px;
+        }
+      }
+
+      @media (max-width: 767px) {
+        .one-line-radio {
+          margin-bottom: 0;
+          margin-top: 5px;
+        }
+      }
 
       .checkbox {
         margin-top: 7px;
         margin-bottom: 7px;
+      }
+      .checkbox-below-form {
+        margin-top: 0;
       }
 
       .nav-justified {
@@ -140,11 +169,41 @@
         margin-top: 5px; /* Default of 20px minus form margin of 15px */
       }
 
+      hr.vr {
+        display: none;
+      }
+      @media (min-width: 768px) {
+        hr.vr {
+          display: block;
+          margin: auto;
+          border: 0;
+          border-right: 2px solid #eee;
+          height: 100%;
+          width: 0;
+          -webkit-box-sizing: content-box;
+             -moz-box-sizing: content-box;
+                  box-sizing: content-box;
+        }
+        hr.vr.in-form {
+          margin-top: -8px; /* Form margin of 15px divided by 2 */
+        }
+        .row-contains-vr {
+          display: flex;
+        }
+      }
+
       .form-group.has-error .form-control-feedback {
         display: block;
       }
       .form-group .form-control-feedback {
         display: none;
+      }
+      .radio-inline {
+        padding: 2px 2px 2px 22px;
+      }
+      .form-group.has-error .radio-inline {
+        border: 1px solid #a94442;
+        border-radius: 4px;
       }
     </style>
 
