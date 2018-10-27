@@ -5,7 +5,7 @@
 script_file=$(readlink -f "$0" 2> /dev/null || echo "$0")
 
 # Sets $password_file
-source $(dirname "$script_file")/get_password.sh
+source $(dirname "$script_file")/mqtt_config.sh
 
 hide_flags_arg="--hide-flags"
 
@@ -45,7 +45,7 @@ else
 		do_hide_flags=false
   fi
 
-  mosquitto_pub -u ctfwsmaster -P $(cat "$password_file") -q 1 -r -t ctfws/game/endtime -m "$d" &&
+  mosquitto_pub -h ${MQTT_HOST:-localhost} -u ctfwsmaster -P $(cat "$password_file") -q 1 -r -t ctfws/game/endtime -m "$d" &&
   echo "Ended game at $d" &&
 
   if [ "$do_hide_flags" = true ]

@@ -25,3 +25,6 @@ then
   exit 1
 fi
 
+if [ -r "$(dirname $password_file)/broker.txt" ]; then
+  MQTT_HOST=$(cat "$(dirname $password_file)/broker.txt")
+fi

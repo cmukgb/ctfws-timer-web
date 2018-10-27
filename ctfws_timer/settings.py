@@ -75,6 +75,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'ctfws_timer.context_processors.debug_setting',
                 'ctfws_timer.context_processors.http_host',
+                'ctfws_timer.context_processors.broker_uri',
             ],
         },
     },

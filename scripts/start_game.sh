@@ -5,7 +5,7 @@
 script_file=$(readlink -f "$0" 2> /dev/null || echo "$0")
 
 # Sets $password_file
-source $(dirname "$script_file")/get_password.sh
+source $(dirname "$script_file")/mqtt_config.sh
 
 zero_flags_arg="--zero-flags"
 
@@ -64,7 +64,7 @@ else
   fi
 
   m="$d 900 4 900 $num_flags $game_num $territory"
-  mosquitto_pub -u ctfwsmaster -P $(cat $password_file) -q 1 -r -t ctfws/game/config -m "$m" &&
+  mosquitto_pub -h ${MQTT_HOST:-localhost} -u ctfwsmaster -P $(cat $password_file) -q 1 -r -t ctfws/game/config -m "$m" &&
   echo "Started game $game_num with $num_flags flags at $d (Red in $red / Yellow in $yellow)" &&
 
   if [ "$do_zero_flags" = true ]

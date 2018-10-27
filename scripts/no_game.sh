@@ -5,14 +5,14 @@
 script_file=$(readlink -f "$0" 2> /dev/null || echo "$0")
 
 # Sets $password_file
-source $(dirname "$script_file")/get_password.sh
+source $(dirname "$script_file")/mqtt_config.sh
 
 if [ "$#" -ne 0 ]
 then
   echo "Usage: $0"
   exit 1
 else
-  mosquitto_pub -u ctfwsmaster -P $(cat "$password_file") -q 1 -r -t ctfws/game/config -m none &&
+  mosquitto_pub -h ${MQTT_HOST:-localhost} -u ctfwsmaster -P $(cat "$password_file") -q 1 -r -t ctfws/game/config -m none &&
   echo "Set to no game" &&
   $(dirname "$script_file")/set_flags.sh "0 0"
 fi

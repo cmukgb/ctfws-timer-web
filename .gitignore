@@ -1,5 +1,6 @@
 *.swp
-password.txt
+scripts/password.txt
+scripts/broker.txt
 secret_key.txt
 __pycache__
 db.sqlite3

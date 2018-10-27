@@ -67,13 +67,12 @@
   // saying whether the caller is the judges page. It only affects the
   // clientId.
   function initMqtt(onMessageArrived, isJudge) {
-    // Set the hostname and clientID
-    var hostname = "ws://{{ http_host }}:1884/mqtt";
+    // Set the clientID
     var clientId = "kgb_web" + (isJudge ? "judge" : "app") + "_" +
       Math.random().toString(16).substr(2, 8);
 
     // Create the client instance
-    mqttClient = new Paho.MQTT.Client(hostname, clientId);
+    mqttClient = new Paho.MQTT.Client("{{broker_uri}}", clientId);
 
     // Set callback handlers
     mqttClient.onConnected = onConnected;
