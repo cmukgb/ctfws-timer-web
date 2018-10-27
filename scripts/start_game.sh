@@ -40,7 +40,7 @@ else
     then
       d="$5"
       do_zero_flags=true
-    elif [ "$5" = "$_flags_arg" ]
+    elif [ "$5" = "$zero_flags_arg" ]
     then
       d="$4"
       do_zero_flags=true
