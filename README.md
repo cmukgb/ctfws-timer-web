@@ -1,4 +1,4 @@
-# ctfws-timer-page
+# ctfws-timer-web
 A webpage to display info from the CtFwS timer and game status server
 
 A more detailed description of the project can be found at
