@@ -190,7 +190,7 @@
               $("#territorySpan").text("");
             } else {
               var split = splitOnWhitespace(msg, 7);
-              $("#startTimeSpan").text(split[0]);
+              $("#startTimeSpan").html(formatTimestamp(split[0]));
               $("#numFlagsSpan").text(split[4]);
               $("#gameNumSpan").text(split[5]);
               $("#territorySpan").text(split[6]);
@@ -212,30 +212,30 @@
             }
             break;
           case 'endtime':
-            $("#endTimeSpan").text(msg);
+            $("#endTimeSpan").html(formatTimestamp(msg));
             break;
           // In all three message cases, append a non-breaking space so that
           // empty messages don't change the page layout.
           case 'message':
             var split = splitOnFirstWhitespace(msg);
-            $("#bothMessageTimeSpan").text(split[0]);
+            $("#bothMessageTimeSpan").html(formatTimestamp(split[0]));
             $("#bothMessageSpan").text(split[1]);
             $("#bothMessageSpan").append("&nbsp;");
             break;
           case 'message/player':
             var split = splitOnFirstWhitespace(msg);
-            $("#playerMessageTimeSpan").text(split[0]);
+            $("#playerMessageTimeSpan").html(formatTimestamp(split[0]));
             $("#playerMessageSpan").text(split[1]);
             $("#playerMessageSpan").append("&nbsp;");
             break;
           case 'message/jail':
             var split = splitOnFirstWhitespace(msg);
-            $("#jailMessageTimeSpan").text(split[0]);
+            $("#jailMessageTimeSpan").html(formatTimestamp(split[0]));
             $("#jailMessageSpan").text(split[1]);
             $("#jailMessageSpan").append("&nbsp;");
             break;
           case 'messagereset':
-            $("#hideMessagesTimeSpan").text(msg);
+            $("#hideMessagesTimeSpan").html(formatTimestamp(msg));
             break;
           default:
             console.error("Unknown topic: " + message.destinationName);
@@ -261,6 +261,11 @@
         $("#lockTotalsButton").click(toggleStuffTotalsLock);
         $("#saveTotalsButton").click(postStuffForm);
         updateStuffTotalsDisabledState(); // Update based on the initial value
+
+        window.formatTimestamp = function(secs) {
+          var localeString = new Date(secs * 1000).toLocaleString();
+          return "<abbr title=\"" + localeString + "\">" + secs + "</abbr>";
+        }
 
         // Setup the MQTT client and connect. This function is defined in
         // mqtt.html, which is included above. This defines mqttClient as the
