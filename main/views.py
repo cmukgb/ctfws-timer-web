@@ -78,7 +78,7 @@ def get_args(post):
 def judge(request):
     if request.method == 'POST':
         if 'command' not in request.POST:
-            return HttpResponse('No command specified', status=500)
+            return HttpResponse('No command specified', status=400)
         elif request.POST['command'] == 'save_count_totals':
             query = StuffCount.objects.all()
             if query.count() > 0:
@@ -90,16 +90,16 @@ def judge(request):
                 form.save()
                 return HttpResponse()
             else:
-                return HttpResponse('Invalid data', status=500)
+                return HttpResponse('Invalid data', status=400)
         else:
             args = get_args(request.POST)
             if args is None:
-                return HttpResponse('Unknown command', status=500)
+                return HttpResponse('Unknown command', status=400)
             try:
                 output = subprocess.check_output(args, stderr=subprocess.STDOUT)
                 return HttpResponse(output)
             except subprocess.CalledProcessError as err:
-                return HttpResponse(err.output, status=500)
+                return HttpResponse(err.output, status=400)
     else:
         query = StuffCount.objects.all()
         if query.count() > 0:
