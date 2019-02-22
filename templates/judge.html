@@ -183,7 +183,8 @@
       function onMessageArrived(message) {
         console.info("onMessageArrived: " + message.destinationName + ": " +
             message.payloadString);
-
+        $("#errorMessage").removeClass("text-danger");
+        $("#errorMessage").text("");
         // In all the below cases, when we set a span containing a timestamp,
         // we also set a tooltip showing the human-readable string. Normally
         // this would be set in the "title" attribute, but the Bootstrap
@@ -264,6 +265,13 @@
         }
       }
 
+      // Called when MQTT fails to connect or the connection is lost
+      function onConnectionError() {
+        console.info("onConnectionError");
+        $("#errorMessage").addClass("text-danger");
+        $("#errorMessage").text("Error connecting to the server");
+      }
+
       $(document).ready(function () {
         // Enable all Bootstrap popovers
         $("[data-toggle='tooltip']").tooltip();
@@ -290,7 +298,7 @@
         // Setup the MQTT client and connect. This function is defined in
         // mqtt.html, which is included above. This defines mqttClient as the
         // global variable for the client connection.
-        initMqtt(onMessageArrived, true);
+        initMqtt(onMessageArrived, onConnectionError, true);
 
         console.info("Finished setup");
       });
@@ -348,9 +356,12 @@
               Leave any timestamp blank to use the current server time when the
               command is run.
             </p>
-            <div id="commandResult">
-              <h4 id="firstCommandResult" class="text-center">&nbsp;</h4>
-              <h4 id="extraCommandResults" class="text-center"></h4>
+            <div class="min-height-one-line">
+              <h4 id="errorMessage" class="text-center">Connecting...</h4>
+              <div id="commandResult" class="text-center">
+                <h4 id="firstCommandResult"></h4>
+                <h4 id="extraCommandResults"></h4>
+              </div>
             </div>
           </div>
         </div>

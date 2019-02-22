@@ -120,6 +120,11 @@
         logServerDate();
         setInterval(logServerDate, serverDateLogInterval);
 
+        if (typeof Vue === "undefined") {
+          console.error("Failed to setup Vue");
+          return;
+        }
+
         // Vue plugin to store certain instance data in sessionStorage.
         // Adds the 'storage' property to the Vue instance.
         Vue.use(vuejsStorage);
@@ -133,9 +138,8 @@
             serverNow: getServerNow(),
             clientNow: getClientNow(),
             // Whether the most recent config message was not "none"
-            // Defaults to null (and is only ever set to null here), so if it's
-            // null, then we haven't gotten a config message yet.
-            displayGame: null,
+            displayGame: false,
+            errorMessage: 'Connecting...',
             gameNumber: 0,
             times: {
               start: 0,
@@ -179,7 +183,7 @@
             // Setup the MQTT client and connect. This function is defined in
             // mqtt.html, which is included above. This defines mqttClient as
             // the global variable for the client connection.
-            initMqtt(this.onMessageArrived);
+            initMqtt(this.onMessageArrived, this.onConnectionError, false);
 
             // Update the "now" variables every updateNowIntervalTime. Vue will
             // react to this change and update all UI that uses them.
@@ -358,9 +362,15 @@
               console.info("onCancelButtonClick");
               this.stun.start = 0;
             },
+            onConnectionError: function() {
+              console.info("onConnectionError");
+              this.errorMessage = "Error Connecting to the Server";
+            },
             onMessageArrived: function(message) {
               console.info("onMessageArrived: " + message.destinationName +
                   ": " + message.payloadString);
+
+              this.errorMessage = "";
 
               var msg = message.payloadString;
               var topic = message.destinationName.substring(
@@ -519,8 +529,8 @@
 {% endblock %}
 
 {% block page_title %}
-    <span v-if="displayGame === null">
-      Connecting...
+    <span v-if="errorMessage">
+      [[ errorMessage ]]
     </span>
     <span v-else-if="displayGame">
       Game [[ gameNumberText ]]:

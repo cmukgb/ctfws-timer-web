@@ -16,6 +16,8 @@
 
   // The global object for the MQTT connection
   var mqttClient = null;
+  // The callback given by the client in initMqtt to call when there are errors
+  var onConnectionError = null;
 
   // Called when the client's connect call succeeds
   function onConnectSuccess() {
@@ -27,12 +29,18 @@
   // Called if the client can't connect
   function onConnectFailure(failureObject) {
     console.info("onConnectFailure: " + failureObject);
+    if (onConnectionError) {
+      onConnectionError();
+    }
   }
 
   // Called when the client loses its connection
   function onConnectionLost(responseObject) {
     if (responseObject.errorCode !== 0) {
       console.warn("onConnectionLost: " + responseObject.errorMessage);
+    }
+    if (onConnectionError) {
+      onConnectionError();
     }
   }
 
@@ -66,7 +74,7 @@
   // Construct the mqttClient and connect. The isJudge argument is a bool
   // saying whether the caller is the judges page. It only affects the
   // clientId.
-  function initMqtt(onMessageArrived, isJudge) {
+  function initMqtt(onMessageArrived, onError, isJudge) {
     // Set the hostname and clientID
     var hostname = "ws://{{ http_host }}:1884/mqtt";
     var clientId = "kgb_web" + (isJudge ? "judge" : "app") + "_" +
@@ -74,6 +82,7 @@
 
     // Create the client instance
     mqttClient = new Paho.MQTT.Client(hostname, clientId);
+    onConnectionError = onError;
 
     // Set callback handlers
     mqttClient.onConnected = onConnected;
