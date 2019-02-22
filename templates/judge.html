@@ -24,6 +24,11 @@
         }
       }
 
+      // Convert a POSIX timestamp in seconds to a human-readable date string
+      function secsToTimeString(secs) {
+        return new Date(secs * 1000).toLocaleTimeString();
+      }
+
       function postForm(e) {
         e.preventDefault(); // Prevent normal form submission
 
@@ -179,6 +184,11 @@
         console.info("onMessageArrived: " + message.destinationName + ": " +
             message.payloadString);
 
+        // In all the below cases, when we set a span containing a timestamp,
+        // we also set a tooltip showing the human-readable string. Normally
+        // this would be set in the "title" attribute, but the Bootstrap
+        // tooltip library ignores dynamically set titles, so we sidestep it
+        // and use "data-original-title" which is what Bootstrap checks.
         var msg = message.payloadString;
         var topic = message.destinationName.substring(11);
         switch (topic) {
@@ -191,6 +201,8 @@
             } else {
               var split = splitOnWhitespace(msg, 7);
               $("#startTimeSpan").text(split[0]);
+              $("#startTimeSpan").attr("data-original-title",
+                secsToTimeString(split[0]));
               $("#numFlagsSpan").text(split[4]);
               $("#gameNumSpan").text(split[5]);
               $("#territorySpan").text(split[6]);
@@ -213,29 +225,39 @@
             break;
           case 'endtime':
             $("#endTimeSpan").text(msg);
+            $("#endTimeSpan").attr("data-original-title",
+              secsToTimeString(msg));
             break;
           // In all three message cases, append a non-breaking space so that
           // empty messages don't change the page layout.
           case 'message':
             var split = splitOnFirstWhitespace(msg);
             $("#bothMessageTimeSpan").text(split[0]);
+            $("#bothMessageTimeSpan").attr("data-original-title",
+              secsToTimeString(split[0]));
             $("#bothMessageSpan").text(split[1]);
             $("#bothMessageSpan").append("&nbsp;");
             break;
           case 'message/player':
             var split = splitOnFirstWhitespace(msg);
             $("#playerMessageTimeSpan").text(split[0]);
+            $("#playerMessageTimeSpan").attr("data-original-title",
+              secsToTimeString(split[0]));
             $("#playerMessageSpan").text(split[1]);
             $("#playerMessageSpan").append("&nbsp;");
             break;
           case 'message/jail':
             var split = splitOnFirstWhitespace(msg);
             $("#jailMessageTimeSpan").text(split[0]);
+            $("#jailMessageTimeSpan").attr("data-original-title",
+              secsToTimeString(split[0]));
             $("#jailMessageSpan").text(split[1]);
             $("#jailMessageSpan").append("&nbsp;");
             break;
           case 'messagereset':
             $("#hideMessagesTimeSpan").text(msg);
+            $("#hideMessagesTimeSpan").attr("data-original-title",
+              secsToTimeString(msg));
             break;
           default:
             console.error("Unknown topic: " + message.destinationName);
@@ -243,6 +265,9 @@
       }
 
       $(document).ready(function () {
+        // Enable all Bootstrap popovers
+        $("[data-toggle='tooltip']").tooltip();
+
         // Form submit actions
         $(".form-ajax-submit").submit(postForm);
         $(".form-no-submit").submit(function (e) {e.preventDefault();});
@@ -354,7 +379,9 @@
                           id="startTimeInput" name="start_timestamp"
                           placeholder="Start timestamp">
                     </div>
-                    <p id="startTimeSpan" class="judge-value text-center"></p>
+                    <p id="startTimeSpan" class="judge-value text-center"
+                        data-toggle="tooltip" data-placement="bottom">
+                    </p>
                   </div>
                 </div>
 
@@ -554,13 +581,16 @@
                         placeholder="Message timestamp">
                   </div>
                   <p id="playerMessageTimeSpan"
-                    class="hidden judge-value text-center">
+                    class="hidden judge-value text-center"
+                    data-toggle="tooltip" data-placement="bottom">
                   </p>
                   <p id="jailMessageTimeSpan"
-                    class="hidden judge-value text-center">
+                    class="hidden judge-value text-center"
+                    data-toggle="tooltip" data-placement="bottom">
                   </p>
                   <p id="bothMessageTimeSpan"
-                    class="judge-value text-center">
+                    class="judge-value text-center"
+                    data-toggle="tooltip" data-placement="bottom">
                   </p>
                 </div>
 
@@ -650,7 +680,8 @@
                                   placeholder="Timestamp">
                             </div>
                             <p id="hideMessagesTimeSpan"
-                                class="judge-value-xs">
+                                class="judge-value-xs"
+                                data-toggle="tooltip" data-placement="bottom">
                             </p>
                           </div>
                           <button type="submit"
@@ -693,7 +724,9 @@
                       <input type="text" class="form-control" id="endTimeInput"
                           name="end_timestamp" placeholder="End timestamp">
                     </div>
-                    <p id="endTimeSpan" class="judge-value text-center"></p>
+                    <p id="endTimeSpan" class="judge-value text-center"
+                        data-toggle="tooltip" data-placement="bottom">
+                    </p>
                   </div>
                 </div>
 
