@@ -65,6 +65,8 @@ def get_args(post):
             result += [post['start_timestamp']]
         if 'zero_flags' in post and post['zero_flags'] == 'on':
             result += ['--zero-flags']
+        if 'send_message' in post and post['send_message'] == 'on':
+            result += ['--send-message']
         return result
     elif com == 'clear_messages':
         result = [clear_messages]
