@@ -10,12 +10,17 @@ source $(dirname "$script_file")/get_password.sh
 zero_flags_arg="--zero-flags"
 send_message_arg="--send-message"
 
+player_message_template='Red is defending $red. Yellow is defending $yellow.'
+jail_message_template='R=$red Y=$yellow'
+
 if [ "$#" -ne 3 ] && [ "$#" -ne 4 ] && [ "$#" -ne 5 ] && [ "$#" -ne 6 ]
 then
   echo "Usage: $0 num_flags game_num territory [timestamp] [$zero_flags_arg] [$send_message_arg]"
   echo "       territory is either 'dw' (for red defending Doherty) or 'wd'"
   echo "If $zero_flags_arg is set, flags will be set to '0 0'"
   echo "If $send_message_arg is set, a default initial message will be sent"
+  echo "       Message for players: \"$player_message_template\""
+  echo "       Message for jails: \"$jail_message_template\""
   exit 1
 else
   do_zero_flags=false
@@ -75,7 +80,9 @@ else
 
   if [ "$do_send_message" = true ]
   then
-    $(dirname "$script_file")/send_player_message.sh "Red is defending $red. Yellow is defending $yellow." "$date" &&
-    $(dirname "$script_file")/send_jail_message.sh "R=$red Y=$yellow" "$date"
+    player_message=$(eval echo "$player_message_template")
+    $(dirname "$script_file")/send_player_message.sh "$player_message" "$date" &&
+    jail_message=$(eval echo "$jail_message_template")
+    $(dirname "$script_file")/send_jail_message.sh "$jail_message" "$date"
   fi
 fi
