@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.views import redirect_to_login
 from django.forms import modelform_factory
 
 import os
@@ -18,7 +18,6 @@ def user_is_judge(user):
     return user.groups.filter(name='judges').exists()
 
 def get_args(post):
-
     base_dir = settings.BASE_DIR
     no_game = os.path.join(base_dir, 'scripts', 'no_game.sh')
     start_game = os.path.join(base_dir, 'scripts', 'start_game.sh')
@@ -76,8 +75,13 @@ def get_args(post):
     else:
         return None
 
-@user_passes_test(user_is_judge)
 def judge(request):
+    if not user_is_judge(request.user):
+        if request.method == 'POST':
+            return HttpResponse(
+                    'You are not logged in as a judge. Try logging in again.',
+                    status=403)
+        return redirect_to_login(request.get_full_path())
     if request.method == 'POST':
         if 'command' not in request.POST:
             return HttpResponse('No command specified', status=400)
