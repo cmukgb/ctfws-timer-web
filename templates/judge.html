@@ -295,10 +295,50 @@
         $("#saveTotalsButton").click(postStuffForm);
         updateStuffTotalsDisabledState(); // Update based on the initial value
 
-        // Setup the MQTT client and connect. This function is defined in
-        // mqtt.html, which is included above. This defines mqttClient as the
-        // global variable for the client connection.
-        initMqtt(onMessageArrived, onConnectionError, true);
+        if (typeof Vue === "undefined") {
+          console.error("Failed to setup Vue");
+          return;
+        }
+
+        new Vue({
+          el: '#brokerTabPane', // Have Vue use the broker tab as its template
+          delimiters: ['[[', ']]'], // Use these since Django uses { { } }
+          data: {
+            topics: {},
+          },
+          // Called after the Vue instance is created
+          created: function() {
+            // Setup the MQTT client and connect. This function is defined in
+            // mqtt.html, which is included above. This defines mqttClient as
+            // the global variable for the client connection.
+            initMqtt(this.onMessageArrived, onConnectionError, true);
+          },
+          computed: {
+          },
+          methods: {
+            onMessageArrived: function(message) {
+              // console.info("[Vue] onMessageArrived: " +
+              //     message.destinationName + ": " + message.payloadString);
+
+              // If this is a game message, also pass it to the above handler.
+              if (message.destinationName.indexOf('ctfws/game/') === 0) {
+                onMessageArrived(message);
+              }
+
+              var topicStrs = message.destinationName.split('/');
+              var firstTopicStrs = topicStrs.slice(0, topicStrs.length - 1);
+              var lastTopicStr = topicStrs[topicStrs.length - 1];
+              var parentTopic = this.topics;
+              firstTopicStrs.forEach(function(topicStr) {
+                if (!parentTopic.hasOwnProperty(topicStr)) {
+                  Vue.set(parentTopic, topicStr, {});
+                }
+                parentTopic = parentTopic[topicStr];
+              });
+              Vue.set(parentTopic, lastTopicStr, message.payloadString);
+            },
+          },
+        });
 
         console.info("Finished setup");
       });
@@ -335,6 +375,12 @@
         <a href="#stuffTabPane" aria-controls="stuffTabPane" role="tab"
             data-toggle="tab">
           Stuff
+        </a>
+      </li>
+      <li role="presentation">
+        <a href="#brokerTabPane" aria-controls="brokerTabPane" role="tab"
+            data-toggle="tab">
+          Broker
         </a>
       </li>
     </ul>
@@ -1114,6 +1160,14 @@
 
           <input type="hidden" name="command" value="save_count_totals">
         </form>
+      </div>
+    </div>
+  </div>
+
+  <div role="tabpanel" class="tab-pane" id="brokerTabPane">
+    <div class="row">
+      <div class="col-md-offset-2 col-md-8 col-sm-offset-1 col-sm-10 col-xs-12">
+        <pre>[[ topics ]]</pre>
       </div>
     </div>
   </div>

@@ -18,12 +18,19 @@
   var mqttClient = null;
   // The callback given by the client in initMqtt to call when there are errors
   var mqttOnConnectionError = null;
+  // Whether initMqtt() was called with isJudge === true
+  var mqttIsJudge = false;
 
   // Called when the client's connect call succeeds
   function onConnectSuccess() {
     // Once a connection has been made, subscribe to all topics.
     console.info("onConnectSuccess");
-    mqttClient.subscribe("ctfws/game/#");
+    if (mqttIsJudge) {
+      mqttClient.subscribe("#");
+      mqttClient.subscribe("$SYS/#");
+    } else {
+      mqttClient.subscribe("ctfws/game/#");
+    }
   }
 
   // Called if the client can't connect
@@ -72,8 +79,8 @@
   }
 
   // Construct the mqttClient and connect. The isJudge argument is a bool
-  // saying whether the caller is the judges page. It only affects the
-  // clientId.
+  // saying whether the caller is the judges page. It affects the clientId and
+  // which topics are subscribed to.
   function initMqtt(onMessageArrived, onError, isJudge) {
     // Set the hostname and clientID
     var hostname = "ws://{{ http_host }}:1884/mqtt";
@@ -83,6 +90,7 @@
     // Create the client instance
     mqttClient = new Paho.MQTT.Client(hostname, clientId);
     mqttOnConnectionError = onError;
+    mqttIsJudge = isJudge;
 
     // Set callback handlers
     mqttClient.onConnected = onConnected;
