@@ -17,7 +17,7 @@
   // The global object for the MQTT connection
   var mqttClient = null;
   // The callback given by the client in initMqtt to call when there are errors
-  var onConnectionError = null;
+  var mqttOnConnectionError = null;
 
   // Called when the client's connect call succeeds
   function onConnectSuccess() {
@@ -29,8 +29,8 @@
   // Called if the client can't connect
   function onConnectFailure(failureObject) {
     console.info("onConnectFailure: " + failureObject);
-    if (onConnectionError) {
-      onConnectionError();
+    if (mqttOnConnectionError) {
+      mqttOnConnectionError();
     }
   }
 
@@ -39,8 +39,8 @@
     if (responseObject.errorCode !== 0) {
       console.warn("onConnectionLost: " + responseObject.errorMessage);
     }
-    if (onConnectionError) {
-      onConnectionError();
+    if (mqttOnConnectionError) {
+      mqttOnConnectionError();
     }
   }
 
@@ -82,7 +82,7 @@
 
     // Create the client instance
     mqttClient = new Paho.MQTT.Client(hostname, clientId);
-    onConnectionError = onError;
+    mqttOnConnectionError = onError;
 
     // Set callback handlers
     mqttClient.onConnected = onConnected;
