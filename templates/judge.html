@@ -305,13 +305,14 @@
           delimiters: ['[[', ']]'], // Use these since Django uses { { } }
           data: {
             topics: {},
+            errorConnecting: false,
           },
           // Called after the Vue instance is created
           created: function() {
             // Setup the MQTT client and connect. This function is defined in
             // mqtt.html, which is included above. This defines mqttClient as
             // the global variable for the client connection.
-            initMqtt(this.onMessageArrived, onConnectionError, true);
+            initMqtt(this.onMessageArrived, this.onConnectionError, true);
           },
           computed: {
           },
@@ -319,6 +320,7 @@
             onMessageArrived: function(message) {
               // console.info("[Vue] onMessageArrived: " +
               //     message.destinationName + ": " + message.payloadString);
+              this.errorConnecting = false;
 
               // If this is a game message, also pass it to the above handler.
               if (message.destinationName.indexOf('ctfws/game/') === 0) {
@@ -336,6 +338,10 @@
                 parentTopic = parentTopic[topicStr];
               });
               Vue.set(parentTopic, lastTopicStr, message.payloadString);
+            },
+            onConnectionError: function() {
+              this.errorConnecting = true;
+              onConnectionError();
             },
           },
         });
@@ -1167,6 +1173,10 @@
   <div role="tabpanel" class="tab-pane" id="brokerTabPane">
     <div class="row">
       <div class="col-md-offset-2 col-md-8 col-sm-offset-1 col-sm-10 col-xs-12">
+        <div v-if="errorConnecting" class="alert alert-danger" role="alert">
+          Error connecting to the broker. The below topics may be incorrect or
+          out-of-date.
+        </div>
         <pre>[[ topics ]]</pre>
       </div>
     </div>
