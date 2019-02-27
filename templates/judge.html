@@ -304,7 +304,10 @@
           el: '#brokerTabPane', // Have Vue use the broker tab as its template
           delimiters: ['[[', ']]'], // Use these since Django uses { { } }
           data: {
-            topics: {},
+            topics: {
+              value: '',
+              children: {}, // Nested version of this same object
+            },
             errorConnecting: false,
           },
           // Called after the Vue instance is created
@@ -327,17 +330,17 @@
                 onMessageArrived(message);
               }
 
-              var topicStrs = message.destinationName.split('/');
-              var firstTopicStrs = topicStrs.slice(0, topicStrs.length - 1);
-              var lastTopicStr = topicStrs[topicStrs.length - 1];
               var parentTopic = this.topics;
-              firstTopicStrs.forEach(function(topicStr) {
-                if (!parentTopic.hasOwnProperty(topicStr)) {
-                  Vue.set(parentTopic, topicStr, {});
+              message.destinationName.split('/').forEach(function(topicStr) {
+                if (!parentTopic.children.hasOwnProperty(topicStr)) {
+                  Vue.set(parentTopic.children, topicStr, {
+                    value: '',
+                    children: {},
+                  });
                 }
-                parentTopic = parentTopic[topicStr];
+                parentTopic = parentTopic.children[topicStr];
               });
-              Vue.set(parentTopic, lastTopicStr, message.payloadString);
+              parentTopic.value = message.payloadString;
             },
             onConnectionError: function() {
               this.errorConnecting = true;
