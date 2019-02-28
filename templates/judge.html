@@ -393,9 +393,10 @@
         <table v-if="topicName || topics.value" class="topic-tree-table">
           <tr>
             <td :class="{ invisible: !Object.keys(topics.children).length }">
-              <a data-toggle="collapse" :href="'#' + collapseId"
+              <a data-toggle="collapse" :data-target="'#' + collapseId"
                   aria-expanded="true"
                   :aria-controls="'#' + collapseId"
+                  href="javascript:void(0)"
                   @click="collapsed = !collapsed">
                 <span
                     v-if="collapsed"
