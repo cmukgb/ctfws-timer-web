@@ -272,6 +272,37 @@
         $("#errorMessage").text("Error connecting to the server");
       }
 
+      var ctfwsTopicTreeComponent = {
+        name: 'ctfws-topic-tree',
+        delimiters: ['[[', ']]'], // Use these since Django uses { { } }
+        template: '#ctfwsTopicTreeTemplate',
+        props: {
+          topics: {
+            type: Object,
+            required: true,
+          },
+          topicName: {
+            type: String,
+            required: true,
+          },
+          fullName: {
+            type: String,
+            required: true,
+          },
+        },
+        data: function() {
+          return {
+            collapsed: false,
+          };
+        },
+        computed: {
+          collapseId: function() {
+            var id = 'topic-tree-' + this.fullName
+            return id.replace(/\$/g, '');
+          },
+        },
+      };
+
       $(document).ready(function () {
         // Enable all Bootstrap popovers
         $("[data-toggle='tooltip']").tooltip();
@@ -303,6 +334,9 @@
         new Vue({
           el: '#brokerTabPane', // Have Vue use the broker tab as its template
           delimiters: ['[[', ']]'], // Use these since Django uses { { } }
+          components: {
+            'ctfws-topic-tree': ctfwsTopicTreeComponent,
+          },
           data: {
             topics: {
               value: '',
@@ -351,6 +385,45 @@
 
         console.info("Finished setup");
       });
+    </script>
+
+    <!-- This is the template HTML for the <ctfws-topic-tree> component -->
+    <script type="text/x-template" id="ctfwsTopicTreeTemplate">
+      <div>
+        <table v-if="topicName || topics.value" class="topic-tree-table">
+          <tr>
+            <td :class="{ invisible: !Object.keys(topics.children).length }">
+              <a data-toggle="collapse" :href="'#' + collapseId"
+                  aria-expanded="true"
+                  :aria-controls="'#' + collapseId"
+                  @click="collapsed = !collapsed">
+                <span
+                    v-if="collapsed"
+                    class="glyphicon glyphicon-menu-right"
+                    aria-hidden="true">
+                </span>
+                <span
+                    v-else
+                    class="glyphicon glyphicon-menu-down"
+                    aria-hidden="true">
+                </span>
+              </a>
+            </td>
+            <td>[[ topicName ]]:</td>
+            <td>[[ topics.value ]]</td>
+          </tr>
+        </table>
+        <div :id="collapseId" class="collapse in">
+          <ctfws-topic-tree
+              v-for="(childTopic, childTopicName) in topics.children"
+              :key="fullName + childTopicName + '-'"
+              :topics="childTopic"
+              :topic-name="childTopicName"
+              :full-name="fullName + childTopicName + '-'"
+              class="indent-tree">
+          </ctfws-topic-tree>
+        </div>
+      </div>
     </script>
 {% endblock %}
 
@@ -1175,12 +1248,14 @@
 
   <div role="tabpanel" class="tab-pane" id="brokerTabPane">
     <div class="row">
-      <div class="col-md-offset-2 col-md-8 col-sm-offset-1 col-sm-10 col-xs-12">
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
         <div v-if="errorConnecting" class="alert alert-danger" role="alert">
           Error connecting to the broker. The below topics may be incorrect or
           out-of-date.
         </div>
-        <pre>[[ topics ]]</pre>
+        <ctfws-topic-tree :topics="topics" topic-name="" full-name=""
+            class="well font-family-monospace">
+        </ctfws-topic-tree>
       </div>
     </div>
   </div>
