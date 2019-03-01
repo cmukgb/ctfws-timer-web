@@ -331,7 +331,7 @@
           return;
         }
 
-        new Vue({
+        var vmBrokerTab = new Vue({
           el: '#brokerTabPane', // Have Vue use the broker tab as its template
           delimiters: ['[[', ']]'], // Use these since Django uses { { } }
           components: {
@@ -355,7 +355,7 @@
           },
           methods: {
             onMessageArrived: function(message) {
-              // console.info("[Vue] onMessageArrived: " +
+              // console.info("[Vue Broker] onMessageArrived: " +
               //     message.destinationName + ": " + message.payloadString);
               this.errorConnecting = false;
 
@@ -375,10 +375,93 @@
                 parentTopic = parentTopic.children[topicStr];
               });
               parentTopic.value = message.payloadString;
+
+              if (vmDevicesTab && vmDevicesTab.onMessageArrived) {
+                vmDevicesTab.onMessageArrived(message);
+              }
             },
             onConnectionError: function() {
               this.errorConnecting = true;
               onConnectionError();
+              if (vmDevicesTab && vmDevicesTab.onConnectionError) {
+                vmDevicesTab.onConnectionError();
+              }
+            },
+          },
+        });
+
+        var vmDevicesTab = new Vue({
+          el: '#devicesTabPane', // Have Vue use the devices tab as its template
+          delimiters: ['[[', ']]'], // Use these since Django uses { { } }
+          data: {
+            devices: {},
+            timesync: null,
+            errorConnecting: false,
+          },
+          computed: {
+            timesyncFormatted: function() {
+              var secs = parseInt(this.timesync);
+              if (!isNaN(secs) && secs >= 0) {
+                return new Date(secs * 1000).toLocaleString();
+              } else {
+                return '';
+              }
+            },
+          },
+          methods: {
+            onMessageArrived: function(message) {
+              // console.info("[Vue Devices] onMessageArrived: " +
+              //     message.destinationName + ": " + message.payloadString);
+              this.errorConnecting = false;
+
+              if (message.destinationName === 'ctfws/timesync') {
+                this.timesync = message.payloadString;
+              }
+
+              var devPrefix = 'ctfws/dev/';
+              var devcPrefix = 'ctfws/devc/';
+              var fullTopic = message.destinationName;
+              var deviceTopic = '';
+              if (fullTopic.indexOf(devPrefix) === 0) {
+                deviceTopic = fullTopic.substring(devPrefix.length);
+              }
+              if (fullTopic.indexOf(devcPrefix) === 0) {
+                deviceTopic = fullTopic.substring(devcPrefix.length);
+              }
+              if (deviceTopic) {
+                var split = deviceTopic.split('/');
+                if (split.length !== 2) {
+                  console.error("Could not parse device subtopic: " +
+                      fullTopic);
+                } else {
+                  var deviceName = split[0];
+                  var leafTopic = split[1];
+                  if (!deviceName) {
+                    console.error("Empty device name in topic: " + fullTopic);
+                  } else {
+                    if (!this.devices.hasOwnProperty(deviceName)) {
+                      Vue.set(this.devices, deviceName, {
+                        beat: '',
+                        role: '',
+                        location: '',
+                      });
+                    }
+                    var deviceObject = this.devices[deviceName];
+                    if (leafTopic === 'beat') {
+                      deviceObject.beat = message.payloadString;
+                    } else if (leafTopic === 'role') {
+                      deviceObject.role = message.payloadString;
+                    } else if (leafTopic === 'location') {
+                      deviceObject.location = message.payloadString;
+                    } else {
+                      console.error("Unknown device subtopic: " + fullTopic);
+                    }
+                  }
+                }
+              }
+            },
+            onConnectionError: function() {
+              this.errorConnecting = true;
             },
           },
         });
@@ -458,6 +541,12 @@
         <a href="#stuffTabPane" aria-controls="stuffTabPane" role="tab"
             data-toggle="tab">
           Stuff
+        </a>
+      </li>
+      <li role="presentation">
+        <a href="#devicesTabPane" aria-controls="devicesTabPane" role="tab"
+            data-toggle="tab">
+          Devices
         </a>
       </li>
       <li role="presentation">
@@ -1243,6 +1332,53 @@
 
           <input type="hidden" name="command" value="save_count_totals">
         </form>
+      </div>
+    </div>
+  </div>
+
+  <div role="tabpanel" class="tab-pane" id="devicesTabPane">
+    <div class="row">
+      <div class="col-lg-offset-3 col-lg-6 col-md-offset-2 col-md-8
+          col-sm-offset-1 col-sm-10 col-xs-12">
+        <div v-if="errorConnecting" class="alert alert-danger" role="alert">
+          Error connecting to the broker. The below may be incorrect or
+          out-of-date.
+        </div>
+        <table class="table table-striped table-bordered">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Beat</th>
+              <th>Location</th>
+              <th>Role</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(topics, deviceName) in devices" :key="deviceName">
+              <th>[[ deviceName ]]</th>
+              <td>[[ topics.beat ]]</td>
+              <td>[[ topics.location ]]</td>
+              <td>[[ topics.role ]]</td>
+            </tr>
+            <tr v-if="!Object.keys(devices).length">
+              <th colspan="4" class="text-center">
+                No device information found
+              </th>
+            </tr>
+          </tbody>
+        </table>
+        <p class="text-center lead">
+          Broker Timestamp:
+          <span v-if="timesync === null">
+            <strong><em>none</em></strong>
+          </span>
+          <span v-else>
+            [[ timesync ]]
+            <span v-if="timesyncFormatted">
+              ([[ timesyncFormatted ]])
+            </span>
+          </span>
+        </p>
       </div>
     </div>
   </div>
