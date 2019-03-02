@@ -179,6 +179,38 @@
         $("#" + this.value + "MessageSpan").removeClass("hidden");
       }
 
+      function setupTabHooks() {
+        var tabPaneStr = 'TabPane';
+        function showHashedTab() {
+          $('a[href="' + location.hash + tabPaneStr + '"]').tab('show');
+        }
+        function setHash(activeTabSelector) {
+          var newHash = ('#' + $(activeTabSelector).attr('href')
+              .slice(1, -1 * tabPaneStr.length));
+          if (newHash !== location.hash) {
+            if (history.pushState) {
+              history.pushState(null, null, newHash);
+            } else {
+              location.hash = newHash;
+            }
+          }
+        }
+        // Show active tab on reload and set the default if not present
+        if (location.hash !== '') {
+          showHashedTab();
+        } else {
+          setHash('li.active>a[data-toggle="tab"]');
+        }
+        // Show the right tab on back button too
+        window.onpopstate = function() {
+          showHashedTab();
+        };
+        // Remember the hash in the URL without jumping
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+          setHash(e.target);
+        });
+      }
+
       // Called when an MQTT message arrives
       function onMessageArrived(message) {
         console.info("onMessageArrived: " + message.destinationName + ": " +
@@ -325,6 +357,8 @@
         $("#lockTotalsButton").click(toggleStuffTotalsLock);
         $("#saveTotalsButton").click(postStuffForm);
         updateStuffTotalsDisabledState(); // Update based on the initial value
+
+        setupTabHooks();
 
         if (typeof Vue === "undefined") {
           console.error("Failed to setup Vue");
@@ -553,6 +587,7 @@
 <div class="row">
   <div class="col-sm-offset-1 col-sm-10 col-xs-12">
     <ul class="nav nav-tabs nav-justified" role="tablist">
+      <!-- Tab panel ids must end with 'TabPane' for setupTabHooks() to work -->
       <li role="presentation" class="active">
         <a href="#gameTabPane" aria-controls="gameTabPane" role="tab"
             data-toggle="tab">
