@@ -268,9 +268,9 @@
         <div class="row vertical-center">
           <div class="col-sm-offset-1 col-sm-10 col-xs-12">
             <h5 class="inline-block">
-              Check out the
+              <span class="hidden-xs">Check out the</span>
               <a href="http://www.cmukgb.org/ctfws/cheatsheet.pdf">
-                <span class="hidden-xs">CtFwS</span> cheatsheet
+                CtFwS cheatsheet
               </a>
               and
               <a href="https://play.google.com/store/apps/details?id=com.acmetensortoys.ctfwstimer">
@@ -284,6 +284,12 @@
                 </a>
               </h5>
             </div>
+            {% if user.is_authenticated %}
+              <h5 class="inline-block pull-right side-margins hidden-xs
+                  text-muted">
+                Logged in as {{ user }}
+              </h5>
+            {% endif %}
           </div>
         </div>
       </div>
