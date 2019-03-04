@@ -252,6 +252,14 @@
         <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.min.js"></script>
     {% endif %}
 
+    <!-- vuejs-storage from CDN -->
+    <!-- Use minified version when deploying -->
+    {% if DEBUG %}
+        <script src="https://cdn.jsdelivr.net/npm/vuejs-storage@3/dist/vuejs-storage.js"></script>
+    {% else %}
+        <script src="https://cdn.jsdelivr.net/npm/vuejs-storage@3/dist/vuejs-storage.min.js"></script>
+    {% endif %}
+
     {% block scripts %}
     {% endblock %}
 

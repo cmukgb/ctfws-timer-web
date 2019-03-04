@@ -10,11 +10,6 @@
          and the judges page -->
     {% include "mqtt.html" %}
 
-    <!-- Minified version of vuejs-storage from CDN -->
-    <!-- This must be version 1.0.0 as there is a bug in 1.0.1 (the latest as of
-         this writing) -->
-    <script src="https://cdn.jsdelivr.net/npm/vuejs-storage@1.0.0/dist/vuejs-storage.min.js"></script>
-
     <script>
       {% if DEBUG %}
           "use strict";
@@ -117,7 +112,7 @@
           return;
         }
 
-        // Vue plugin to store certain instance data in sessionStorage.
+        // Vue plugin to store certain instance data in localStorage.
         // Adds the 'storage' property to the Vue instance.
         Vue.use(vuejsStorage);
 
@@ -155,19 +150,15 @@
               numYellow: 0,
               perTeam: 0,
             },
+            messages: [],
             // Whether the red team is defending Wean (null indicates error).
             redInWean: null,
             hideMessagesBefore: 0,
           },
-          // Used by vuejs-storage: Everything in this.storage.data should work
-          // exactly the same as things in this.data (including being available
-          // just as this.foo), except data in storage will persist accross page
-          // loads, until the browser is restarted (see window.sessionStorage).
+          // Used by vuejs-storage: The Vue data keys specified in "keys" will
+          // persist accross page loads (see window.localStorage).
           storage: {
-            data: {
-              messages: [],
-            },
-            storage: sessionStorage,
+            keys: ['messages'],
             namespace: 'ctfws-timer',
           },
           // Called after the Vue instance is created
