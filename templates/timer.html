@@ -331,18 +331,13 @@
             stunElapsed: function() {
               return Math.min(this.now - this.stun.start, this.stun.length);
             },
-            sortedFilteredMessages: function() {
-              // Have to capture 'this' in order to use it in showMessage
-              var vm = this;
-              function showMessage(m) {
-                return m.time >= vm.hideMessagesBefore;
-              }
+            sortedMessages: function() {
               // Compare messages by timestamp such that sorting will put them
               // in order from newest to oldest
               function compareMessages(a, b) {
                 return b.time - a.time;
               }
-              return this.messages.filter(showMessage).sort(compareMessages);
+              return this.messages.sort(compareMessages);
             },
           },
           methods: {
@@ -444,7 +439,8 @@
                       // topic, but there's no harm in leaving this code as a
                       // backup. It serves a slightly different purpose.
                       this.messages = []
-                    } else if (!messageInList(newMessage, this.messages)) {
+                    } else if (secs >= this.hideMessagesBefore &&
+                        !messageInList(newMessage, this.messages)) {
                       this.messages.push(newMessage);
                     }
                   } else {
@@ -458,6 +454,9 @@
                   var secs = parseInt(msg.trim());
                   if (!isNaN(secs)) {
                     this.hideMessagesBefore = secs;
+                    this.messages = this.messages.filter(function(m) {
+                      return m.time >= secs;
+                    });
                   } else {
                     console.error("Invalid messagereset message: " + msg);
                   }
@@ -757,10 +756,10 @@
             <th class="col-sm-2 col-xs-2">Time</th>
             <th>Message</th>
           </tr>
-          <tr v-if="sortedFilteredMessages.length === 0">
+          <tr v-if="sortedMessages.length === 0">
             <td colspan="2" class="text-center">No messages</td>
           </tr>
-          <tr v-else v-for="message in sortedFilteredMessages"
+          <tr v-else v-for="message in sortedMessages"
             :key="message.time + '|' + message.body"
             :class="toMessageColor(message.time)">
             <td>[[ message.time | secsToLocaleTimeString ]]</td>
