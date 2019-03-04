@@ -11,6 +11,7 @@
       {% endif %}
 
       var totalsLocked = true; // Whether the stuff count totals are disabled
+      var vmFlagsPane; // Vue instance for the flag tracking pane
 
       // Split off the first line of the input and replace any remaining
       // newlines with semicolons
@@ -211,6 +212,19 @@
         });
       }
 
+      function updateVueNumFlags(numFlagsStr) {
+        var numFlags = parseInt(numFlagsStr);
+        if (!isNaN(numFlags)) {
+          if (vmFlagsPane) {
+            vmFlagsPane.numFlags = numFlags;
+          } else {
+            console.warn("Flags Pane Vue instance is undefined.");
+          }
+        } else {
+          console.error("Non-integer number of flags: " + numFlagsStr);
+        }
+      }
+
       // Called when an MQTT message arrives
       function onMessageArrived(message) {
         console.info("onMessageArrived: " + message.destinationName + ": " +
@@ -227,12 +241,14 @@
         switch (topic) {
           case 'config':
             if (msg === "none") {
+              updateVueNumFlags("0");
               $("#startTimeSpan").text("none");
               $("#numFlagsSpan").text("");
               $("#gameNumSpan").text("");
               $("#territorySpan").html("&nbsp;");
             } else {
               var split = splitOnWhitespace(msg, 7);
+              updateVueNumFlags(split[4]);
               $("#startTimeSpan").text(split[0]);
               $("#startTimeSpan").attr("data-original-title",
                 secsToTimeString(split[0]));
@@ -364,6 +380,59 @@
           console.error("Failed to setup Vue");
           return;
         }
+
+        // Vue plugin to store certain instance data in localStorage.
+        // Adds the 'storage' property to the Vue instance.
+        Vue.use(vuejsStorage);
+
+        // This is a global variable so that it can be used in the global
+        // onMessageArrived().
+        vmFlagsPane = new Vue({
+          el: '#flagsPanel', // Have Vue use the flags panel as its template
+          delimiters: ['[[', ']]'], // Use these since Django uses { { } }
+          data: {
+            numFlags: 0,
+            flags: [],
+          },
+          // Used by vuejs-storage: The Vue data keys specified in "keys" will
+          // persist accross page loads (see window.localStorage).
+          storage: {
+            keys: ['flags'],
+            namespace: 'ctfws-judge',
+          },
+          created: function() {
+            // Start with numFlags === flags.length so the alert doesn't pop up
+            // and then disappear. Very quickly, numFlags should be updated to
+            // the broker value. If that doesn't happen, it's probably best to
+            // just show the current table without an alert anyways.
+            this.numFlags = this.flags.length;
+          },
+          watch: {
+            numFlags: function() {
+              if (this.flags.length === 0) {
+                this.fillFlagsArray();
+              }
+            },
+          },
+          methods: {
+            fillFlagsArray: function() {
+              this.flags = [];
+              for (var i = 0; i < this.numFlags; i++) {
+                this.flags.push({
+                  letter: String.fromCharCode('A'.charCodeAt(0) + i),
+                  red: false,
+                  yellow: false,
+                });
+              }
+            },
+            uncheckFlagsArray: function() {
+              this.flags.forEach(function(flag) {
+                flag.red = false;
+                flag.yellow = false;
+              });
+            },
+          },
+        });
 
         var vmBrokerTab = new Vue({
           el: '#brokerTabPane', // Have Vue use the broker tab as its template
@@ -1062,6 +1131,76 @@
               </div>
               <input type="hidden" name="command" value="no_game">
             </form>
+          </div>
+        </div>
+
+        <hr class="hr-below-form">
+
+        <div id="flagsPanel" class="panel panel-default">
+          <div class="panel-heading">
+            <h1 class="panel-title">Flags</h1>
+          </div>
+          <div v-if="numFlags !== flags.length" class="panel-body">
+            <div class="alert alert-info mb-0 flags-alert text-center"
+                role="alert">
+              <span class="inline-block flags-alert-contents">
+                <span class="inline-block">
+                  The number of flags has changed to [[ numFlags ]].
+                </span>
+                <span class="inline-block">
+                  Click to clear and update the table.
+                </span>
+              </span>
+              <button type="button"
+                  class="btn btn-info btn-sm flags-alert-contents inline-block"
+                  @click="fillFlagsArray">
+                Update
+              </button>
+            </div>
+          </div>
+          <div v-if="flags.length === 0" class="panel-body text-center">
+            No number of flags set
+          </div>
+          <div v-if="flags.length" class="table-responsive">
+            <table class="table table-bordered table-condensed">
+              <thead>
+                <tr>
+                  <th>
+                    <button type="button"
+                        class="btn btn-default btn-xs mt-0"
+                        @click="uncheckFlagsArray">
+                      Clear
+                    </button>
+                  </th>
+                  <th v-for="flag in flags" :key="'flag-letter-' + flag.letter"
+                      class="text-center">
+                    [[ flag.letter ]]
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="danger">
+                  <th>
+                    Red
+                  </th>
+                  <td v-for="flag in flags" :key="'flag-red-' + flag.letter"
+                      class="text-center">
+                    <input v-model="flag.red" type="checkbox"
+                        :aria-label="'Red flag ' + flag.letter">
+                  </td>
+                </tr>
+                <tr class="warning">
+                  <th>
+                    Yellow
+                  </th>
+                  <td v-for="flag in flags" :key="'flag-yellow-' + flag.letter"
+                      class="text-center">
+                    <input v-model="flag.yellow" type="checkbox"
+                        :aria-label="'Yellow flag ' + flag.letter">
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
