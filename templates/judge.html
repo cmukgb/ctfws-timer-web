@@ -591,6 +591,74 @@
           },
         });
 
+        // Activate clipboard.js on the copy buttons in the judges tab.
+        new ClipboardJS('.assignments-copy-btn');
+
+        var vmJudgesTab = new Vue({
+          el: '#judgesTabPane', // Have Vue use the judges tab as its template
+          delimiters: ['[[', ']]'], // Use these since Django uses { { } }
+          data: {
+            roles: [
+              { display: 'Head', key: 'head' },
+              { display: 'DH Jail', key: 'dh_jail' },
+              { display: 'DH Roam 1', key: 'dh_roam_1' },
+              { display: 'DH Roam 2', key: 'dh_roam_2' },
+              { display: 'WeH Jail', key: 'weh_jail' },
+              { display: 'WeH Roam 1', key: 'weh_roam_1' },
+              { display: 'WeH Roam 2', key: 'weh_roam_2' },
+              { display: 'On Call', key: 'on_call' },
+              { display: 'Playing', key: 'playing' },
+              { display: 'Exec', key: 'exec' },
+            ],
+            assignments: [],
+            editing: false,
+            copySupported: ClipboardJS.isSupported(),
+          },
+          created: function() {
+            var obj = {};
+            this.roles.forEach(function(role) {
+              obj[role.key] = 'Murphy';
+            });
+            this.assignments.push(Object.assign({}, obj));
+            this.assignments.push(Object.assign({}, obj));
+            this.assignments.push(Object.assign({}, obj));
+            this.assignments.push(Object.assign({}, obj));
+          },
+          computed: {
+            copyText: function() {
+              var vm = this;
+              return vm.assignments.map(function(game, index) {
+                var rolesArray = vm.roles.map(function(role) {
+                  return role.display.toUpperCase() + ': ' + game[role.key];
+                });
+                return 'GAME ' + (index + 1) + ':\n' + rolesArray.join('\n');
+              });
+            },
+          },
+          methods: {
+            clearAssignments: function() {
+              this.assignments.forEach(function(game) {
+                Object.keys(game).forEach(function(role) {
+                  game[role] = '';
+                });
+              });
+            },
+            tableDataClasses: function(role, index) {
+              function roleContains(building) {
+                return role.key.indexOf(building) >= 0;
+              }
+              var weh = roleContains('weh');
+              var dh = roleContains('dh');
+              var isEven = index % 2 === 0;
+              return {
+                info: role.key === 'head',
+                warning: (isEven && weh) || (!isEven && dh),
+                danger: (!isEven && weh) || (isEven && dh),
+              };
+            },
+          },
+        });
+
         console.info("Finished setup");
       });
     </script>
@@ -679,6 +747,12 @@
         <a href="#brokerTabPane" aria-controls="brokerTabPane" role="tab"
             data-toggle="tab">
           Broker
+        </a>
+      </li>
+      <li role="presentation">
+        <a href="#judgesTabPane" aria-controls="judgesTabPane" role="tab"
+            data-toggle="tab">
+          Judges
         </a>
       </li>
     </ul>
@@ -1593,6 +1667,96 @@
         <ctfws-topic-tree :topics="topics" topic-name="" full-name=""
             class="well font-family-monospace">
         </ctfws-topic-tree>
+      </div>
+    </div>
+  </div>
+
+  <div role="tabpanel" class="tab-pane" id="judgesTabPane">
+    <div class="row">
+      <div class="col-sm-offset-1 col-sm-10 col-xs-12">
+        <div class="panel panel-success">
+          <div class="panel-heading">
+            <h1 class="panel-title">Assignments</h1>
+          </div>
+          <div class="table-responsive">
+            <!-- TODO Condensed? Hover rows? -->
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th class="nowrap vertical-align-middle">
+                    <button type="button" class="btn btn-info btn-sm mt-0"
+                        :class="{ active: editing }"
+                        :aria-pressed="editing"
+                        @click="editing = !editing">
+                      Edit
+                    </button>
+                    <button v-if="editing" type="button"
+                        class="btn btn-warning btn-sm mt-0"
+                        @click="clearAssignments">
+                      Clear
+                    </button>
+                  </th>
+                  <th v-for="(game, index) in assignments" :key="index"
+                      class="vertical-align-middle">
+                    <span class="inline-block">Game [[ index + 1]]</span>
+                    <button v-if="copySupported"
+                        :data-clipboard-text="copyText[index]" type="button"
+                        class="btn btn-default btn-xs mt-0 assignments-copy-btn">
+                      Copy
+                    </button>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="role in roles" :key="role.key">
+                  <th class="nowrap">
+                    [[ role.display ]]
+                  </th>
+                  <td v-for="(game, index) in assignments"
+                      :key="role.key + index"
+                      :class="tableDataClasses(role, index)">
+                    <!-- TODO Placeholder?-->
+                    <input v-if="editing" v-model="game[role.key]"
+                        class="form-control input-sm"
+                        @keyup.enter="editing = false">
+                    <span v-else>
+                      [[ game[role.key] ]]
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- TODO Adjust columns -->
+        <div class="panel panel-info">
+          <div class="panel-heading">
+            <h1 class="panel-title">Flag Placement</h1>
+          </div>
+          <ul class="list-group">
+            <li class="list-group-item">
+              No higher than six feet
+            </li>
+            <li class="list-group-item">
+              Visible from most angles
+            </li>
+            <li class="list-group-item">
+              Not within ten feet of a glyph
+            </li>
+            <li class="list-group-item">
+              In a hallway or room with two exits
+            </li>
+            <li class="list-group-item">
+              No more than one per room or hallway
+            </li>
+            <li class="list-group-item">
+              Removable with one smooth motion
+              <span class="text-muted">
+                (cannot be pinned to boards)
+              </span>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
