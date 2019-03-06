@@ -30,6 +30,29 @@
         return new Date(secs * 1000).toLocaleTimeString();
       }
 
+      function validateInputs() {
+        var error = false;
+
+        $(this).closest("form").find(".input-required").each(function () {
+          if ($.trim(this.value) === "") {
+            error = true;
+          }
+        });
+
+        $(this).closest("form").find(".radio-required").each(function () {
+          if ($("input:radio:checked", this).length < 1) {
+            error = true;
+          }
+        });
+
+        if (error) {
+          $(this).closest("form").find("button:submit").attr("disabled", "disabled");
+        }
+        else {
+          $(this).closest("form").find("button:submit").removeAttr("disabled");
+        }
+      }
+
       function postForm(e) {
         e.preventDefault(); // Prevent normal form submission
 
@@ -354,6 +377,10 @@
       $(document).ready(function () {
         // Enable all Bootstrap popovers
         $("[data-toggle='tooltip']").tooltip();
+
+        // Form input validation actions
+        $(".input-required").on("input", validateInputs);
+        $(".radio-required").on("input", validateInputs);
 
         // Form submit actions
         $(".form-ajax-submit").submit(postForm);
@@ -892,7 +919,7 @@
                     Set flags to 0
                   </label>
                 </div>
-                <button type="submit" class="center-block btn btn-primary">
+                <button type="submit" class="center-block btn btn-primary" disabled>
                   Start Game
                 </button>
               </div>
@@ -966,7 +993,7 @@
 
                 <div class="col-sm-3 col-xs-12">
                   <div class="form-group">
-                    <button type="submit" class="center-block btn btn-primary">
+                    <button type="submit" class="center-block btn btn-primary" disabled>
                       Set Flags
                     </button>
                   </div>
