@@ -1,4 +1,5 @@
 {# This comment helps vim figure out this is a Django HTML file type #}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -264,6 +265,25 @@
         margin-left: 5px;
         margin-bottom: 2px;
       }
+
+      .label {
+        border-radius: 0.8em;
+      }
+
+      #tabsBar > li > a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #tabsBar > li > a > span {
+        flex: 0 0 auto;
+      }
+      #tabsBar > li > a > span.label {
+        margin-left: 5px;
+      }
+      #tabsBar > li > a > span.label:last-child {
+        margin-right: -5px;
+      }
     </style>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
@@ -289,6 +309,92 @@
 
     <!-- clipboard.js from CDN -->
     <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+
+    <!-- ServerDate JavaScript served from the same server as this file -->
+    <script src="{% static 'js/ServerDate.js' %}"></script>
+
+    <script>
+      {% if DEBUG %}
+          "use strict";
+      {% endif %}
+
+      // Convert a POSIX timestamp in seconds to a human-readable date string
+      function secsToTimeString(secs) {
+        return secs ? new Date(secs * 1000).toLocaleTimeString() : secs;
+      }
+
+      // If useWords, then convert seconds to
+      // "[minus ][H hr[s]][M min[s]]S sec[s]" or "[minus ]D day[s]"
+      // Otherwise, convert seconds to
+      // "[-][H:]M:S"
+      function toHMSHelper(time, useWords) {
+        var negative = false;
+        if (time < 0) {
+          negative = true;
+          time = time * -1;
+        }
+
+        var hours = Math.floor(time / 3600);
+        time = time - hours * 3600;
+        var minutes = Math.floor(time / 60);
+        var seconds = time - minutes * 60;
+
+        if (useWords) {
+          var result = "";
+          if (hours >= 24) {
+            var days = Math.round(hours / 24);
+            result += days + " day" + (days === 1 ? "" : "s");
+          } else {
+            if (hours > 0) {
+              result += hours + " hr" + (hours === 1 ? "" : "s") + " ";
+            }
+            if (minutes > 0) {
+              result += minutes + " min" + (minutes === 1 ? "" : "s") + " ";
+            }
+            // Add seconds if there are any or add "0 secs" if there are no
+            // hours and no minutes
+            if (seconds > 0 || (minutes <= 0 && hours <= 0)) {
+              result += seconds + " sec" + (seconds === 1 ? "" : "s");
+            }
+          }
+          return (negative ? "minus " : "") + result.trim();
+
+        } else {
+          var result = "";
+          if (hours === 0) {
+            result = minutes + ":" + (seconds < 10 ? "0" + seconds : seconds);
+          } else {
+            result =  hours + ":" + (minutes < 10 ? "0" + minutes : minutes) +
+              ":" + (seconds < 10 ? "0" + seconds : seconds);
+          }
+          return (negative ? "-" : "") + result;
+        }
+      }
+
+      // Convert seconds to "[-][H:]M:S"
+      function toHMS(time) {
+        return toHMSHelper(time, false);
+      }
+
+      // Convert seconds to "[minus ][H hr[s]][M min[s]]S sec[s]"
+      // If seconds is more than one day, only show "[minus ]D day[s]"
+      function toHMSWords(time) {
+        return toHMSHelper(time, true);
+      }
+
+      // Get the server's current Unix time in seconds
+      function getServerNow() {
+        return Math.round(ServerDate.now() / 1000);
+      }
+
+      // Get the client's current Unix time in seconds
+      function getClientNow() {
+        return Math.round(Date.now() / 1000);
+      }
+
+      // Constants
+      var updateNowIntervalTime = 500; // ms
+    </script>
 
     {% block scripts %}
     {% endblock %}

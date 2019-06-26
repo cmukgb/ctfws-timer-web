@@ -25,11 +25,6 @@
         }
       }
 
-      // Convert a POSIX timestamp in seconds to a human-readable date string
-      function secsToTimeString(secs) {
-        return new Date(secs * 1000).toLocaleTimeString();
-      }
-
       function postForm(e) {
         e.preventDefault(); // Prevent normal form submission
 
@@ -497,11 +492,23 @@
           el: '#devicesTabPane', // Have Vue use the devices tab as its template
           delimiters: ['[[', ']]'], // Use these since Django uses { { } }
           data: {
+            serverNow: getServerNow(),
             devices: {},
             timesync: null,
             errorConnecting: false,
           },
+          created: function() {
+            // Update the "now" variable every updateNowIntervalTime. Vue will
+            // react to this change and update all UI that uses them.
+            var vm = this;
+            setInterval(function() {
+              vm.serverNow = getServerNow();
+            }, updateNowIntervalTime);
+          },
           computed: {
+            staleThreshold: function() {
+              return 60; // Seconds
+            },
             timesyncFormatted: function() {
               var secs = parseInt(this.timesync);
               if (!isNaN(secs) && secs >= 0) {
@@ -510,15 +517,43 @@
                 return '';
               }
             },
+            serverNowFormatted: function() {
+              if (this.serverNow) {
+                return new Date(this.serverNow * 1000).toLocaleString();
+              } else {
+                return '';
+              }
+            },
             deviceRows: function() {
               var devices = this.devices;
+              var vm = this;
               var rows = Object.keys(devices).map(function(deviceName) {
                 var topics = devices[deviceName];
+                var offset = 0;
+                var timeStr = '';
+                var timeInt = parseInt(topics.time);
+                if (!isNaN(timeInt)) {
+                  offset = vm.serverNow - timeInt;
+                  timeStr = secsToTimeString(timeInt) +
+                    ' (' + toHMSWords(offset) + ' ago)';
+                } else {
+                  timeStr = topics.time;
+                }
+                var classStr = '';
+                if (topics.status === 'dead') {
+                  classStr = 'danger';
+                } else if (offset > vm.staleThreshold) {
+                  classStr = 'warning';
+                }
                 return {
                   name: deviceName,
-                  beat: topics.beat,
+                  time: timeStr,
+                  status: topics.status,
+                  mac: topics.mac,
                   role: topics.role,
                   location: topics.location,
+                  offset: offset,
+                  class: classStr,
                 };
               });
               rows.sort(function(a, b) {
@@ -531,6 +566,35 @@
                 return 0;
               });
               return rows;
+            },
+            yellowBadges: function() {
+              var vm = this;
+              var staleRows = this.deviceRows.filter(function(row) {
+                return row.status !== 'dead' &&
+                  row.offset > vm.staleThreshold;
+              });
+              return staleRows.length;
+            },
+            redBadges: function() {
+              var deadRows = this.deviceRows.filter(function(row) {
+                return row.status === 'dead';
+              });
+              return deadRows.length;
+            },
+          },
+          watch: {
+            deviceRows: function() {
+              function setBadge(selector, value) {
+                if (value) {
+                  $(selector).text(value);
+                  $(selector).removeClass('hidden');
+                } else {
+                  $(selector).text('');
+                  $(selector).addClass('hidden');
+                }
+              }
+              setBadge('#devicesRedBadgeCount', this.redBadges);
+              setBadge('#devicesYellowBadgeCount', this.yellowBadges);
             },
           },
           methods: {
@@ -566,14 +630,30 @@
                   } else {
                     if (!this.devices.hasOwnProperty(deviceName)) {
                       Vue.set(this.devices, deviceName, {
-                        beat: '',
+                        time: '',
+                        status: '',
+                        mac: '',
                         role: '',
                         location: '',
                       });
                     }
                     var deviceObject = this.devices[deviceName];
                     if (leafTopic === 'beat') {
-                      deviceObject.beat = message.payloadString;
+                      var beatArgs = message.payloadString.split(/\s+/);
+                      deviceObject.status = beatArgs[0];
+                      function hasBeatArg(s) {
+                        return typeof s !== 'undefined' && s !== '-';
+                      }
+                      if (hasBeatArg(beatArgs[1])) {
+                        deviceObject.time = beatArgs[1];
+                      } else {
+                        deviceObject.time = '';
+                      }
+                      if (hasBeatArg(beatArgs[2])) {
+                        deviceObject.mac = beatArgs[2];
+                      } else {
+                        deviceObject.mac = '';
+                      }
                     } else if (leafTopic === 'role') {
                       deviceObject.role = message.payloadString;
                     } else if (leafTopic === 'location') {
@@ -723,36 +803,56 @@
 {% block container %}
 <div class="row">
   <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-    <ul class="nav nav-tabs nav-justified" role="tablist">
+    <ul id="tabsBar" class="nav nav-tabs nav-justified" role="tablist">
       <!-- Tab panel ids must end with 'TabPane' for setupTabHooks() to work -->
       <li role="presentation" class="active">
         <a href="#gameTabPane" aria-controls="gameTabPane" role="tab"
             data-toggle="tab">
-          Game
+          <span>
+            Game
+          </span>
         </a>
       </li>
       <li role="presentation">
         <a href="#stuffTabPane" aria-controls="stuffTabPane" role="tab"
             data-toggle="tab">
-          Stuff
+          <span>
+            Stuff
+          </span>
         </a>
       </li>
       <li role="presentation">
         <a href="#devicesTabPane" aria-controls="devicesTabPane" role="tab"
             data-toggle="tab">
-          Devices
+          <span>
+            Devices
+          </span>
+          <span
+            id="devicesRedBadgeCount"
+            class="hidden label label-danger"
+          >
+          </span>
+          <span
+            id="devicesYellowBadgeCount"
+            class="hidden label label-warning"
+          >
+          </span>
         </a>
       </li>
       <li role="presentation">
         <a href="#brokerTabPane" aria-controls="brokerTabPane" role="tab"
             data-toggle="tab">
-          Broker
+          <span>
+            Broker
+          </span>
         </a>
       </li>
       <li role="presentation">
         <a href="#judgesTabPane" aria-controls="judgesTabPane" role="tab"
             data-toggle="tab">
-          Judges
+          <span>
+            Judges
+          </span>
         </a>
       </li>
     </ul>
@@ -1620,20 +1720,45 @@
               <thead>
                 <tr>
                   <th>Name</th>
-                  <th>Beat</th>
+                  <th>Status</th>
+                  <th>Time</th>
+                  <th>MAC</th>
                   <th>Location</th>
                   <th>Role</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="device in deviceRows" :key="device.name">
+                <tr
+                  v-for="device in deviceRows"
+                  :key="device.name"
+                  :class="device.class"
+                >
                   <th>[[ device.name ]]</th>
-                  <td>[[ device.beat ]]</td>
-                  <td>[[ device.location ]]</td>
-                  <td>[[ device.role ]]</td>
+                  <td>[[ device.status ]]</td>
+                  <td>[[ device.time ]]</td>
+                  <td>[[ device.mac ]]</td>
+                  <td>
+                    <span v-if="device.location === 'w'">
+                      Wean
+                    </span>
+                    <span v-else-if="device.location === 'd'">
+                      Doherty
+                    </span>
+                    <code v-else-if="device.location">
+                      [[ device.location ]]
+                    </code>
+                  </td>
+                  <td>
+                    <span v-if="device.role === 'j'">
+                      Jail
+                    </span>
+                    <code v-else-if="device.role">
+                      [[ device.role ]]
+                    </code>
+                  </td>
                 </tr>
                 <tr v-if="!deviceRows.length">
-                  <th colspan="4" class="text-center">
+                  <th colspan="6" class="text-center">
                     No device information found
                   </th>
                 </tr>
@@ -1641,18 +1766,32 @@
             </table>
           </div>
         </div>
-        <p class="text-center lead">
-          Broker Timestamp:
-          <span v-if="timesync === null">
-            <em>none</em>
-          </span>
-          <span v-else>
-            [[ timesync ]]
-            <span v-if="timesyncFormatted">
-              ([[ timesyncFormatted ]])
+        <div class="text-center lead">
+          <p>
+            Broker Timestamp:
+            <span v-if="timesync === null">
+              <em>none</em>
             </span>
-          </span>
-        </p>
+            <span v-else>
+              [[ timesync ]]
+              <span v-if="timesyncFormatted">
+                ([[ timesyncFormatted ]])
+              </span>
+            </span>
+          </p>
+          <p>
+            Server Time:
+            <span v-if="!serverNow">
+              <em>none</em>
+            </span>
+            <span v-else>
+              [[ serverNow ]]
+              <span v-if="serverNowFormatted">
+                ([[ serverNowFormatted ]])
+              </span>
+            </span>
+          </p>
+        </div>
       </div>
     </div>
   </div>

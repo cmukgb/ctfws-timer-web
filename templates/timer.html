@@ -1,11 +1,6 @@
 {% extends "base.html" %}
 
-{% load static %}
-
 {% block scripts %}
-    <!-- ServerDate JavaScript served from the same server as this file -->
-    <script src="{% static 'js/ServerDate.js' %}"></script>
-
     <!-- Inserts a <script> containing all the MQTT JavaScript common to this
          and the judges page -->
     {% include "mqtt.html" %}
@@ -14,70 +9,6 @@
       {% if DEBUG %}
           "use strict";
       {% endif %}
-
-      // If useWords, then convert seconds to
-      // "[minus ][H hr[s]][M min[s]]S sec[s]"
-      // Otherwise, convert seconds to
-      // "[-][H:]M:S"
-      function toHMSHelper(time, useWords) {
-        var negative = false;
-        if (time < 0) {
-          negative = true;
-          time = time * -1;
-        }
-
-        var hours = Math.floor(time / 3600);
-        time = time - hours * 3600;
-        var minutes = Math.floor(time / 60);
-        var seconds = time - minutes * 60;
-
-        if (useWords) {
-          var result = "";
-          if (hours > 0) {
-            result += hours + " hr" + (hours === 1 ? "" : "s") + " ";
-          }
-          if (minutes > 0) {
-            result += minutes + " min" + (minutes === 1 ? "" : "s") + " ";
-          }
-          // Add seconds if there are any or add "0 secs" if there are no
-          // hours and no minutes
-          if (seconds > 0 || (minutes <= 0 && hours <= 0)) {
-            result += seconds + " sec" + (seconds === 1 ? "" : "s");
-          }
-          return (negative ? "minus " : "") + result.trim();
-
-        } else {
-          var result = "";
-          if (hours === 0) {
-            result = minutes + ":" + (seconds < 10 ? "0" + seconds : seconds);
-          } else {
-            result =  hours + ":" + (minutes < 10 ? "0" + minutes : minutes) +
-              ":" + (seconds < 10 ? "0" + seconds : seconds);
-          }
-          return (negative ? "-" : "") + result;
-
-        }
-      }
-
-      // Convert seconds to "[-][H:]M:S"
-      function toHMS(time) {
-        return toHMSHelper(time, false);
-      }
-
-      // Convert seconds to "[minus ][H hr[s]][M min[s]]S sec[s]"
-      function toHMSWords(time) {
-        return toHMSHelper(time, true);
-      }
-
-      // Get the server's current Unix time in seconds
-      function getServerNow() {
-        return Math.round(ServerDate.now() / 1000);
-      }
-
-      // Get the client's current Unix time in seconds
-      function getClientNow() {
-        return Math.round(Date.now() / 1000);
-      }
 
       // Log the ServerDate precision and delta every serverDateLogInterval
       function logServerDate() {
@@ -98,7 +29,6 @@
       }
 
       // Constants
-      var updateNowIntervalTime = 500; // ms
       var clockOffsetThreshold = 15; // seconds
       var serverDateLogInterval = 60 * 1000; // ms
 
