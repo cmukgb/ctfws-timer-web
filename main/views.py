@@ -5,11 +5,14 @@ from django.forms import modelform_factory
 
 import os
 import subprocess
+import json
 
 from ctfws_timer import settings
-from .models import StuffCount
+from .models import StuffCount, EventAssignments, GameAssignments
 
 StuffCountForm = modelform_factory(StuffCount, fields='__all__')
+GameAssignmentsForm = modelform_factory(GameAssignments,
+    exclude=('game_number', 'event'))
 
 def index(request):
     return render(request, 'timer.html')
@@ -75,6 +78,26 @@ def get_args(post):
     else:
         return None
 
+def get_assignments():
+    event_query = EventAssignments.objects.all()
+    if event_query.count() > 0:
+        event = event_query[0]
+    else:
+        event = EventAssignments()
+        event.save()
+    games_query = event.gameassignments_set.all()
+    if games_query.count() > 0:
+        games = list(games_query)
+    else:
+        games = []
+        for i in range(4):
+            game = GameAssignments()
+            game.game_number = i + 1
+            game.event = event
+            game.save()
+            games.append(game)
+    return games
+
 def judge(request):
     if not user_is_judge(request.user):
         if request.method == 'POST':
@@ -97,6 +120,27 @@ def judge(request):
                 return HttpResponse()
             else:
                 return HttpResponse('Invalid data', status=400)
+        elif request.POST['command'] == 'save_assignments':
+            if 'assignments' not in request.POST:
+                return HttpResponse(
+                    'No assignments provided for command save_assignments',
+                    status=400)
+            assignments = json.loads(request.POST['assignments'])
+            if not isinstance(assignments, list):
+                return HttpResponse('Provided assignments is not a list',
+                    status=400)
+            games = get_assignments()
+            if len(assignments) != len(games):
+                return HttpResponse(
+                    'Provided assignments list does not have expected length ' +
+                    str(len(games)), status=400)
+            forms = list(map(lambda p : GameAssignmentsForm(p[0], instance=p[1]),
+                zip(assignments, games)))
+            if not all(list(map(lambda f : f.is_valid(), forms))):
+                return HttpResponse('Invalid data', status=400)
+            for form in forms:
+                form.save()
+            return HttpResponse()
         else:
             args = get_args(request.POST)
             if args is None:
@@ -113,7 +157,11 @@ def judge(request):
         else:
             stuff_totals = StuffCount() # Defaults all fields to 0
         stuff_form = StuffCountForm()
+        game_assignments = get_assignments()
+        game_form = GameAssignmentsForm()
         return render(request, 'judge.html', {
             'stuff_totals': stuff_totals,
             'stuff_form': stuff_form,
+            'game_assignments': game_assignments,
+            'game_form': game_form,
         })

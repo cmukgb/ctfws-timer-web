@@ -690,19 +690,37 @@
               { display: 'Playing', key: 'playing' },
               { display: 'Exec', key: 'exec' },
             ],
-            assignments: [],
+            assignments: [
+            {% for game in game_assignments %}
+              {
+                head: '{{ game.head }}',
+                dh_jail: '{{ game.dh_jail }}',
+                dh_roam_1: '{{ game.dh_roam_1 }}',
+                dh_roam_2: '{{ game.dh_roam_2 }}',
+                weh_jail: '{{ game.weh_jail }}',
+                weh_roam_1: '{{ game.weh_roam_1 }}',
+                weh_roam_2: '{{ game.weh_roam_2 }}',
+                on_call: '{{ game.on_call }}',
+                playing: '{{ game.playing }}',
+                exec: '{{ game.exec }}',
+              },
+            {% endfor %}
+            ],
             editing: false,
+            changes: false,
+            saving: false,
+            successMessage: '',
+            errorMessage: '',
             copySupported: ClipboardJS.isSupported(),
           },
           created: function() {
-            var obj = {};
-            this.roles.forEach(function(role) {
-              obj[role.key] = 'Murphy';
+            var vm = this;
+            window.addEventListener('beforeunload', function(e) {
+              if (vm.changes) {
+                e.preventDefault(); // Cancel the event
+                e.returnValue = ''; // Chrome requires returnValue to be set
+              }
             });
-            this.assignments.push(Object.assign({}, obj));
-            this.assignments.push(Object.assign({}, obj));
-            this.assignments.push(Object.assign({}, obj));
-            this.assignments.push(Object.assign({}, obj));
           },
           computed: {
             copyText: function() {
@@ -714,14 +732,65 @@
                 return 'GAME ' + (index + 1) + ':\n' + rolesArray.join('\n');
               });
             },
+            formData: function() {
+              var assignments = this.assignments.map(function(a) {
+                return {
+                  {{ game_form.head.html_name }}: a.head,
+                  {{ game_form.dh_jail.html_name }}: a.dh_jail,
+                  {{ game_form.dh_roam_1.html_name }}: a.dh_roam_1,
+                  {{ game_form.dh_roam_2.html_name }}: a.dh_roam_2,
+                  {{ game_form.weh_jail.html_name }}: a.weh_jail,
+                  {{ game_form.weh_roam_1.html_name }}: a.weh_roam_1,
+                  {{ game_form.weh_roam_2.html_name }}: a.weh_roam_2,
+                  {{ game_form.on_call.html_name }}: a.on_call,
+                  {{ game_form.playing.html_name }}: a.playing,
+                  {{ game_form.exec.html_name }}: a.exec,
+                };
+              });
+              return {
+                command: 'save_assignments',
+                assignments: JSON.stringify(assignments),
+                csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val(),
+              };
+            },
+          },
+          watch: {
+            assignments: {
+              deep: true,
+              handler: function() {
+                this.changes = true;
+                this.successMessage = '';
+              },
+            },
           },
           methods: {
-            clearAssignments: function() {
-              this.assignments.forEach(function(game) {
-                Object.keys(game).forEach(function(role) {
-                  game[role] = '';
-                });
+            saveAssignments: function() {
+              var vm = this;
+              vm.successMessage = '';
+              vm.errorMessage = '';
+              vm.saving = true;
+              var result = $.post({% url 'judge' %}, vm.formData);
+              result.done(function (response) {
+                vm.saving = false;
+                vm.editing = false;
+                vm.changes = false;
+                vm.successMessage = 'Saved!';
               });
+              result.fail(function (response) {
+                vm.saving = false;
+                var unknown = 'Unknown error (the server may be unreachable)';
+                var error = response.responseText.trim();
+                vm.errorMessage = error ? 'Error: ' + error : unknown;
+              })
+            },
+            clearAssignments: function() {
+              if (window.confirm('Clear all assignments?')) {
+                this.assignments.forEach(function(game) {
+                  Object.keys(game).forEach(function(role) {
+                    game[role] = '';
+                  });
+                });
+              }
             },
             tableDataClasses: function(role, index) {
               function roleContains(building) {
@@ -1813,88 +1882,111 @@
   <div role="tabpanel" class="tab-pane" id="judgesTabPane">
     <div class="row">
       <div class="col-sm-offset-1 col-sm-10 col-xs-12">
-        <div class="panel panel-success">
-          <div class="panel-heading">
-            <h1 class="panel-title">Assignments</h1>
-          </div>
-          <div class="table-responsive">
-            <!-- TODO Condensed? Hover rows? -->
-            <table class="table table-bordered">
-              <thead>
-                <tr>
-                  <th class="nowrap vertical-align-middle">
-                    <button type="button" class="btn btn-info btn-sm mt-0"
-                        :class="{ active: editing }"
-                        :aria-pressed="editing"
-                        @click="editing = !editing">
-                      Edit
-                    </button>
-                    <button v-if="editing" type="button"
-                        class="btn btn-warning btn-sm mt-0"
-                        @click="clearAssignments">
-                      Clear
-                    </button>
-                  </th>
-                  <th v-for="(game, index) in assignments" :key="index"
-                      class="vertical-align-middle">
-                    <span class="inline-block">Game [[ index + 1]]</span>
-                    <button v-if="copySupported"
-                        :data-clipboard-text="copyText[index]" type="button"
-                        class="btn btn-default btn-xs mt-0 assignments-copy-btn">
-                      Copy
-                    </button>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="role in roles" :key="role.key">
-                  <th class="nowrap">
-                    [[ role.display ]]
-                  </th>
-                  <td v-for="(game, index) in assignments"
-                      :key="role.key + index"
-                      :class="tableDataClasses(role, index)">
-                    <!-- TODO Placeholder?-->
-                    <input v-if="editing" v-model="game[role.key]"
-                        class="form-control input-sm"
-                        @keyup.enter="editing = false">
-                    <span v-else>
-                      [[ game[role.key] ]]
+        <div class="row">
+          <div class="col-xs-12 col-lg-9">
+            <div class="panel panel-success">
+              <div class="panel-heading">
+                <h1 class="panel-title">
+                  Assignments
+                  <span class="pull-right">
+                    <span v-if="successMessage">
+                      [[ successMessage]]
                     </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                    <span v-if="errorMessage" class="text-danger">
+                      [[ errorMessage ]]
+                    </span>
+                    <span v-if="saving" class="text-info">
+                      Saving...
+                    </span>
+                    <span v-else-if="changes" class="text-warning ml-7">
+                      Unsaved changes
+                    </span>
+                  </span>
+                </h1>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th class="nowrap vertical-align-middle">
+                        <button v-if="!editing" type="button"
+                            class="btn btn-info btn-sm mt-0"
+                            @click="editing = true">
+                          Edit
+                        </button>
+                        <button v-if="editing" type="button"
+                            class="btn btn-success btn-sm mt-0"
+                            @click="saveAssignments">
+                          Save
+                        </button>
+                        <button v-if="editing" type="button"
+                            class="btn btn-warning btn-sm mt-0"
+                            @click="clearAssignments">
+                          Clear
+                        </button>
+                      </th>
+                      <th v-for="(game, index) in assignments" :key="index"
+                          class="vertical-align-middle">
+                        <span class="inline-block">Game [[ index + 1]]</span>
+                        <button v-if="copySupported && !editing"
+                            :data-clipboard-text="copyText[index]" type="button"
+                            class="btn btn-default btn-xs mt-0 assignments-copy-btn">
+                          Copy
+                        </button>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="role in roles" :key="role.key">
+                      <th class="nowrap vertical-align-middle">
+                        [[ role.display ]]
+                      </th>
+                      <td v-for="(game, index) in assignments"
+                          :key="role.key + index"
+                          :class="tableDataClasses(role, index)">
+                        <input v-if="editing" v-model="game[role.key]"
+                            type="text" class="form-control input-sm"
+                            autocomplete="off">
+                        <span v-else>
+                          [[ game[role.key] ]]
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
-        </div>
-        <!-- TODO Adjust columns -->
-        <div class="panel panel-info">
-          <div class="panel-heading">
-            <h1 class="panel-title">Flag Placement</h1>
+          <div class="col-xs-12 col-lg-3">
+            <div class="panel panel-info">
+              <div class="panel-heading">
+                <h1 class="panel-title">Flag Placement</h1>
+              </div>
+              <ul class="list-group">
+                <li class="list-group-item">
+                  No higher than six feet
+                </li>
+                <li class="list-group-item">
+                  Visible from most angles
+                </li>
+                <li class="list-group-item">
+                  Not within ten feet of a glyph
+                </li>
+                <li class="list-group-item">
+                  In a hallway or room with two exits
+                </li>
+                <li class="list-group-item">
+                  No more than one per room or hallway
+                </li>
+                <li class="list-group-item">
+                  Removable with one smooth motion
+                  <span class="text-muted">
+                    (cannot be pinned to boards)
+                  </span>
+                </li>
+              </ul>
+            </div>
           </div>
-          <ul class="list-group">
-            <li class="list-group-item">
-              No higher than six feet
-            </li>
-            <li class="list-group-item">
-              Visible from most angles
-            </li>
-            <li class="list-group-item">
-              Not within ten feet of a glyph
-            </li>
-            <li class="list-group-item">
-              In a hallway or room with two exits
-            </li>
-            <li class="list-group-item">
-              No more than one per room or hallway
-            </li>
-            <li class="list-group-item">
-              Removable with one smooth motion
-              <span class="text-muted">
-                (cannot be pinned to boards)
-              </span>
-            </li>
-          </ul>
         </div>
       </div>
     </div>
