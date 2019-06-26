@@ -107,10 +107,13 @@ def judge(request):
             except subprocess.CalledProcessError as err:
                 return HttpResponse(err.output, status=400)
     else:
-        query = StuffCount.objects.all()
-        if query.count() > 0:
-            totals = query[0]
+        stuff_query = StuffCount.objects.all()
+        if stuff_query.count() > 0:
+            stuff_totals = stuff_query[0]
         else:
-            totals = StuffCount() # Defaults all fields to 0
-        form = StuffCountForm()
-        return render(request, 'judge.html', {'totals': totals, 'form': form})
+            stuff_totals = StuffCount() # Defaults all fields to 0
+        stuff_form = StuffCountForm()
+        return render(request, 'judge.html', {
+            'stuff_totals': stuff_totals,
+            'stuff_form': stuff_form,
+        })
