@@ -387,7 +387,7 @@
               }
             },
             toPercent: function(elapsed, total) {
-              return Math.round((100 * elapsed) / total);
+              return 100 * (elapsed / total);
             },
             // Get the color class to apply to a message in the table given it's
             // timestamp
