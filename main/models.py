@@ -62,7 +62,7 @@ class GameAssignments(models.Model):
 
     on_call = models.CharField(max_length=255, blank=True, default='')
     playing = models.CharField(max_length=255, blank=True, default='')
-    exec = models.CharField(max_length=255, blank=True, default='')
+    exec_people = models.CharField(max_length=255, blank=True, default='')
 
     def __str__(self):
         return '%s: Game %d' % (self.event, self.game_number)

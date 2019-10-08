@@ -702,7 +702,7 @@
                 weh_roam_2: '{{ game.weh_roam_2 }}',
                 on_call: '{{ game.on_call }}',
                 playing: '{{ game.playing }}',
-                exec: '{{ game.exec }}',
+                exec: '{{ game.exec_people }}',
               },
             {% endfor %}
             ],
@@ -744,7 +744,7 @@
                   {{ game_form.weh_roam_2.html_name }}: a.weh_roam_2,
                   {{ game_form.on_call.html_name }}: a.on_call,
                   {{ game_form.playing.html_name }}: a.playing,
-                  {{ game_form.exec.html_name }}: a.exec,
+                  {{ game_form.exec_people.html_name }}: a.exec,
                 };
               });
               return {
