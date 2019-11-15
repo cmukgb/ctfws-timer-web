@@ -1381,7 +1381,13 @@
 
         <div id="flagsPanel" class="panel panel-default">
           <div class="panel-heading">
-            <h1 class="panel-title">Flags</h1>
+            <h1 class="panel-title">
+              Flags
+              <span class="text-muted panel-small side-margins">
+                Stored locally in your browser. Not sent to the server or other
+                devices.
+              </span>
+            </h1>
           </div>
           <div v-if="numFlags !== flags.length" class="panel-body">
             <div class="alert alert-info mb-0 flags-alert text-center"
