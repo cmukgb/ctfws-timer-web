@@ -1952,7 +1952,7 @@
                           :class="tableDataClasses(role, index)">
                         <input v-if="editing" v-model="game[role.key]"
                             type="text" class="form-control input-sm"
-                            autocomplete="off">
+                            :tabindex="index + 1" autocomplete="off">
                         <span v-else>
                           [[ game[role.key] ]]
                         </span>
